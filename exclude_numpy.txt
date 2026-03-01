@@ -1,0 +1,8 @@
+testing
+f2py
+tests
+test
+conftest.py
+*.pyi
+.doc
+.pyi

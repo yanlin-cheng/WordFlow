@@ -1,0 +1,5 @@
+# WordFlow Python ASR 依赖 - Sherpa-ONNX 版本
+# 锁定版本以确保兼容性
+sherpa-onnx>=1.10.0
+numpy>=1.26.0
+requests>=2.31.0

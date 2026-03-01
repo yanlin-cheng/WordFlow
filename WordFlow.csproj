@@ -1,0 +1,151 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>false</UseWindowsForms>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    
+    <!-- 框架依赖发布 - 需要 .NET 8 Runtime，但体积小（安装程序会自动检测并安装） -->
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+    
+    <!-- 注意：WPF 不支持裁剪 -->
+    <PublishTrimmed>false</PublishTrimmed>
+    
+    <!-- 应用程序图标 -->
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.16.3" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <!-- InputSimulator - 成熟的键盘模拟库 -->
+    <PackageReference Include="InputSimulator" Version="1.0.4" />
+
+    <!-- SQLite 数据库 - 包含原生库 -->
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.0" />
+    <!-- SQLite 原生库 - 确保发布时包含 -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.6" />
+    
+    <!-- Dapper 轻量级 ORM -->
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <!-- 拼音转换 -->
+    <PackageReference Include="TinyPinyin" Version="1.0.0" />
+    <!-- 中文分词 -->
+    <PackageReference Include="Jieba.NET" Version="0.42.2" />
+    <!-- 系统托盘 -->
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+    <!-- 压缩解压 -->
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
+  </ItemGroup>
+
+  <!-- 排除模型文件（由安装器下载） -->
+  <ItemGroup>
+    <None Remove="Models\paraformer-onnx\**" />
+    <None Remove="Models\paraformer-zh\**" />
+  </ItemGroup>
+
+  <!-- 排除 WordFlowInstaller 目录 -->
+  <ItemGroup>
+    <Compile Remove="WordFlowInstaller\**" />
+    <EmbeddedResource Remove="WordFlowInstaller\**" />
+    <None Remove="WordFlowInstaller\**" />
+  </ItemGroup>
+
+  <!-- 包含 PythonASR 文件夹（复制到输出目录） -->
+  <ItemGroup>
+    <None Include="PythonASR\*.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="PythonASR\*.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="PythonASR\*.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="PythonASR\*.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="PythonASR\*.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  
+  <!-- 复制模型文件（如果存在） - 使用 Copy 任务而不是 Exec -->
+  <Target Name="CopyModelFiles" AfterTargets="Build">
+    <Copy SourceFiles="PythonASR\models\paraformer-zh\model.int8.onnx" 
+          DestinationFiles="$(OutDir)PythonASR\models\paraformer-zh\model.int8.onnx" 
+          SkipUnchangedFiles="true"
+          Condition="Exists('PythonASR\models\paraformer-zh\model.int8.onnx')" />
+    <Copy SourceFiles="PythonASR\models\paraformer-zh\tokens.txt" 
+          DestinationFiles="$(OutDir)PythonASR\models\paraformer-zh\tokens.txt" 
+          SkipUnchangedFiles="true"
+          Condition="Exists('PythonASR\models\paraformer-zh\tokens.txt')" />
+    <Copy SourceFiles="PythonASR\models\sensevoice-small\model.int8.onnx" 
+          DestinationFiles="$(OutDir)PythonASR\models\sensevoice-small\model.int8.onnx" 
+          SkipUnchangedFiles="true"
+          Condition="Exists('PythonASR\models\sensevoice-small\model.int8.onnx')" />
+    <Copy SourceFiles="PythonASR\models\sensevoice-small\tokens.txt" 
+          DestinationFiles="$(OutDir)PythonASR\models\sensevoice-small\tokens.txt" 
+          SkipUnchangedFiles="true"
+          Condition="Exists('PythonASR\models\sensevoice-small\tokens.txt')" />
+  </Target>
+
+  <!-- 复制嵌入的 Python 环境（包括 site-packages） -->
+  <Target Name="CopyPythonEnvironment" BeforeTargets="Build">
+    <ItemGroup>
+      <!-- Python 根目录文件 -->
+      <PythonExeFiles Include="PythonASR\python\*.exe" />
+      <PythonDllFiles Include="PythonASR\python\*.dll" />
+      <PythonPydFiles Include="PythonASR\python\*.pyd" />
+      <PythonDatFiles Include="PythonASR\python\*.dat" />
+      <PythonBinFiles Include="PythonASR\python\*.bin" />
+      <PythonPthFiles Include="PythonASR\python\*.pth" />
+      <PythonZipFiles Include="PythonASR\python\*.zip" />
+      <PythonOtherFiles Include="PythonASR\python\*.cat;PythonASR\python\LICENSE.txt;PythonASR\python\*._pth" />
+      <!-- Lib/site-packages 目录（包含所有依赖包） -->
+      <PythonSitePackages Include="PythonASR\python\Lib\site-packages\**\*" 
+                          Exclude="PythonASR\python\Lib\site-packages\**\__pycache__\**;**\*.pyc" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PythonExeFiles)" 
+          DestinationFiles="@(PythonExeFiles->'$(OutDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonDllFiles)" 
+          DestinationFiles="@(PythonDllFiles->'$(OutDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonPydFiles)" 
+          DestinationFiles="@(PythonPydFiles->'$(OutDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonDatFiles)" 
+          DestinationFiles="@(PythonDatFiles->'$(OutDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonBinFiles)" 
+          DestinationFiles="@(PythonBinFiles->'$(OutDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonPthFiles)" 
+          DestinationFiles="@(PythonPthFiles->'$(OutDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonZipFiles)" 
+          DestinationFiles="@(PythonZipFiles->'$(OutDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonOtherFiles)" 
+          DestinationFiles="@(PythonOtherFiles->'$(OutDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonSitePackages)" 
+          DestinationFiles="@(PythonSitePackages->'$(OutDir)PythonASR\python\Lib\site-packages\%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- 包含 Data 文件夹中的配置文件 -->
+  <ItemGroup>
+    <None Include="Data\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

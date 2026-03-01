@@ -1,0 +1,232 @@
+<Window x:Class="WordFlow.Views.ModelDownloadDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="首次使用设置 - WordFlow" 
+        Height="450" Width="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#F5F5F5">
+    
+    <Window.Resources>
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#0078D4"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#106EBE"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#CCCCCC"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#666666"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F0F0F0"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 标题 -->
+        <TextBlock Grid.Row="0" 
+                   Text="欢迎使用 WordFlow" 
+                   FontSize="24" 
+                   FontWeight="SemiBold"
+                   Foreground="#333333"
+                   Margin="0,0,0,10"/>
+        
+        <!-- 副标题 -->
+        <TextBlock Grid.Row="1" 
+                   Text="语音输入助手" 
+                   FontSize="14"
+                   Foreground="#666666"
+                   Margin="0,0,0,20"/>
+        
+        <!-- 说明文本 -->
+        <TextBlock Grid.Row="2" 
+                   Text="首次使用需要下载语音识别模型（约 200MB）。下载完成后即可开始使用。"
+                   TextWrapping="Wrap"
+                   Foreground="#555555"
+                   LineHeight="22"
+                   Margin="0,0,0,20"/>
+        
+        <!-- 模型信息卡片 -->
+        <Border Grid.Row="3" 
+                Background="White" 
+                BorderBrush="#E0E0E0"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="20"
+                Margin="0,0,0,20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Row="0" 
+                           Text="Paraformer-中文模型" 
+                           FontWeight="SemiBold"
+                           FontSize="16"
+                           Foreground="#333333"
+                           Margin="0,0,0,8"/>
+                
+                <TextBlock Grid.Row="1" 
+                           Text="支持中文语音识别，准确率高，适用于日常办公和写作场景。"
+                           TextWrapping="Wrap"
+                           Foreground="#666666"
+                           FontSize="13"
+                           Margin="0,0,0,15"/>
+                
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,15">
+                    <TextBlock Text="大小：" Foreground="#888888" FontSize="13"/>
+                    <TextBlock Text="约 200 MB" Foreground="#333333" FontSize="13" FontWeight="Medium"/>
+                    <TextBlock Text="  |  " Foreground="#CCCCCC"/>
+                    <TextBlock Text="来源：Gitee Release" Foreground="#888888" FontSize="13"/>
+                </StackPanel>
+                
+                <!-- 下载进度区域 -->
+                <Grid Grid.Row="3" x:Name="ProgressGrid" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- 进度条 -->
+                    <ProgressBar Grid.Row="0" 
+                                 x:Name="DownloadProgressBar"
+                                 Height="8"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="0"
+                                 Background="#E0E0E0"
+                                 Foreground="#0078D4"
+                                 BorderThickness="0"
+                                 Margin="0,0,0,10"/>
+                    
+                    <!-- 进度信息 -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" 
+                                   x:Name="StatusText"
+                                   Text="准备下载..."
+                                   Foreground="#555555"
+                                   FontSize="13"/>
+                        
+                        <TextBlock Grid.Column="1" 
+                                   x:Name="ProgressText"
+                                   Text="0%"
+                                   Foreground="#0078D4"
+                                   FontWeight="Medium"
+                                   FontSize="13"/>
+                    </Grid>
+                    
+                    <!-- 速度和剩余时间 -->
+                    <TextBlock Grid.Row="2" 
+                               x:Name="SpeedText"
+                               Text=""
+                               Foreground="#888888"
+                               FontSize="12"
+                               Margin="0,5,0,0"/>
+                </Grid>
+                
+                <!-- 错误信息 -->
+                <TextBlock Grid.Row="3" 
+                           x:Name="ErrorText"
+                           Text=""
+                           Foreground="#D32F2F"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed"/>
+            </Grid>
+        </Border>
+        
+        <!-- 按钮区域 -->
+        <StackPanel Grid.Row="4" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    Margin="0,0,0,15">
+            <Button x:Name="SkipButton"
+                    Content="稍后设置"
+                    Style="{StaticResource SecondaryButton}"
+                    Margin="0,0,10,0"
+                    Click="SkipButton_Click"/>
+            
+            <Button x:Name="DownloadButton"
+                    Content="立即下载"
+                    Style="{StaticResource PrimaryButton}"
+                    Click="DownloadButton_Click"/>
+            
+            <Button x:Name="RetryButton"
+                    Content="重试"
+                    Style="{StaticResource PrimaryButton}"
+                    Visibility="Collapsed"
+                    Click="DownloadButton_Click"/>
+            
+            <Button x:Name="ContinueButton"
+                    Content="开始使用"
+                    Style="{StaticResource PrimaryButton}"
+                    Visibility="Collapsed"
+                    Click="ContinueButton_Click"/>
+        </StackPanel>
+        
+        <!-- 底部提示 -->
+        <TextBlock Grid.Row="5" 
+                   Text="提示：下载过程中可随时取消，下次启动时会继续下载。"
+                   FontSize="12"
+                   Foreground="#999999"
+                   HorizontalAlignment="Center"/>
+    </Grid>
+</Window>

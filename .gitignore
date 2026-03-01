@@ -1,0 +1,68 @@
+# 编译输出
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+
+# VS Code
+.vscode/
+
+# 发布测试目录（不纳入版本控制）
+publish/
+publish_final/
+publish_fix/
+publish_self_contained/
+publish_test/
+publish_v2/
+
+# 安装包输出（不纳入版本控制）
+Output/
+
+# 上传文件（由 CI/CD 生成）
+上传文件/
+
+# WordFlowInstaller 项目输出
+WordFlowInstaller/bin/
+WordFlowInstaller/obj/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+PythonASR/venv/
+PythonASR/python/Lib/site-packages/
+
+# 模型文件（体积过大，单独下载）
+PythonASR/models/*.tar.bz2
+PythonASR/models/*.part*
+Data/models/*.tar.bz2
+
+# 日志文件
+Logs/
+*.log
+
+# 临时文件
+*.tmp
+Thumbs.db
+
+# 数据库文件（用户数据）
+Data/*.db
+*.db
+
+# 调试日志
+debug_log.txt
+
+# Python 嵌入环境（体积过大）
+PythonASR/python/
+
+# ONNX 模型文件
+*.onnx
+*.bin
+
+# Inno Setup 编译输出
+Installer/Output/
