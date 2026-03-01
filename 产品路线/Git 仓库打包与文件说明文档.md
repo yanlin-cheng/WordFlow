@@ -1,9 +1,10 @@
 # WordFlow 项目 Git 仓库打包与文件说明文档
 
-**文档版本：** v1.1  
+**文档版本：** v1.2  
 **创建日期：** 2026 年 3 月 1 日  
 **更新日期：** 2026 年 3 月 2 日  
-**适用仓库：** https://github.com/wanddream/WordFlowV2.git
+**适用仓库：** https://github.com/wanddream/WordFlowV2.git  
+**最新提交：** 477534d - 更新：UI 优化与项目清理
 
 ---
 
@@ -235,6 +236,12 @@
 | `产品路线/WordFlow 架构规划文档.md` | v2.0 架构规划 |
 | `产品路线/Git 仓库打包与文件说明文档.md` | 本文档 |
 
+### 4.8 Git 提交历史
+
+| 提交哈希 | 说明 | 日期 |
+|---------|------|------|
+| 477534d | UI 优化与项目清理，新增产品路线文档 | 2026-03-02 |
+
 ### 4.6 打包发布流程
 
 ```bash
@@ -278,26 +285,27 @@ git push -u origin main
 
 ### 上传前检查
 
-- [ ] 确认 `bin/` 和 `obj/` 目录已被 .gitignore 忽略
-- [ ] 确认 `PythonASR/models/` 目录已被忽略
-- [ ] 确认 `PythonASR/python/` 目录已被忽略
-- [ ] 确认数据库文件未被包含
-- [ ] 确认日志文件未被包含
+- [x] 确认 `bin/` 和 `obj/` 目录已被 .gitignore 忽略
+- [x] 确认 `PythonASR/models/` 目录已被忽略
+- [x] 确认 `PythonASR/python/` 目录已被忽略
+- [x] 确认数据库文件未被包含
+- [x] 确认日志文件未被包含
 
 ### 必传文件检查
 
-- [ ] `WordFlow.slnx`
-- [ ] `WordFlow.csproj`
-- [ ] `App.xaml` / `App.xaml.cs`
-- [ ] `MainWindow.xaml` / `MainWindow.xaml.cs`
-- [ ] `Services/` 目录
-- [ ] `Views/` 目录
-- [ ] `Models/` 目录
-- [ ] `PythonASR/asr_server.py`
-- [ ] `PythonASR/requirements.txt`
-- [ ] `Installer/WordFlowSetup.iss`
-- [ ] `README.md`
-- [ ] `.gitignore`
+- [x] `WordFlow.slnx`
+- [x] `WordFlow.csproj`
+- [x] `App.xaml` / `App.xaml.cs`
+- [x] `MainWindow.xaml` / `MainWindow.xaml.cs`
+- [x] `Services/` 目录
+- [x] `Views/` 目录
+- [x] `Models/` 目录
+- [x] `PythonASR/asr_server.py`
+- [x] `PythonASR/requirements.txt`
+- [x] `Installer/WordFlowSetup.iss`
+- [x] `README.md`
+- [x] `.gitignore`
+- [x] `产品路线/` 目录
 
 ---
 
