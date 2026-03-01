@@ -106,6 +106,9 @@ namespace WordFlow
             {
                 mainWindow.Show();
             }
+
+            // 12. 检查是否需要首次运行设置
+            await CheckFirstRunSetupAsync(mainWindow);
         }
 
         /// <summary>
@@ -264,6 +267,58 @@ namespace WordFlow
             var sb = new System.Text.StringBuilder(256);
             GetWindowText(hWnd, sb, 256);
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// 检查是否需要首次运行设置向导
+        /// </summary>
+        private async Task CheckFirstRunSetupAsync(Window mainWindow)
+        {
+            try
+            {
+                // 使用 ModelDownloadService 检查是否需要首次设置
+                var downloadService = new ModelDownloadService();
+                bool needsSetup = await downloadService.NeedsFirstRunSetupAsync();
+
+                if (needsSetup)
+                {
+                    Logger.Log("首次运行：需要设置向导");
+                    
+                    // 显示首次运行向导
+                    var wizard = new FirstRunWizard
+                    {
+                        Owner = mainWindow
+                    };
+                    
+                    var result = wizard.ShowDialog();
+                    
+                    if (result == true)
+                    {
+                        Logger.Log("首次运行向导：已完成");
+                        // 用户完成了设置，可以开始使用
+                        EventBus.Publish(new StatusChangedEvent
+                        {
+                            Message = "欢迎使用 WordFlow！"
+                        });
+                    }
+                    else
+                    {
+                        Logger.Log("首次运行向导：用户取消或跳过");
+                        EventBus.Publish(new StatusChangedEvent
+                        {
+                            Message = "欢迎使用 WordFlow！请在设置中下载模型"
+                        });
+                    }
+                }
+                else
+                {
+                    Logger.Log("非首次运行：模型已安装");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"检查首次运行设置失败：{ex.Message}");
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)

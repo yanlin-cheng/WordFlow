@@ -1,8 +1,6 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using WordFlow.Infrastructure;
@@ -16,17 +14,14 @@ namespace WordFlow.Views
         private readonly GlobalHotkeyServiceV2 _hotkeyService;
         private int _selectedHotkeyCode;
         private bool _isSaved = false;
-        private ModelDownloadService? _modelDownloadService;
 
         public SettingsWindow(SettingsService settingsService, GlobalHotkeyServiceV2 hotkeyService)
         {
             InitializeComponent();
             _settingsService = settingsService;
             _hotkeyService = hotkeyService;
-            _modelDownloadService = new ModelDownloadService();
 
             LoadSettings();
-            LoadModelSettings();
 
             // 订阅窗口关闭事件，确保点击 X 也能保存
             Closing += OnWindowClosing;
@@ -56,40 +51,6 @@ namespace WordFlow.Views
             // 加载启动设置
             AutoStartCheckBox.IsChecked = AutoStartService.IsAutoStartEnabled();
             StartMinimizedCheckBox.IsChecked = _settingsService.Settings.StartMinimized;
-        }
-
-        private async void LoadModelSettings()
-        {
-            try
-            {
-                ModelStatusText.Text = "正在加载模型列表...";
-                
-                // 加载可用模型
-                var models = await _modelDownloadService!.GetAvailableModelsAsync();
-                
-                if (models.Any())
-                {
-                    ModelListBox.ItemsSource = models.Select(m => new ModelItem
-                    {
-                        Id = m.Id,
-                        Name = m.Name,
-                        Description = m.Description,
-                        Size = m.Size,
-                        IsInstalled = Directory.Exists(Path.Combine(_modelDownloadService.GetModelsDir(), m.Id)),
-                        IsSelected = false
-                    }).ToList();
-                    
-                    ModelStatusText.Text = $"已加载 {models.Count} 个模型配置";
-                }
-                else
-                {
-                    ModelStatusText.Text = "未找到模型配置";
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelStatusText.Text = $"加载模型失败：{ex.Message}";
-            }
         }
 
         private void HotkeyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -164,86 +125,20 @@ namespace WordFlow.Views
             e.Handled = true;
         }
 
-        private void RefreshModelButton_Click(object sender, RoutedEventArgs e)
+        private void RunWizardButton_Click(object sender, RoutedEventArgs e)
         {
-            LoadModelSettings();
+            // 打开首次运行向导
+            var wizard = new FirstRunWizard();
+            wizard.Owner = this;
+            wizard.ShowDialog();
         }
 
-        private async void DownloadModelButton_Click(object sender, RoutedEventArgs e)
+        private void ManageModelButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ModelListBox.SelectedItem is not ModelItem selectedModel)
-            {
-                MessageBox.Show("请先选择一个模型", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            if (selectedModel.IsInstalled)
-            {
-                MessageBox.Show("该模型已安装", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            try
-            {
-                DownloadModelButton.IsEnabled = false;
-                DownloadProgressText.Text = "正在下载...";
-
-                var models = await _modelDownloadService!.GetAvailableModelsAsync();
-                var model = models.FirstOrDefault(m => m.Id == selectedModel.Id);
-                
-                if (model == null)
-                {
-                    MessageBox.Show("未找到模型配置", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                var result = await _modelDownloadService.DownloadModelAsync(model);
-                
-                if (result.Success)
-                {
-                    DownloadProgressText.Text = "下载完成！";
-                    MessageBox.Show($"模型 {model.Name} 下载并安装成功！", "成功", 
-                        MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadModelSettings(); // 刷新列表
-                }
-                else
-                {
-                    DownloadProgressText.Text = "下载失败";
-                    MessageBox.Show($"下载失败：{result.Error}", "错误", 
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                DownloadProgressText.Text = "下载失败";
-                MessageBox.Show($"下载异常：{ex.Message}", "错误", 
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-                DownloadModelButton.IsEnabled = true;
-            }
+            // 打开模型管理窗口
+            var modelManager = new ModelManagerWindow();
+            modelManager.Owner = this;
+            modelManager.ShowDialog();
         }
-
-        private void MirrorRadio_Changed(object sender, RoutedEventArgs e)
-        {
-            // 这里可以添加切换下载源的逻辑
-            // 目前由安装器处理
-        }
-    }
-
-    public class ModelItem
-    {
-        public string Id { get; set; } = "";
-        public string Name { get; set; } = "";
-        public string Description { get; set; } = "";
-        public string Size { get; set; } = "";
-        public bool IsInstalled { get; set; }
-        public bool IsSelected { get; set; }
-        
-        public string StatusText => IsInstalled ? "✓ 已安装" : "⚠ 未安装";
-        public System.Windows.Media.Brush StatusColor => IsInstalled 
-            ? System.Windows.Media.Brushes.Green 
-            : System.Windows.Media.Brushes.Orange;
     }
 }

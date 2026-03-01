@@ -1,17 +1,14 @@
 <Window x:Class="WordFlow.Views.FirstRunWizard"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WordFlow 首次运行设置" 
+        Title="WordFlow 首次运行向导" 
         Height="600" 
-        Width="600"
+        Width="700"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        Closing="Window_Closing">
-    <Grid Margin="25">
+        Background="#F8F9FA">
+    <Grid Margin="30">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -20,153 +17,230 @@
 
         <!-- 欢迎标题 -->
         <StackPanel Grid.Row="0" Margin="0,0,0,15">
-            <TextBlock Text="欢迎使用 WordFlow！" 
-                       FontSize="22" 
-                       FontWeight="Bold"/>
-            <TextBlock Text="首次使用需要完成环境配置，请按照向导完成设置。" 
+            <TextBlock Text="🎉 欢迎使用 WordFlow！" 
+                       FontSize="24" 
+                       FontWeight="Bold"
+                       Foreground="#333333"/>
+            <TextBlock Text="您的智能语音输入助手" 
                        FontSize="13"
-                       Foreground="Gray"
-                       Margin="0,8,0,0"
-                       TextWrapping="Wrap"/>
+                       Foreground="#666666"
+                       Margin="0,5,0,0"/>
         </StackPanel>
 
-        <!-- 步骤指示器 -->
-        <Border Grid.Row="1" Background="#F5F5F5" CornerRadius="5" Padding="15" Margin="0,0,0,15">
-            <StackPanel Orientation="Horizontal">
-                <Border x:Name="Step1Indicator" Background="#4CAF50" CornerRadius="10" Width="24" Height="24">
-                    <TextBlock Text="1" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                               FontWeight="Bold" Foreground="White" FontSize="12"/>
+        <!-- 内容区域 - 卡片式展示 -->
+        <Border Grid.Row="1" Background="White" CornerRadius="12" Padding="30" 
+                BorderBrush="#E0E0E0" BorderThickness="1"
+                PreviewMouseWheel="ContentArea_PreviewMouseWheel">
+            <Grid>
+                <!-- 卡片 1：快速设置与节省时间 -->
+                <Border x:Name="Card1" Visibility="Visible" Background="Transparent">
+                    <StackPanel>
+                        <!-- 节省时间估算 -->
+                        <Border Background="#FFF8E1" CornerRadius="8" Padding="20" Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock Text="⏱️ 效率提升" FontSize="16" FontWeight="Bold" Foreground="#FF8F00" Margin="0,0,0,10"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="每次输入 300 字，约节省 " FontSize="14" Foreground="#555555"/>
+                                    <TextBlock Text="7 分钟" FontSize="28" FontWeight="Bold" Foreground="#FF6F00"/>
+                                </StackPanel>
+                                <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#777777">
+                                    <Run>计算依据：普通人打字速度约 40 字/分钟，输入 300 字需 7.5 分钟；</Run><LineBreak/>
+                                    <Run>语音输入识别速度快，修正时间约 30 秒，综合节省约 7 分钟。</Run>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 快速开始指南 -->
+                        <Border Background="#F5F5F5" CornerRadius="10" Padding="25">
+                            <StackPanel>
+                                <TextBlock Text="快速开始" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+                                <TextBlock TextWrapping="Wrap" FontSize="14" Foreground="#555555" LineHeight="26">
+                                    <Run FontWeight="SemiBold" Foreground="#333333">1.</Run> <Run>按住热键（</Run><Run FontWeight="Bold" Foreground="#0078D4">` 键</Run><Run> 或 </Run><Run FontWeight="Bold" Foreground="#0078D4">右 Alt 键</Run><Run>）说话</Run><LineBreak/>
+                                    <Run FontWeight="SemiBold" Foreground="#333333">2.</Run> <Run>松开热键，文字自动输入到当前光标位置</Run><LineBreak/>
+                                    <Run FontWeight="SemiBold" Foreground="#333333">3.</Run> <Run>在设置中可修改热键和更多选项</Run><LineBreak/>
+                                    <Run FontWeight="SemiBold" Foreground="#333333">4.</Run> <Run>在个人词库中管理专业词汇</Run>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        
+                        <TextBlock Text="点击「下一步」了解更多功能" 
+                                   FontSize="12" 
+                                   Foreground="#999999" 
+                                   HorizontalAlignment="Center" 
+                                   Margin="0,20,0,0"/>
+                    </StackPanel>
                 </Border>
-                <TextBlock Text="环境检测" VerticalAlignment="Center" Margin="10,0,20,0" FontWeight="Bold"/>
-                
-                <Border x:Name="Step2Indicator" Background="#E0E0E0" CornerRadius="10" Width="24" Height="24">
-                    <TextBlock Text="2" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                               FontWeight="Bold" Foreground="#666" FontSize="12"/>
+
+                <!-- 卡片 2：语音输入 -->
+                <Border x:Name="Card2" Visibility="Collapsed" Background="Transparent">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="#0078D4" CornerRadius="60" Width="80" Height="80">
+                            <TextBlock Text="🎤" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="25,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="语音输入方法" FontSize="20" FontWeight="Bold" Margin="0,0,0,12"/>
+                            <TextBlock TextWrapping="Wrap" FontSize="14" Foreground="#555555" LineHeight="24">
+                                <Run FontWeight="SemiBold">1. 按住热键说话</Run><LineBreak/>
+                                <Run>    默认热键：</Run><Run FontWeight="Bold" Foreground="#0078D4">` 键</Run><Run>（ESC 下方、数字 1 左侧）</Run><LineBreak/>
+                                <Run>    备选热键：</Run><Run FontWeight="Bold" Foreground="#0078D4">右 Alt 键</Run><LineBreak/>
+                                <Run FontWeight="SemiBold">2. 松开热键，语音自动转文字</Run><LineBreak/>
+                                <Run FontWeight="SemiBold">3. 文字直接输入到当前光标位置</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
                 </Border>
-                <TextBlock Text="模型下载" VerticalAlignment="Center" Margin="10,0" FontWeight="Bold"/>
-            </StackPanel>
+
+                <!-- 卡片 3：热键设置 -->
+                <Border x:Name="Card3" Visibility="Collapsed" Background="Transparent">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="#FF9800" CornerRadius="60" Width="80" Height="80">
+                            <TextBlock Text="⌨️" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="25,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="热键设置" FontSize="20" FontWeight="Bold" Margin="0,0,0,12"/>
+                            <TextBlock TextWrapping="Wrap" FontSize="14" Foreground="#555555" LineHeight="24">
+                                <Run>• 录音热键：按住说话</Run><LineBreak/>
+                                <Run>   当前默认：</Run><Run FontWeight="Bold" Foreground="#FF9800">` 键</Run><Run> 或 </Run><Run FontWeight="Bold" Foreground="#FF9800">右 Alt 键</Run><LineBreak/>
+                                <Run>• 可在设置中自由切换热键</Run><LineBreak/>
+                                <Run>• 开机自启动，最小化到系统托盘</Run><LineBreak/>
+                                <Run>• 后台运行，不干扰正常工作</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 卡片 4：设置方法 -->
+                <Border x:Name="Card4" Visibility="Collapsed" Background="Transparent">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="#4CAF50" CornerRadius="60" Width="80" Height="80">
+                            <TextBlock Text="⚙️" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="25,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="设置方法" FontSize="20" FontWeight="Bold" Margin="0,0,0,12"/>
+                            <TextBlock TextWrapping="Wrap" FontSize="14" Foreground="#555555" LineHeight="24">
+                                <Run>• 右键点击系统托盘图标</Run><LineBreak/>
+                                <Run>• 选择「设置」进入设置界面</Run><LineBreak/>
+                                <Run>• 可修改热键、启动选项等</Run><LineBreak/>
+                                <Run>• 在「关于」页面可重新打开本向导</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 卡片 5：个人词库 -->
+                <Border x:Name="Card5" Visibility="Collapsed" Background="Transparent">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="#9C27B0" CornerRadius="60" Width="80" Height="80">
+                            <TextBlock Text="📚" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="25,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="个人词库训练" FontSize="20" FontWeight="Bold" Margin="0,0,0,12"/>
+                            <TextBlock TextWrapping="Wrap" FontSize="14" Foreground="#555555" LineHeight="24">
+                                <Run>• 自动从您的修正记录中学习</Run><LineBreak/>
+                                <Run>• 支持导入导出专业词库</Run><LineBreak/>
+                                <Run>• 医疗、法律、编程等专业词汇优化</Run><LineBreak/>
+                                <Run>• 越用越懂你的表达习惯</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 卡片 6：下载模型 -->
+                <Border x:Name="Card6" Visibility="Collapsed" Background="Transparent">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="#FF5722" CornerRadius="60" Width="80" Height="80">
+                            <TextBlock Text="💡" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="25,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="下载语音模型" FontSize="20" FontWeight="Bold" Margin="0,0,0,12"/>
+                            <TextBlock TextWrapping="Wrap" FontSize="14" Foreground="#555555" LineHeight="24">
+                                <Run FontWeight="Bold" Foreground="#FF5722">重要提示：</Run><LineBreak/>
+                                <Run>首次使用前，需要下载语音识别模型。</Run><LineBreak/>
+                                <Run>• 推荐模型：</Run><Run FontWeight="Bold">Paraformer 中文</Run><Run>（约 200MB）</Run><LineBreak/>
+                                <Run>• 多语种模型：</Run><Run FontWeight="Bold">SenseVoice</Run><Run>（支持中英日韩粤）</Run><LineBreak/>
+                                <Run>点击「打开模型管理」按钮开始下载</Run>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 完成页面 -->
+                <Border x:Name="CompleteCard" Visibility="Collapsed" Background="Transparent">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Background="#E8F5E9" CornerRadius="60" Width="120" Height="120" Margin="0,0,0,25">
+                            <TextBlock Text="✅" FontSize="60" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="设置完成！" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+                        <TextBlock x:Name="ModelStatusText"
+                                   Text="模型已安装，开始使用语音输入吧！" 
+                                   FontSize="14" Foreground="#666666" 
+                                   HorizontalAlignment="Center" Margin="0,0,0,25"/>
+                        
+                        <Border Background="#F5F5F5" CornerRadius="10" Padding="25">
+                            <StackPanel>
+                                <TextBlock Text="记住快速开始" FontSize="16" FontWeight="Bold" Margin="0,0,0,12"/>
+                                <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="#555555" LineHeight="22">
+                                    <Run FontWeight="SemiBold">1.</Run> 按住热键（<Run FontWeight="Bold">` 键</Run> 或 <Run FontWeight="Bold">右 Alt 键</Run>）说话<LineBreak/>
+                                    <Run FontWeight="SemiBold">2.</Run> 松开热键，文字自动输入<LineBreak/>
+                                    <Run FontWeight="SemiBold">3.</Run> 在设置中可修改热键和更多选项<LineBreak/>
+                                    <Run FontWeight="SemiBold">4.</Run> 在个人词库中管理专业词汇
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Border>
 
-        <!-- 环境检测 -->
-        <GroupBox x:Name="EnvironmentGroupBox" Header="环境检测" Grid.Row="2" Padding="10" Margin="0,0,0,15">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                
-                <!-- .NET 环境 -->
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,5">
-                    <TextBlock x:Name="DotNetStatusIcon" Text="●" FontSize="16" 
-                               Foreground="Orange" Width="20"/>
-                    <TextBlock x:Name="DotNetStatusText" Text="正在检测 .NET 环境..." 
-                               Margin="10,0" VerticalAlignment="Center"/>
-                    <Button x:Name="InstallDotNetButton" Content="下载安装" 
-                            Click="InstallDotNetButton_Click"
-                            Padding="15,5" Margin="10,0,0,0"
-                            Visibility="Collapsed"/>
-                </StackPanel>
-                
-                <!-- Python 环境 -->
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5">
-                    <TextBlock x:Name="PythonStatusIcon" Text="●" FontSize="16" 
-                               Foreground="Green" Width="20"/>
-                    <TextBlock x:Name="PythonStatusText" Text="Python 环境：已就绪" 
-                               Margin="10,0" VerticalAlignment="Center"/>
-                </StackPanel>
-                
-                <!-- 进度条 -->
-                <ProgressBar x:Name="EnvironmentProgressBar" 
-                             Grid.Row="2"
-                             Height="8"
-                             IsIndeterminate="True"
-                             Margin="0,10,0,0"
-                             Visibility="Visible"/>
-            </Grid>
-        </GroupBox>
-
-        <!-- 模型选择 -->
-        <GroupBox x:Name="ModelGroupBox" Header="选择模型" Grid.Row="3" Padding="10" Margin="0,0,0,15" IsEnabled="False">
-            <StackPanel>
-                <ComboBox x:Name="ModelComboBox" 
-                          Padding="8,5"
-                          FontSize="13"
-                          Height="30"
-                          SelectionChanged="ModelComboBox_SelectionChanged"/>
-                <TextBlock x:Name="ModelDescriptionText" 
-                           Text="请先完成环境检测"
-                           Foreground="Gray" 
-                           FontSize="12"
-                           Margin="0,8,0,0"
-                           TextWrapping="Wrap"/>
-            </StackPanel>
-        </GroupBox>
-
-        <!-- 下载进度区域 -->
-        <GroupBox x:Name="DownloadGroupBox" Header="下载进度" Grid.Row="4" Padding="10" Margin="0,0,0,15">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- 进度条 -->
-                <ProgressBar x:Name="DownloadProgressBar" 
-                             Grid.Row="0"
-                             Height="25"
-                             Minimum="0" 
-                             Maximum="100"
-                             Margin="0,0,0,10"/>
-
-                <!-- 进度信息 -->
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
-                    <TextBlock x:Name="ProgressPercentText" 
-                               Text="0%"
-                               FontWeight="Bold"
-                               Width="50"/>
-                    <TextBlock x:Name="ProgressSizeText" 
-                               Text="0 MB / 0 MB"
-                               Width="120"/>
-                    <TextBlock x:Name="ProgressSpeedText" 
-                               Text=""
-                               Width="100"/>
-                    <TextBlock x:Name="ProgressTimeText" 
-                               Text="剩余时间：--"/>
-                </StackPanel>
-
-                <!-- 状态文本 -->
-                <TextBlock x:Name="StatusText" 
-                           Grid.Row="2"
-                           Text='点击"开始下载"按钮开始下载模型'
-                           Foreground="Gray"
-                           TextWrapping="Wrap"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"/>
-            </Grid>
-        </GroupBox>
-
-        <!-- 使用镜像选项 -->
-        <CheckBox x:Name="UseMirrorCheckBox" 
-                  Grid.Row="5"
-                  Content="使用国内镜像加速下载（推荐）"
-                  IsChecked="True"
-                  Margin="0,0,0,15"/>
+        <!-- 卡片指示器 -->
+        <StackPanel x:Name="CardIndicators" Grid.Row="2" Orientation="Horizontal" 
+                    HorizontalAlignment="Center" Margin="0,15,0,15">
+            <!-- 由代码动态生成 -->
+        </StackPanel>
 
         <!-- 底部按钮 -->
-        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button x:Name="DownloadButton" 
-                    Content="开始下载" 
-                    Click="DownloadButton_Click"
-                    Padding="25,10" 
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="BackButton" 
+                    Content="上一步" 
+                    Click="BackButton_Click"
+                    Padding="18,10" 
                     Margin="0,0,10,0"
+                    Visibility="Collapsed"/>
+            
+            <Button x:Name="NextButton" 
+                    Content="下一步" 
+                    Click="NextButton_Click"
+                    Padding="18,10"
                     IsDefault="True"/>
-            <Button x:Name="CancelButton" 
-                    Content="取消" 
-                    Click="CancelButton_Click"
-                    Padding="25,10"
-                    IsEnabled="False"/>
+            
+            <Button x:Name="ModelManagerButton" 
+                    Content="打开模型管理" 
+                    Click="ModelManagerButton_Click"
+                    Padding="18,10"
+                    Margin="10,0,0,0"
+                    Visibility="Collapsed"
+                    Background="#FF5722"
+                    Foreground="White"/>
         </StackPanel>
     </Grid>
 </Window>

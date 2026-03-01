@@ -289,7 +289,7 @@ namespace WordFlow
                 Application.Current.Dispatcher.BeginInvoke(() =>
                 {
                     StatusText.Text = "正在录音...";
-                    RecordIndicator.Fill = Brushes.Red;
+                    RecordButtonIndicator.Fill = Brushes.Red;
                     StartRecordingTimer();
                 });
             });
@@ -299,7 +299,7 @@ namespace WordFlow
             {
                 Application.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    RecordIndicator.Fill = Brushes.Gray;
+                    RecordButtonIndicator.Fill = Brushes.Gray;
                     StopRecordingTimer();
                 });
             });
@@ -492,7 +492,7 @@ namespace WordFlow
                 if (string.IsNullOrEmpty(text))
                 {
                     StatusText.Text = "识别完成（无内容）";
-                    RecordIndicator.Fill = Brushes.Gray;
+                    RecordButtonIndicator.Fill = Brushes.Gray;
                     return;
                 }
 
@@ -535,7 +535,7 @@ namespace WordFlow
                 _isUserCorrecting = false;
 
                 StatusText.Text = "识别完成";
-                RecordIndicator.Fill = Brushes.Gray;
+                RecordButtonIndicator.Fill = Brushes.Gray;
             });
         }
 
@@ -821,13 +821,13 @@ namespace WordFlow
                     
                 if (isRecording)
                 {
-                    RecordIndicator.Fill = Brushes.Red;
+                    RecordButtonIndicator.Fill = Brushes.Red;
                     RecordButtonText.Text = $"正在录音（松开 {keyName} 结束）";
                     StartRecordingTimer();
                 }
                 else
                 {
-                    RecordIndicator.Fill = Brushes.Gray;
+                    RecordButtonIndicator.Fill = Brushes.Gray;
                     RecordButtonText.Text = $"按住 {keyName} 说话";
                     StopRecordingTimer();
                 }
@@ -992,26 +992,14 @@ namespace WordFlow
                             }
                         }
                         
-                        // 更新 UI 状态
-                        if (!string.IsNullOrEmpty(currentModel))
-                        {
-                            ModelStatusText.Text = $"模型：{currentModel}";
-                            ModelStatusText.Foreground = new SolidColorBrush(Colors.Green);
-                            StatusText.Text = $"已连接 - 当前模型：{currentModel}";
-                            Logger.Log($"模型状态已更新：{currentModel}");
-                        }
-                        else
-                        {
-                            ModelStatusText.Text = "模型：未选择";
-                            ModelStatusText.Foreground = new SolidColorBrush(Colors.Orange);
-                            StatusText.Text = "服务已连接，但未选择模型";
-                            Logger.Log("模型状态：已连接但未选择模型");
-                        }
+                        // 更新 UI 状态（使用新的合并显示方法）
+                        UpdateModelStatus(isConnected, currentModel);
+                        StatusText.Text = $"已连接 - 当前模型：{currentModel}";
+                        Logger.Log($"模型状态已更新：{currentModel}");
                     }
                     else
                     {
-                        ModelStatusText.Text = "模型：未连接";
-                        ModelStatusText.Foreground = new SolidColorBrush(Colors.Gray);
+                        UpdateModelStatus(false, "");
                         StatusText.Text = "未连接到 ASR 服务";
                         Logger.Log("模型状态：未连接");
                     }
@@ -1020,8 +1008,7 @@ namespace WordFlow
             catch (Exception ex)
             {
                 Logger.Log($"刷新模型状态失败：{ex.Message}");
-                ModelStatusText.Text = "模型：错误";
-                ModelStatusText.Foreground = new SolidColorBrush(Colors.Red);
+                UpdateModelStatus(false, "");
             }
         }
         
@@ -1308,7 +1295,7 @@ namespace WordFlow
             Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 StatusText.Text = $"正在录音... (松开 {keyName} 结束)";
-                RecordIndicator.Fill = Brushes.Red;
+                RecordButtonIndicator.Fill = Brushes.Red;
             });
         }
 
@@ -1365,22 +1352,37 @@ namespace WordFlow
             _transcriptPopup.ShowTranscript(text);
         }
 
+        /// <summary>
+        /// 更新模型状态显示（合并连接状态和模型状态）
+        /// </summary>
         private void UpdateModelStatus(bool isConnected, string modelName)
         {
+            // 获取状态指示器（椭圆）
+            var indicator = FindName("ModelStatusIndicator") as System.Windows.Shapes.Ellipse;
+            
             if (isConnected && !string.IsNullOrEmpty(modelName))
             {
-                ModelStatusText.Text = $"模型：{modelName}";
-                ModelStatusText.Foreground = Brushes.Green;
+                // 已连接且有模型 - 显示绿色
+                ModelStatusText.Text = modelName;
+                ModelStatusText.Foreground = new SolidColorBrush(Color.FromRgb(76, 175, 80)); // Material Green 500
+                if (indicator != null)
+                    indicator.Fill = new SolidColorBrush(Color.FromRgb(76, 175, 80));
             }
             else if (isConnected)
             {
-                ModelStatusText.Text = "模型：未选择";
-                ModelStatusText.Foreground = Brushes.Orange;
+                // 已连接但未选择模型 - 显示橙色
+                ModelStatusText.Text = "未选择模型";
+                ModelStatusText.Foreground = new SolidColorBrush(Color.FromRgb(255, 152, 0)); // Material Orange 500
+                if (indicator != null)
+                    indicator.Fill = new SolidColorBrush(Color.FromRgb(255, 152, 0));
             }
             else
             {
-                ModelStatusText.Text = "模型：未连接";
-                ModelStatusText.Foreground = Brushes.Gray;
+                // 未连接 - 显示灰色
+                ModelStatusText.Text = "未连接";
+                ModelStatusText.Foreground = new SolidColorBrush(Color.FromRgb(158, 158, 158)); // Material Gray 500
+                if (indicator != null)
+                    indicator.Fill = new SolidColorBrush(Color.FromRgb(158, 158, 158));
             }
         }
 

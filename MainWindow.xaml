@@ -14,32 +14,120 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- 顶部标题栏 -->
-            <Border Grid.Row="0" Background="#1a1a2e" Padding="20,15">
+            <!-- 顶部导航栏 -->
+            <Border Grid.Row="0" Background="#1a1a2e" Padding="15,12">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     
+                    <!-- 左侧：Logo 和标题 -->
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="WordFlow" Foreground="White" FontSize="24" FontWeight="Bold"/>
-                        <TextBlock Text="  ·  个人离线语音输入" Foreground="#00d4aa" FontSize="14" 
-                                   VerticalAlignment="Center" Margin="12,0,0,0" FontWeight="Medium"/>
-                        <Border Background="#00d4aa" CornerRadius="3" Padding="6,2" Margin="15,0,0,0">
-                            <TextBlock Text="离线" Foreground="#1a1a2e" FontSize="11" FontWeight="SemiBold"/>
-                        </Border>
+                        <TextBlock Text="WordFlow" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="离线语音输入" Foreground="#00d4aa" FontSize="13" FontWeight="Medium"
+                                   VerticalAlignment="Center" Margin="10,0,0,0"/>
                     </StackPanel>
                     
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Ellipse x:Name="RecordIndicator" Width="12" Height="12" Fill="Gray" Margin="0,0,8,0"/>
-                        <TextBlock x:Name="StatusText" Text="就绪" Foreground="#AAAAAA" 
-                                   VerticalAlignment="Center" Margin="0,0,20,0"/>
-                        <TextBlock x:Name="ModelStatusText" Text="模型：未连接" Foreground="Gray" 
-                                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <!-- 中间：功能按钮 -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="30,0">
+                        <Button Content="模型管理" Click="ModelManagerButton_Click" 
+                                Padding="16,8" Margin="0,0,12,0" MinWidth="90" FontSize="14" FontWeight="Medium"
+                                Background="Transparent" Foreground="White" BorderThickness="0"
+                                Cursor="Hand" ToolTip="管理语音模型（切换/下载/删除）">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#2a2a4a"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter Property="Background" Value="#1a1a2a"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        
+                        <Button Content="个人词典" Click="VocabularyButton_Click" 
+                                Padding="16,8" Margin="0,0,12,0" MinWidth="90" FontSize="14" FontWeight="Medium"
+                                Background="Transparent" Foreground="White" BorderThickness="0"
+                                Cursor="Hand" ToolTip="管理个人词典和热词">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#2a2a4a"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter Property="Background" Value="#1a1a2a"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        
+                        <Button Content="导入音频" Click="ImportAudioButton_Click" 
+                                Padding="16,8" Margin="0,0,12,0" MinWidth="90" FontSize="14" FontWeight="Medium"
+                                Background="Transparent" Foreground="White" BorderThickness="0"
+                                Cursor="Hand" ToolTip="导入 WAV 文件进行识别">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#2a2a4a"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter Property="Background" Value="#1a1a2a"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        
+                        <Button Content="设置" Click="SettingsButton_Click" 
+                                Padding="16,8" MinWidth="70" FontSize="14" FontWeight="Medium"
+                                Background="Transparent" Foreground="White" BorderThickness="0"
+                                Cursor="Hand" ToolTip="热键和启动设置">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#2a2a4a"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter Property="Background" Value="#1a1a2a"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                    
+                    <!-- 右侧：状态显示 -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <!-- 模型连接状态（合并显示） -->
+                        <Ellipse x:Name="ModelStatusIndicator" Width="10" Height="10" Fill="Gray" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="ModelStatusText" Text="未连接" Foreground="White" FontSize="13"
+                                   VerticalAlignment="Center" Margin="0,0,15,0"/>
+                        <!-- 状态文本 -->
+                        <TextBlock x:Name="StatusText" Text="就绪" Foreground="#AAAAAA" FontSize="13"
+                                   VerticalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -65,14 +153,47 @@
                             </StackPanel>
                             
                             <Button x:Name="RecordButton" Click="RecordButton_Click" 
-                                    Grid.Column="1" Padding="30,15" FontSize="16"
-                                    Background="#1a73e8" Foreground="White" BorderThickness="0"
-                                    Cursor="Hand">
+                                    Grid.Column="1" Padding="40,18" FontSize="17" FontWeight="Medium"
+                                    Cursor="Hand" BorderThickness="0">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#1565c0"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Effect">
+                                            <Setter.Value>
+                                                <DropShadowEffect Color="#1565c0" BlurRadius="15" ShadowDepth="0" Opacity="0.5"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#0d47a1"/>
+                                                <Setter Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect Color="#1565c0" BlurRadius="20" ShadowDepth="0" Opacity="0.7"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background" Value="#08348a"/>
+                                                <Setter Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect Color="#1565c0" BlurRadius="10" ShadowDepth="0" Opacity="0.3"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
                                 <StackPanel Orientation="Horizontal">
-                                    <Ellipse x:Name="RecordButtonIndicator" Width="10" Height="10" 
-                                             Fill="White" Margin="0,0,10,0"/>
-                                    <TextBlock x:Name="RecordButtonText" Text="按住 CapsLock 说话" 
-                                               VerticalAlignment="Center"/>
+                                    <Ellipse x:Name="RecordButtonIndicator" Width="12" Height="12" 
+                                             Fill="White" Margin="0,0,12,0">
+                                        <Ellipse.Effect>
+                                            <DropShadowEffect Color="White" BlurRadius="8" ShadowDepth="0" Opacity="0.5"/>
+                                        </Ellipse.Effect>
+                                    </Ellipse>
+                                    <TextBlock x:Name="RecordButtonText" Text="按住 ` 键说话" 
+                                               VerticalAlignment="Center" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Button>
                         </Grid>
@@ -132,36 +253,6 @@
                         </Border>
                     </Grid>
 
-                    <!-- 快速操作区 -->
-                    <Border Background="White" CornerRadius="12" Padding="25" Margin="0,0,0,20"
-                            BorderBrush="#e0e0e0" BorderThickness="1">
-                        <StackPanel>
-                            <TextBlock Text="快速操作" FontSize="18" FontWeight="Bold" Foreground="#333" Margin="0,0,0,15"/>
-                            <WrapPanel>
-                                <Button Content="🧠 模型管理" Click="ModelManagerButton_Click" 
-                                        Padding="15,10" Margin="0,0,10,10" MinWidth="120"
-                                        Background="#f0f4ff" Foreground="#1a73e8" BorderThickness="0"
-                                        Cursor="Hand" ToolTip="管理语音模型（切换/下载/删除）"/>
-                                <Button Content="📁 导入音频" Click="ImportAudioButton_Click" 
-                                        Padding="15,10" Margin="0,0,10,10" MinWidth="120"
-                                        Background="#f0f4ff" Foreground="#1a73e8" BorderThickness="0"
-                                        Cursor="Hand" ToolTip="导入 WAV 文件进行识别"/>
-                                <Button Content="📚 个人词典" Click="VocabularyButton_Click" 
-                                        Padding="15,10" Margin="0,0,10,10" MinWidth="120"
-                                        Background="#f0f4ff" Foreground="#1a73e8" BorderThickness="0"
-                                        Cursor="Hand" ToolTip="管理个人词典和热词"/>
-                                <Button Content="⚙️ 设置" Click="SettingsButton_Click" 
-                                        Padding="15,10" Margin="0,0,10,10" MinWidth="120"
-                                        Background="#f0f4ff" Foreground="#1a73e8" BorderThickness="0"
-                                        Cursor="Hand" ToolTip="热键和启动设置"/>
-                                <Button Content="🔗 连接服务" Click="ConnectButton_Click" 
-                                        Padding="15,10" Margin="0,0,10,10" MinWidth="120"
-                                        Background="#f0f4ff" Foreground="#1a73e8" BorderThickness="0"
-                                        Cursor="Hand" ToolTip="连接/重连 ASR 服务"/>
-                            </WrapPanel>
-                        </StackPanel>
-                    </Border>
-
                     <!-- 新手引导区 -->
                     <Border Background="White" CornerRadius="12" Padding="25" Margin="0,0,0,20"
                             BorderBrush="#e0e0e0" BorderThickness="1">
@@ -185,8 +276,8 @@
                                 <StackPanel>
                                     <TextBlock Text="💡 提示" FontSize="14" FontWeight="Bold" 
                                                Foreground="#f57c00" Margin="0,0,0,5"/>
-                                <TextBlock Text="• 可在「设置」中更改快捷键（支持 ` 键 或 右 Alt）" 
-                                           FontSize="13" Foreground="#666" Margin="0,2" TextWrapping="Wrap"/>
+                                    <TextBlock Text="• 可在「设置」中更改快捷键（支持 ` 键 或 右 Alt）" 
+                                               FontSize="13" Foreground="#666" Margin="0,2" TextWrapping="Wrap"/>
                                     <TextBlock Text="• 录音时请确保周围环境相对安静" 
                                                FontSize="13" Foreground="#666" Margin="0,2" TextWrapping="Wrap"/>
                                     <TextBlock Text="• 识别结果会自动保存到「历史记录」" 
@@ -198,7 +289,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 编辑器已移除 - 文字将直接输入到目标窗口 -->
+                    <!-- 文字输入说明 -->
                     <Border Background="White" CornerRadius="12" Padding="25" Margin="0,0,0,20"
                             BorderBrush="#e0e0e0" BorderThickness="1">
                         <StackPanel>
@@ -206,7 +297,7 @@
                                        Foreground="#333" Margin="0,0,0,10"/>
                             <TextBlock Text="文字将直接输入到您选择的目标窗口（如记事本、Word 等）" 
                                        FontSize="14" Foreground="#666" Margin="0,5" TextWrapping="Wrap"/>
-                            <TextBlock Text="无需在此处查看，如需查看历史记录，请使用「个人词典」功能" 
+                            <TextBlock Text="如需查看历史记录，请使用「个人词典」功能" 
                                        FontSize="14" Foreground="#666" Margin="0,5" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>

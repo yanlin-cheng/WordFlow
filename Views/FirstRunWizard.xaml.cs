@@ -1,602 +1,340 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using WordFlow.Services;
-using WordFlow.Utils;
 
 namespace WordFlow.Views
 {
     /// <summary>
-    /// 首次运行向导 - 环境检测与模型下载
+    /// 首次运行向导 - 卡片式滚动展示
     /// </summary>
     public partial class FirstRunWizard : Window
     {
         private readonly ModelDownloadService _downloadService;
-        private List<ModelInfo> _models = new();
-        private CancellationTokenSource? _cancellationTokenSource;
-        private bool _isDownloading;
-        private bool _downloadCompleted;
-        private bool _dotNetInstalled;
-        private bool _pythonReady;
+        private int _currentCardIndex = 0; // 0-5 为功能卡片，6 为完成页面
+        private bool _modelDownloaded = false;
+        
+        // 卡片总数（不包括完成页面）
+        private const int FeatureCardCount = 6;
+        private const int CompleteCardIndex = 6;
+        private const int ModelManagerCardIndex = 5; // 下载模型卡片索引
 
         /// <summary>
         /// 下载是否成功完成
         /// </summary>
-        public bool DownloadCompleted => _downloadCompleted;
+        public bool DownloadCompleted => _modelDownloaded;
 
         public FirstRunWizard()
         {
             InitializeComponent();
             
             _downloadService = new ModelDownloadService();
-            _downloadService.ProgressChanged += OnDownloadProgress;
-            _downloadService.StatusChanged += OnDownloadStatus;
             
             Loaded += FirstRunWizard_Loaded;
         }
 
-        #region 初始化与环境检测
+        #region 窗口生命周期
 
         private async void FirstRunWizard_Loaded(object sender, RoutedEventArgs e)
         {
-            await CheckEnvironmentAsync();
+            await CheckModelStatusAsync();
+            InitializeCardIndicators();
+            UpdateCardDisplay();
         }
 
-        /// <summary>
-        /// 检查环境
-        /// </summary>
-        private async Task CheckEnvironmentAsync()
-        {
-            // 检测 .NET 环境
-            await CheckDotNetAsync();
-            
-            // 检测 Python 环境
-            CheckPython();
-            
-            // 更新 UI
-            UpdateEnvironmentUI();
-            
-            // 如果环境就绪，加载模型列表
-            if (_dotNetInstalled && _pythonReady)
-            {
-                await LoadModelsAsync();
-            }
-        }
+        #endregion
+
+        #region 模型状态检查
 
         /// <summary>
-        /// 检测 .NET 运行时
+        /// 检查模型状态
         /// </summary>
-        private async Task CheckDotNetAsync()
-        {
-            DotNetStatusText.Text = "正在检测 .NET 环境...";
-            DotNetStatusIcon.Foreground = Brushes.Orange;
-            
-            await Task.Run(() =>
-            {
-                _dotNetInstalled = IsDotNet8Installed();
-            });
-            
-            if (_dotNetInstalled)
-            {
-                DotNetStatusText.Text = ".NET 8.0 运行时：已安装";
-                DotNetStatusIcon.Foreground = Brushes.Green;
-                EnvironmentProgressBar.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                DotNetStatusText.Text = ".NET 8.0 运行时：未安装";
-                DotNetStatusIcon.Foreground = Brushes.Red;
-                InstallDotNetButton.Visibility = Visibility.Visible;
-                EnvironmentProgressBar.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        /// <summary>
-        /// 检查 .NET 8.0 是否已安装
-        /// </summary>
-        private bool IsDotNet8Installed()
+        private async Task CheckModelStatusAsync()
         {
             try
             {
-                // 方法 1：检查注册表
-                var registryPath = @"SOFTWARE\dotnet\Setup\InstalledVersions\x64";
-                var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(registryPath);
-                if (key != null)
+                var needsSetup = await _downloadService.NeedsFirstRunSetupAsync();
+                _modelDownloaded = !needsSetup;
+                
+                if (_modelDownloaded && ModelStatusText != null)
                 {
-                    var version = key.GetValue("Version")?.ToString();
-                    if (!string.IsNullOrEmpty(version) && version.StartsWith("8.0"))
-                    {
-                        return true;
-                    }
+                    ModelStatusText.Text = "模型已安装，开始使用语音输入吧！";
                 }
-                
-                // 方法 2：检查 dotnet 命令
-                var process = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "dotnet",
-                        Arguments = "--version",
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    }
-                };
-                
-                if (process.Start())
-                {
-                    var output = process.StandardOutput.ReadToEnd();
-                    process.WaitForExit();
-                    return output.StartsWith("8.0");
-                }
-                
-                return false;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 检测 Python 环境
-        /// </summary>
-        private void CheckPython()
-        {
-            var pythonPath = Path.Combine(AppContext.BaseDirectory, "PythonASR", "python", "python.exe");
-            
-            if (File.Exists(pythonPath))
-            {
-                PythonStatusText.Text = "Python 环境：已就绪";
-                PythonStatusIcon.Foreground = Brushes.Green;
-                _pythonReady = true;
-            }
-            else
-            {
-                // 尝试其他可能的位置
-                var alternatePaths = new[]
-                {
-                    Path.Combine(AppContext.BaseDirectory, "..", "PythonASR", "python", "python.exe"),
-                    Path.Combine(AppContext.BaseDirectory, "PythonASR", "venv", "Scripts", "python.exe"),
-                };
-                
-                foreach (var path in alternatePaths)
-                {
-                    if (File.Exists(path))
-                    {
-                        PythonStatusText.Text = "Python 环境：已就绪";
-                        PythonStatusIcon.Foreground = Brushes.Green;
-                        _pythonReady = true;
-                        return;
-                    }
-                }
-                
-                PythonStatusText.Text = "Python 环境：未找到";
-                PythonStatusIcon.Foreground = Brushes.Red;
-                _pythonReady = false;
-            }
-        }
-
-        /// <summary>
-        /// 更新环境检测 UI
-        /// </summary>
-        private void UpdateEnvironmentUI()
-        {
-            if (_dotNetInstalled && _pythonReady)
-            {
-                // 环境就绪，更新步骤指示器
-                Step1Indicator.Background = Brushes.Green;
-                Step2Indicator.Background = Brushes.Green;
-                
-                // 启用模型选择
-                ModelGroupBox.IsEnabled = true;
-                ModelDescriptionText.Text = "请选择一个模型";
-            }
-            else if (_dotNetInstalled)
-            {
-                Step1Indicator.Background = Brushes.Green;
-                ModelDescriptionText.Text = "Python 环境未就绪，请检查安装包完整性";
-            }
-            else
-            {
-                Step1Indicator.Background = Brushes.Red;
-                ModelDescriptionText.Text = "请先安装 .NET 8.0 运行时";
+                Utils.Logger.Log($"检查模型状态失败：{ex.Message}");
             }
         }
 
         #endregion
 
-        #region .NET 安装
-
-        private void InstallDotNetButton_Click(object sender, RoutedEventArgs e)
-        {
-            InstallDotNetButton.IsEnabled = false;
-            DotNetStatusText.Text = "正在下载 .NET 8.0 运行时...";
-            EnvironmentProgressBar.Visibility = Visibility.Visible;
-            EnvironmentProgressBar.IsIndeterminate = false;
-            
-            _ = DownloadAndInstallDotNetAsync();
-        }
+        #region 卡片指示器
 
         /// <summary>
-        /// 下载并安装 .NET 8.0 运行时
+        /// 初始化卡片指示器（小圆点）
         /// </summary>
-        private async Task DownloadAndInstallDotNetAsync()
+        private void InitializeCardIndicators()
         {
-            try
+            CardIndicators.Children.Clear();
+            
+            for (int i = 0; i < FeatureCardCount; i++)
             {
-                // .NET 8.0 Runtime 下载链接（官方 CDN）
-                var downloadUrl = "https://download.visualstudio.microsoft.com/download/pr/3f5b8c62-8d2c-4f3e-9c3a-8b7e6d5f4e3d/2e8b7c6d5f4e3d2c1b0a9f8e7d6c5b4a/dotnet-runtime-8.0.0-win-x64.exe";
-                
-                // 备用链接（.NET 官方）
-                var backupUrl = "https://dotnet.microsoft.com/download/dotnet/thankyou/runtime-8.0.0-windows-x64-installer";
-                
-                var tempPath = Path.Combine(Path.GetTempPath(), "dotnet-runtime-8.0.0-win-x64.exe");
-                
-                using var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromMinutes(30);
-                
-                // 下载文件
-                using var response = await httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
-                
-                var totalBytes = response.Content.Headers.ContentLength ?? 0;
-                var bytesReceived = 0L;
-                
-                using var stream = await response.Content.ReadAsStreamAsync();
-                using var fileStream = File.Create(tempPath);
-                
-                var buffer = new byte[81920];
-                var stopwatch = Stopwatch.StartNew();
-                var lastProgressTime = DateTime.Now;
-                
-                while (true)
+                var ellipse = new Ellipse
                 {
-                    _cancellationTokenSource?.Token.ThrowIfCancellationRequested();
-                    
-                    var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                    if (bytesRead == 0) break;
-                    
-                    await fileStream.WriteAsync(buffer, 0, bytesRead);
-                    bytesReceived += bytesRead;
-                    
-                    // 更新进度（每秒更新一次）
-                    var now = DateTime.Now;
-                    if ((now - lastProgressTime).TotalSeconds >= 1 || bytesReceived >= totalBytes)
+                    Width = 10,
+                    Height = 10,
+                    Margin = new Thickness(5, 0, 5, 0),
+                    Fill = i == 0 ? Brushes.Blue : Brushes.LightGray
+                };
+                
+                // 存储索引信息
+                ellipse.Tag = i;
+                
+                // 点击切换卡片
+                ellipse.MouseLeftButtonUp += (s, e) =>
+                {
+                    if (s is Ellipse ell && ell.Tag is int index)
                     {
-                        var progress = totalBytes > 0 ? (bytesReceived * 100.0 / totalBytes) : 0;
-                        var elapsed = (now - lastProgressTime).TotalSeconds;
-                        var speed = elapsed > 0 ? bytesReceived / elapsed : 0;
-                        var remaining = totalBytes > bytesReceived && speed > 0 
-                            ? TimeSpan.FromSeconds((totalBytes - bytesReceived) / speed) 
-                            : TimeSpan.Zero;
-                        
-                        Dispatcher.Invoke(() =>
-                        {
-                            EnvironmentProgressBar.Value = progress;
-                            DotNetStatusText.Text = $".NET 下载中：{progress:F1}% - {FormatBytes(bytesReceived)} / {FormatBytes(totalBytes)} - {FormatBytes((long)speed)}/s - 剩余：{remaining:mm\\:ss}";
-                        });
-                        
-                        lastProgressTime = now;
-                        bytesReceived = 0;
-                    }
-                }
-                
-                stopwatch.Stop();
-                
-                // 下载完成，运行安装程序
-                Dispatcher.Invoke(() =>
-                {
-                    DotNetStatusText.Text = "正在安装 .NET 8.0 运行时...";
-                });
-                
-                var installProcess = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = tempPath,
-                        Arguments = "/install /passive /norestart",
-                        UseShellExecute = true
+                        _currentCardIndex = index;
+                        UpdateCardDisplay();
                     }
                 };
                 
-                installProcess.Start();
-                await Task.Run(() => installProcess.WaitForExit());
+                // 添加鼠标悬停效果
+                ellipse.Cursor = Cursors.Hand;
                 
-                // 清理临时文件
-                try
-                {
-                    File.Delete(tempPath);
-                }
-                catch { }
-                
-                // 安装完成
-                Dispatcher.Invoke(() =>
-                {
-                    DotNetStatusText.Text = ".NET 8.0 运行时：安装完成";
-                    DotNetStatusIcon.Foreground = Brushes.Green;
-                    EnvironmentProgressBar.Visibility = Visibility.Collapsed;
-                    InstallDotNetButton.Visibility = Visibility.Collapsed;
-                    _dotNetInstalled = true;
-                    UpdateEnvironmentUI();
-                    
-                    if (_pythonReady)
-                    {
-                        _ = LoadModelsAsync();
-                    }
-                });
+                CardIndicators.Children.Add(ellipse);
             }
-            catch (Exception ex)
+        }
+
+        /// <summary>
+        /// 更新卡片指示器状态
+        /// </summary>
+        private void UpdateCardIndicators()
+        {
+            for (int i = 0; i < CardIndicators.Children.Count; i++)
             {
-                Dispatcher.Invoke(() =>
+                if (CardIndicators.Children[i] is Ellipse ellipse)
                 {
-                    DotNetStatusText.Text = $".NET 安装失败：{ex.Message}";
-                    DotNetStatusIcon.Foreground = Brushes.Red;
-                    EnvironmentProgressBar.Visibility = Visibility.Collapsed;
-                    InstallDotNetButton.IsEnabled = true;
-                });
+                    ellipse.Fill = i == _currentCardIndex ? Brushes.Blue : Brushes.LightGray;
+                }
             }
         }
 
         #endregion
 
-        #region 加载模型列表
+        #region 卡片显示控制
 
-        private async Task LoadModelsAsync()
+        /// <summary>
+        /// 更新卡片显示
+        /// </summary>
+        private void UpdateCardDisplay()
         {
-            try
+            // 隐藏所有卡片
+            Card1.Visibility = Visibility.Collapsed;
+            Card2.Visibility = Visibility.Collapsed;
+            Card3.Visibility = Visibility.Collapsed;
+            Card4.Visibility = Visibility.Collapsed;
+            Card5.Visibility = Visibility.Collapsed;
+            SetCard6Visibility(Visibility.Collapsed);
+            CompleteCard.Visibility = Visibility.Collapsed;
+
+            // 显示当前卡片
+            switch (_currentCardIndex)
             {
-                StatusText.Text = "正在加载模型列表...";
-                
-                _models = await _downloadService.GetAvailableModelsAsync();
-                
-                if (_models.Count == 0)
-                {
-                    StatusText.Text = "无法加载模型列表，请检查网络连接后重试。";
-                    DownloadButton.IsEnabled = false;
-                    return;
-                }
-                
-                // 填充模型下拉框
-                foreach (var model in _models)
-                {
-                    var defaultMark = model.Default ? " [推荐]" : "";
-                    ModelComboBox.Items.Add($"{model.Name} ({model.Size}){defaultMark}");
-                }
-                
-                // 默认选中第一个推荐模型
-                var defaultIndex = _models.FindIndex(m => m.Default);
-                ModelComboBox.SelectedIndex = defaultIndex >= 0 ? defaultIndex : 0;
-                
-                UpdateModelDescription();
-                StatusText.Text = "点击\"开始下载\"按钮开始下载模型";
+                case 0:
+                    Card1.Visibility = Visibility.Visible;
+                    NextButton.Content = "下一步";
+                    break;
+                case 1:
+                    Card2.Visibility = Visibility.Visible;
+                    NextButton.Content = "下一步";
+                    break;
+                case 2:
+                    Card3.Visibility = Visibility.Visible;
+                    NextButton.Content = "下一步";
+                    break;
+                case 3:
+                    Card4.Visibility = Visibility.Visible;
+                    NextButton.Content = "下一步";
+                    break;
+                case 4:
+                    Card5.Visibility = Visibility.Visible;
+                    NextButton.Content = "下一步";
+                    break;
+                case ModelManagerCardIndex:
+                    SetCard6Visibility(Visibility.Visible);
+                    // 下载模型卡片不显示下一步按钮
+                    NextButton.Visibility = Visibility.Collapsed;
+                    SetModelManagerButtonVisibility(Visibility.Visible);
+                    break;
+                case CompleteCardIndex:
+                    CompleteCard.Visibility = Visibility.Visible;
+                    NextButton.Content = "开始使用";
+                    break;
             }
-            catch (Exception ex)
+
+            // 更新按钮状态
+            BackButton.Visibility = _currentCardIndex > 0 ? Visibility.Visible : Visibility.Collapsed;
+            
+            // 在下载模型卡片隐藏下一步按钮，显示打开模型管理按钮
+            if (_currentCardIndex == ModelManagerCardIndex)
             {
-                Logger.Log($"加载模型列表失败：{ex.Message}");
-                StatusText.Text = $"加载模型列表失败：{ex.Message}";
-                DownloadButton.IsEnabled = false;
+                NextButton.Visibility = Visibility.Collapsed;
+                SetModelManagerButtonVisibility(Visibility.Visible);
+            }
+            else
+            {
+                NextButton.Visibility = Visibility.Visible;
+                SetModelManagerButtonVisibility(Visibility.Collapsed);
+            }
+            
+            // 更新指示器（完成页面不显示指示器）
+            if (_currentCardIndex < FeatureCardCount)
+            {
+                CardIndicators.Visibility = Visibility.Visible;
+                UpdateCardIndicators();
+            }
+            else
+            {
+                CardIndicators.Visibility = Visibility.Collapsed;
             }
         }
 
-        private void ModelComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        /// <summary>
+        /// 设置 Card6 可见性
+        /// </summary>
+        private void SetCard6Visibility(Visibility visibility)
         {
-            UpdateModelDescription();
+            if (FindName("Card6") is System.Windows.Controls.Border card6Border)
+                card6Border.Visibility = visibility;
         }
 
-        private void UpdateModelDescription()
+        /// <summary>
+        /// 设置 ModelManagerButton 可见性
+        /// </summary>
+        private void SetModelManagerButtonVisibility(Visibility visibility)
         {
-            if (ModelComboBox.SelectedIndex >= 0 && ModelComboBox.SelectedIndex < _models.Count)
-            {
-                var model = _models[ModelComboBox.SelectedIndex];
-                ModelDescriptionText.Text = model.Description;
-            }
+            if (FindName("ModelManagerButton") is System.Windows.Controls.Button btn)
+                btn.Visibility = visibility;
         }
 
         #endregion
 
-        #region 下载控制
+        #region 导航控制
 
-        private async void DownloadButton_Click(object sender, RoutedEventArgs e)
+        private void NextButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_isDownloading)
+            if (_currentCardIndex == ModelManagerCardIndex)
             {
-                CancelDownload();
-                return;
+                // 下载模型卡片，必须打开模型管理
+                OpenModelManager();
             }
-            
-            await StartDownloadAsync();
-        }
-
-        private async Task StartDownloadAsync()
-        {
-            if (ModelComboBox.SelectedIndex < 0 || ModelComboBox.SelectedIndex >= _models.Count)
+            else if (_currentCardIndex < CompleteCardIndex)
             {
-                MessageBox.Show("请先选择一个模型", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-            
-            var model = _models[ModelComboBox.SelectedIndex];
-            var useMirror = UseMirrorCheckBox.IsChecked ?? true;
-            
-            // 确认对话框
-            var result = MessageBox.Show(
-                $"即将下载模型：{model.Name}（{model.Size}）\n\n" +
-                "下载可能需要几分钟时间，请确保网络连接稳定。\n\n" +
-                "是否继续？",
-                "确认下载",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-            
-            if (result != MessageBoxResult.Yes)
-                return;
-            
-            _isDownloading = true;
-            _cancellationTokenSource = new CancellationTokenSource();
-            
-            // 更新 UI 状态
-            DownloadButton.Content = "取消下载";
-            CancelButton.IsEnabled = false;
-            ModelComboBox.IsEnabled = false;
-            UseMirrorCheckBox.IsEnabled = false;
-            
-            // 更新步骤指示器
-            Step2Indicator.Background = Brushes.Green;
-            
-            try
-            {
-                var downloadResult = await _downloadService.DownloadModelAsync(
-                    model, 
-                    useMirror, 
-                    _cancellationTokenSource.Token);
+                _currentCardIndex++;
+                UpdateCardDisplay();
                 
-                if (downloadResult.Success)
+                // 如果到达下载模型卡片且已有模型，直接跳到完成页面
+                if (_currentCardIndex == ModelManagerCardIndex && _modelDownloaded)
                 {
-                    _downloadCompleted = true;
-                    StatusText.Text = "模型下载安装成功！点击\"完成\"继续。";
-                    
-                    // 更新按钮状态
-                    DownloadButton.Content = "完成";
-                    DownloadButton.IsEnabled = true;
-                    CancelButton.Content = "完成";
-                    CancelButton.IsEnabled = true;
-                }
-                else
-                {
-                    StatusText.Text = $"下载失败：{downloadResult.Error}";
-                    ResetDownloadUI();
+                    _currentCardIndex = CompleteCardIndex;
+                    UpdateCardDisplay();
                 }
             }
-            catch (OperationCanceledException)
+            else
             {
-                StatusText.Text = "下载已取消";
-                ResetDownloadUI();
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"下载异常：{ex.Message}");
-                StatusText.Text = $"下载异常：{ex.Message}";
-                ResetDownloadUI();
-            }
-        }
-
-        private void CancelDownload()
-        {
-            _cancellationTokenSource?.Cancel();
-            StatusText.Text = "正在取消下载...";
-        }
-
-        private void ResetDownloadUI()
-        {
-            _isDownloading = false;
-            DownloadButton.Content = "开始下载";
-            DownloadButton.IsEnabled = true;
-            CancelButton.IsEnabled = false;
-            CancelButton.Content = "取消";
-            ModelComboBox.IsEnabled = true;
-            UseMirrorCheckBox.IsEnabled = true;
-        }
-
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_downloadCompleted)
-            {
+                // 完成
                 DialogResult = true;
                 Close();
             }
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentCardIndex > 0)
+            {
+                _currentCardIndex--;
+                UpdateCardDisplay();
+            }
+        }
+
+        /// <summary>
+        /// 滚轮翻页支持
+        /// </summary>
+        private void ContentArea_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            // 向下滚动（Delta < 0）- 下一页
+            if (e.Delta < 0)
+            {
+                if (_currentCardIndex < CompleteCardIndex)
+                {
+                    _currentCardIndex++;
+                    UpdateCardDisplay();
+                }
+            }
+            // 向上滚动（Delta > 0）- 上一页
+            else if (e.Delta > 0)
+            {
+                if (_currentCardIndex > 0)
+                {
+                    _currentCardIndex--;
+                    UpdateCardDisplay();
+                }
+            }
+            
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 打开模型管理窗口
+        /// </summary>
+        private void OpenModelManager()
+        {
+            var modelManager = new ModelManagerWindow();
+            modelManager.Owner = this;
+            
+            // 模态显示，等待用户关闭模型管理窗口
+            modelManager.ShowDialog();
+            
+            // 用户关闭模型管理窗口后，检查是否下载了模型
+            _ = CheckModelStatusAfterManagerAsync();
+        }
+
+        private void ModelManagerButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenModelManager();
+        }
+
+        /// <summary>
+        /// 模型管理窗口关闭后检查模型状态
+        /// </summary>
+        private async Task CheckModelStatusAfterManagerAsync()
+        {
+            await CheckModelStatusAsync();
+            
+            if (_modelDownloaded)
+            {
+                // 已下载模型，显示完成页面
+                _currentCardIndex = CompleteCardIndex;
+                UpdateCardDisplay();
+            }
             else
             {
-                var result = MessageBox.Show(
-                    "尚未下载模型，无法使用语音识别功能。\n\n确定要退出吗？",
-                    "确认退出",
-                    MessageBoxButton.YesNo,
+                MessageBox.Show(
+                    "检测到您还未下载模型，语音输入功能将无法使用。\n\n请返回模型管理下载模型，或稍后在设置中下载。",
+                    "提示",
+                    MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 
-                if (result == MessageBoxResult.Yes)
-                {
-                    DialogResult = false;
-                    Close();
-                }
-            }
-        }
-
-        #endregion
-
-        #region 进度更新
-
-        private void OnDownloadProgress(object? sender, DownloadProgressEventArgs e)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                DownloadProgressBar.Value = e.ProgressPercentage;
-                ProgressPercentText.Text = $"{e.ProgressPercentage:F1}%";
-                ProgressSizeText.Text = $"{FormatBytes(e.BytesReceived)} / {FormatBytes(e.TotalBytes)}";
-                ProgressSpeedText.Text = $"{FormatBytes((long)e.Speed)}/s";
-                ProgressTimeText.Text = e.RemainingTime.TotalSeconds > 0 
-                    ? $"剩余：{e.RemainingTime:mm\\:ss}" 
-                    : "";
-            });
-        }
-
-        private void OnDownloadStatus(object? sender, string status)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                StatusText.Text = status;
-            });
-        }
-
-        private static string FormatBytes(long bytes)
-        {
-            if (bytes < 1024) return $"{bytes} B";
-            if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
-            if (bytes < 1024 * 1024 * 1024) return $"{bytes / (1024.0 * 1024):F1} MB";
-            return $"{bytes / (1024.0 * 1024 * 1024):F1} GB";
-        }
-
-        #endregion
-
-        #region 窗口关闭
-
-        private void Window_Closing(object? sender, CancelEventArgs e)
-        {
-            if (_isDownloading)
-            {
-                var result = MessageBox.Show(
-                    "正在下载模型，确定要取消吗？\n\n已下载的部分将保留，下次可继续下载。",
-                    "确认退出",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-                
-                if (result == MessageBoxResult.Yes)
-                {
-                    _cancellationTokenSource?.Cancel();
-                }
-                else
-                {
-                    e.Cancel = true;
-                }
-            }
-            else if (!_downloadCompleted)
-            {
-                var result = MessageBox.Show(
-                    "尚未下载模型，无法使用语音识别功能。\n\n确定要退出吗？",
-                    "确认退出",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-                
-                if (result != MessageBoxResult.Yes)
-                {
-                    e.Cancel = true;
-                }
+                // 保持在下载模型卡片
+                _currentCardIndex = ModelManagerCardIndex;
+                UpdateCardDisplay();
             }
         }
 

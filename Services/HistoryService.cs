@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using WordFlow.Models;
@@ -47,25 +48,47 @@ namespace WordFlow.Services
         }
         
         /// <summary>
-        /// 确保数据库连接已初始化
+        /// 确保数据库连接已初始化（线程安全）
         /// </summary>
         private void EnsureInitialized()
         {
-            if (_initialized && _connection != null)
+            // 快速路径：已初始化则直接返回
+            if (Volatile.Read(ref _initialized) && _connection != null)
                 return;
                 
             lock (_lock)
             {
-                if (_initialized && _connection != null)
+                // 双重检查锁
+                if (Volatile.Read(ref _initialized) && _connection != null)
                     return;
                     
                 try
                 {
-                    Logger.Log($"HistoryService: 正在初始化数据库连接...");
+                    Logger.Log($"HistoryService: 正在初始化数据库连接... 路径：{_dbPath}");
+                    
+                    // 确保数据库目录存在
+                    var dbDir = System.IO.Path.GetDirectoryName(_dbPath);
+                    if (!string.IsNullOrEmpty(dbDir) && !System.IO.Directory.Exists(dbDir))
+                    {
+                        System.IO.Directory.CreateDirectory(dbDir);
+                        Logger.Log($"HistoryService: 创建数据库目录 {dbDir}");
+                    }
+                    
+                    // 创建并打开连接
                     _connection = new SqliteConnection($"Data Source={_dbPath}");
                     _connection.Open();
+                    
+                    // 验证连接
+                    using (var cmd = _connection.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT 1";
+                        cmd.ExecuteScalar();
+                    }
+                    
+                    // 初始化数据库表
                     InitializeDatabase();
-                    _initialized = true;
+                    
+                    Volatile.Write(ref _initialized, true);
                     Logger.Log("HistoryService: 数据库初始化成功");
                 }
                 catch (Exception ex)
@@ -74,8 +97,11 @@ namespace WordFlow.Services
                     Logger.Log($"HistoryService: 内部异常 - {ex.InnerException?.Message}");
                     Logger.Log($"HistoryService: 堆栈跟踪 - {ex.StackTrace}");
                     
-                    // 不抛出异常，允许服务继续运行（数据库功能将不可用）
-                    _initialized = false;
+                    // 清理失败状态
+                    _connection?.Close();
+                    _connection?.Dispose();
+                    _connection = null;
+                    Volatile.Write(ref _initialized, false);
                 }
             }
         }

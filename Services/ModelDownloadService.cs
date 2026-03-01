@@ -88,8 +88,10 @@ namespace WordFlow.Services
                 // 确保目录存在
                 Directory.CreateDirectory(_modelsDir);
                 
-                // 检查是否有任何模型目录
-                var modelDirs = Directory.GetDirectories(_modelsDir);
+                // 检查是否有任何模型目录（排除备份目录）
+                var modelDirs = Directory.GetDirectories(_modelsDir)
+                    .Where(dir => !dir.EndsWith("_bak") && !dir.EndsWith(".bak"))
+                    .ToArray();
                 var hasValidModel = modelDirs.Any(dir => IsValidModel(dir));
                 
                 Logger.Log($"首次设置检测：模型目录数={modelDirs.Length}, 有效模型={hasValidModel}");

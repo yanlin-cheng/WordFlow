@@ -18,7 +18,6 @@
                 <Grid Margin="15">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
@@ -54,104 +53,49 @@
                 </Grid>
             </TabItem>
 
-            <!-- 模型管理 -->
-            <TabItem Header="模型管理">
-                <Grid Margin="15">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Grid.Row="0">
-                        <TextBlock Text="已安装模型" FontWeight="Bold" Margin="0,0,0,10"/>
-                        <TextBlock x:Name="CurrentModelText" 
-                                   Text="当前模型：未选择"
-                                   Foreground="Green"
-                                   Margin="0,0,0,10"/>
-                        <Border BorderBrush="Gray" BorderThickness="1" Padding="10" Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock x:Name="ModelStatusText" 
-                                           Text="正在检测模型..."
-                                           TextWrapping="Wrap"
-                                           Margin="0,0,0,10"/>
-                                <Button x:Name="RefreshModelButton"
-                                        Content="刷新模型状态"
-                                        Padding="10,5"
-                                        HorizontalAlignment="Left"
-                                        Click="RefreshModelButton_Click"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-
-                    <GroupBox Header="可用模型" Grid.Row="1" Padding="10">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            
-                            <ListBox x:Name="ModelListBox" Grid.Row="0" SelectionMode="Single">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                            <TextBlock Text="{Binding Description}" FontSize="11" Foreground="Gray"/>
-                                            <TextBlock Text="{Binding StatusText}" FontSize="11" 
-                                                       Foreground="{Binding StatusColor}" Margin="0,3,0,0"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                            
-                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,0">
-                                <Button x:Name="DownloadModelButton"
-                                        Content="下载选中模型"
-                                        Padding="15,8"
-                                        HorizontalAlignment="Left"
-                                        Click="DownloadModelButton_Click"/>
-                                <TextBlock x:Name="DownloadProgressText" 
-                                           Text="" 
-                                           Margin="15,8,0,0"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Grid>
-                    </GroupBox>
-
-                    <StackPanel Grid.Row="2" Margin="0,15,0,0">
-                        <TextBlock Text="模型下载源" FontWeight="Bold" Margin="0,0,0,5"/>
-                        <StackPanel Orientation="Horizontal">
-                            <RadioButton x:Name="GiteeMirrorRadio" Content="Gitee（国内推荐）" 
-                                         GroupName="MirrorSource" Margin="0,0,15,0"
-                                         Checked="MirrorRadio_Changed"/>
-                            <RadioButton x:Name="OriginalRadio" Content="原始源" 
-                                         GroupName="MirrorSource"
-                                         Checked="MirrorRadio_Changed"/>
-                        </StackPanel>
-                        <TextBlock Text="Gitee 源位于国内服务器，下载速度更快" 
-                                   FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
-                    </StackPanel>
-                </Grid>
-            </TabItem>
-
             <!-- 关于 -->
             <TabItem Header="关于">
                 <Grid Margin="15">
                     <StackPanel>
                         <TextBlock Text="WordFlow - 智能语音输入工具" FontSize="16" FontWeight="Bold"/>
                         <TextBlock Text="版本：1.0.0" Foreground="Gray" Margin="0,10,0,0"/>
-                        <TextBlock Margin="0,10,0,0">
+                        
+                        <Separator Margin="0,15,0,15"/>
+                        
+                        <TextBlock Text="相关链接" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <TextBlock Margin="0,0,0,10">
                             <Hyperlink NavigateUri="https://github.com/wanddream/WordFlow" 
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 GitHub 项目地址
                             </Hyperlink>
                         </TextBlock>
-                        <TextBlock>
+                        <TextBlock Margin="0,0,0,10">
                             <Hyperlink NavigateUri="https://gitee.com/cheng-yanlin/WordFlow-Release" 
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 Gitee 发布页面
                             </Hyperlink>
                         </TextBlock>
+                        
+                        <Separator Margin="0,15,0,15"/>
+                        
+                        <!-- 首次运行向导入口 -->
+                        <TextBlock Text="工具" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <Button x:Name="RunWizardButton"
+                                Content="🎯 重新运行首次向导"
+                                Padding="15,10"
+                                HorizontalAlignment="Left"
+                                Click="RunWizardButton_Click"/>
+                        <TextBlock Text="查看功能介绍和下载语音模型" 
+                                   FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
+                        
+                        <Button x:Name="ManageModelButton"
+                                Content="📦 模型管理"
+                                Padding="15,10"
+                                HorizontalAlignment="Left"
+                                Margin="0,10,0,0"
+                                Click="ManageModelButton_Click"/>
+                        <TextBlock Text="下载、切换或删除语音模型" 
+                                   FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
