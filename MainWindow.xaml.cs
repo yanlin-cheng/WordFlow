@@ -438,7 +438,7 @@ namespace WordFlow
                 _speechService.RecordingStateChanged += OnRecordingStateChanged;
                 _speechService.ProcessingStateChanged += OnProcessingStateChanged;
 
-                StatusText.Text = "正在连接ASR服务...";
+                StatusText.Text = "正在连接 ASR 服务...";
                 
                 // 初始化并获取模型信息
                 var (connected, models, currentModel) = await _speechService.InitializeAsync();
@@ -446,29 +446,54 @@ namespace WordFlow
                 if (connected)
                 {
                     _availableModels = models;
+                    
+                    // 如果没有加载模型，尝试自动加载第一个已安装的
+                    if (string.IsNullOrEmpty(currentModel))
+                    {
+                        Logger.Log("未检测到已加载模型，尝试自动加载...");
+                        var loaded = await _speechService.AutoLoadModelAsync();
+                        if (loaded)
+                        {
+                            currentModel = _speechService.CurrentModel;
+                            Logger.Log($"自动加载模型成功：{currentModel}");
+                        }
+                    }
+                    
                     UpdateModelStatus(true, currentModel);
                     
-                    // 如果没有已安装的模型，在状态栏显示提示（不阻塞用户）
-                    if (!models.Any(m => m.Installed))
+                    // 根据模型状态更新状态栏
+                    if (string.IsNullOrEmpty(currentModel))
                     {
-                        StatusText.Text = "未安装模型，请在设置中下载模型";
-                        ModelStatusText.Text = "模型：未安装";
-                        ModelStatusText.Foreground = Brushes.Orange;
+                        if (!models.Any(m => m.Installed))
+                        {
+                            StatusText.Text = "未安装模型，请在设置中下载模型";
+                            ModelStatusText.Text = "模型：未安装";
+                            ModelStatusText.Foreground = Brushes.Orange;
+                        }
+                        else
+                        {
+                            StatusText.Text = "已安装模型，请在设置中选择要使用的模型";
+                            ModelStatusText.Text = "模型：未加载";
+                            ModelStatusText.Foreground = Brushes.Orange;
+                        }
+                    }
+                    else
+                    {
+                        StatusText.Text = $"服务已连接 - {currentModel}";
                     }
                     
                     return true;
                 }
                 else
                 {
-                    StatusText.Text = "未连接到ASR服务，点击'连接服务'按钮手动连接";
+                    StatusText.Text = "未连接到 ASR 服务，点击'连接服务'按钮手动连接";
                     UpdateModelStatus(false, "");
-                    // 不再弹出消息框，让用户自己选择是否连接
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"初始化失败: {ex.Message}";
+                StatusText.Text = $"初始化失败：{ex.Message}";
                 UpdateModelStatus(false, "");
                 return false;
             }

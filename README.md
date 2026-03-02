@@ -1,6 +1,8 @@
-# WordFlow v1.0.0
+# WordFlow v2.0
 
 WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可将语音实时转换为文字并输入到任意应用程序中。
+
+**v2.0 全新版本** - 基于 .NET 8 WPF 重构，提供更稳定、更智能的语音输入体验。
 
 ---
 
@@ -10,7 +12,7 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 
 | 下载项 | 文件大小 | 说明 |
 |--------|---------|------|
-| [⬇️ WordFlow.exe](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v1.0.0/WordFlow.exe) | 74 MB | **主程序**（自包含，无需安装，双击即用） |
+| [⬇️ WordFlow_Setup.exe](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v2.0.0/WordFlow_Setup.exe) | 约 60 MB | **安装程序**（自动检测并安装 .NET 8 环境） |
 
 ### 方式二：手动下载模型（可选）
 
@@ -18,11 +20,11 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 
 | 下载项 | 文件大小 | 说明 |
 |--------|---------|------|
-| [🧠 模型文件 1/3](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v1.0.0/paraformer-zh.tar.bz2.part1) | 90 MB | 语音模型分卷 1 |
-| [🧠 模型文件 2/3](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v1.0.0/paraformer-zh.tar.bz2.part2) | 90 MB | 语音模型分卷 2 |
-| [🧠 模型文件 3/3](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v1.0.0/paraformer-zh.tar.bz2.part3) | 26 MB | 语音模型分卷 3 |
+| [🧠 模型文件 1/3](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v2.0.0/paraformer-zh.tar.bz2.part1) | 90 MB | 语音模型分卷 1 |
+| [🧠 模型文件 2/3](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v2.0.0/paraformer-zh.tar.bz2.part2) | 90 MB | 语音模型分卷 2 |
+| [🧠 模型文件 3/3](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v2.0.0/paraformer-zh.tar.bz2.part3) | 26 MB | 语音模型分卷 3 |
 
-> **💡 提示**: 推荐直接下载 `WordFlow.exe`，首次启动时会自动下载模型。
+> **💡 提示**: 推荐使用安装程序安装，首次启动时会自动下载模型。
 
 ---
 
@@ -42,14 +44,15 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 
 **备用方式**：如安装时未下载模型，可在程序中下载：
 1. 启动 WordFlow
-2. 点击「设置」按钮
-3. 在模型管理页面选择模型并下载
+2. 点击「模型管理」按钮
+3. 在模型管理页面点击模型的"下载"按钮
+4. 下载完成后会自动尝试加载模型
 
 ### 使用说明
 
 1. **启动 WordFlow** - 程序会最小化到系统托盘
-2. **按住说话** - 按住热键开始录音
-3. **松手上屏** - 松开热键自动识别并输入文字
+2. **按住说话** - 按住热键（默认 CapsLock）开始录音
+3. **松手上屏** - 松开热键自动识别并输入文字到目标应用
 
 ---
 
@@ -57,13 +60,16 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 
 ### 核心功能
 
-- 🎤 **智能语音输入** - 按住说话，松手自动识别上屏
-- 🧠 **本地 ASR 识别** - 使用阿里达摩院 Paraformer 模型，离线可用
-- 📚 **个人词典** - 支持自定义词汇，AI 智能纠错
-- 📝 **历史记录** - 自动保存输入历史，方便查阅
-- 🔔 **托盘集成** - 最小化到系统托盘，随时调用
-- ⚡ **开机自启** - 支持设置开机自动启动
-- ⌨️ **全局热键** - 可自定义热键
+| 功能 | 说明 |
+|------|------|
+| 🎤 **智能语音输入** | 按住说话，松手自动识别上屏 |
+| 🧠 **本地 ASR 识别** | 使用阿里达摩院 Paraformer 模型，离线可用 |
+| 📚 **个人词库** | 支持自定义词汇，AI 智能纠错 |
+| 📝 **历史记录** | 自动保存输入历史，方便查阅 |
+| 🔔 **托盘集成** | 最小化到系统托盘，随时调用 |
+| ⚡ **开机自启** | 支持设置开机自动启动 |
+| ⌨️ **全局热键** | 可自定义热键 |
+| 🔄 **自动模型加载** | 下载完成后自动尝试加载模型 |
 
 ### 热键设置
 
@@ -79,6 +85,14 @@ WordFlow 支持多种热键配置，满足不同使用习惯：
 > - 按键面积大，不易误触
 > - 按下时有明显的物理反馈
 
+### 模型管理
+
+v2.0 新增模型管理功能：
+- **一键下载**：点击"下载"按钮直接下载模型，无需重复选择
+- **自动加载**：下载完成后自动尝试加载模型
+- **服务检测**：如 ASR 服务未启动，会提示是否启动
+- **状态显示**：实时显示模型状态（已安装/未下载/已加载）
+
 ---
 
 ## 💻 系统要求
@@ -86,7 +100,7 @@ WordFlow 支持多种热键配置，满足不同使用习惯：
 | 项目 | 要求 |
 |------|------|
 | 操作系统 | Windows 10/11 64 位 |
-| 运行环境 | **无需安装**（程序已自包含 .NET 8.0） |
+| 运行环境 | .NET 8.0 Runtime（安装程序会自动检测安装） |
 | 磁盘空间 | 至少 300MB 可用空间（含模型文件） |
 | 网络 | 首次启动需要联网下载模型 |
 | 麦克风 | 需要可用的音频输入设备 |
@@ -98,31 +112,71 @@ WordFlow 支持多种热键配置，满足不同使用习惯：
 
 ### 技术栈
 
-- **前端框架**: WPF (.NET 8.0)
-- **语音识别**: Paraformer (ONNX Runtime)
-- **音频处理**: NAudio
-- **数据存储**: SQLite
-- **分词引擎**: Jieba.NET
-- **拼音转换**: TinyPinyin
+| 组件 | 技术 | 说明 |
+|------|------|------|
+| UI 框架 | .NET 8 WPF | 成熟稳定，Windows 原生支持 |
+| 数据库 | SQLite | 轻量级，无需额外服务 |
+| ORM | Dapper | 轻量级，性能好 |
+| 语音识别 | Paraformer (ONNX Runtime) | 阿里达摩院开源模型 |
+| 音频处理 | NAudio | 成熟的.NET 音频库 |
+| 分词引擎 | Jieba.NET | 中文分词 |
+| 拼音转换 | TinyPinyin | 汉字转拼音 |
+| 日志 | Serilog | 结构化日志 |
 
-### 文件结构
-
-首次运行后自动生成：
+### 目录结构
 
 ```
-WordFlow.exe 所在目录/
-├── WordFlow.exe              # 主程序（自包含，单文件）
+WordFlow/
+├── WordFlow.exe              # .NET 主程序
+├── appsettings.json          # 应用配置
+├── Data/
+│   └── models.json           # 模型配置
 ├── PythonASR/
-│   ├── asr_server.py         # ASR 服务
+│   ├── asr_server.py         # ASR 服务端
+│   ├── download_model.py     # 模型下载脚本
 │   ├── start_server.bat      # 启动脚本
 │   └── models/
 │       └── paraformer-zh/    # 语音模型（首次启动下载）
 │           ├── model.int8.onnx
 │           └── tokens.txt
-├── Data/
-│   ├── models.json           # 模型配置
-│   └── Vocabulary.db         # 个人词库
-└── Settings.json             # 配置文件
+├── Resources/
+│   └── icon.ico              # 应用图标
+└── Logs/                     # 日志文件
+```
+
+### 服务架构
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    WordFlow 客户端                       │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │              .NET WPF 界面层                     │   │
+│  │  - 主窗口 (MainWindow)                          │   │
+│  │  - 设置窗口 (SettingsWindow)                    │   │
+│  │  - 词库管理 (VocabularyManagerWindow)           │   │
+│  │  - 模型管理 (ModelManagerWindow)                │   │
+│  │  - 首次运行向导 (FirstRunWizard)                │   │
+│  └─────────────────────────────────────────────────┘   │
+│                          ↓                               │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │              .NET 服务层                         │   │
+│  │  - SettingsService (设置管理)                   │   │
+│  │  - HistoryService (历史记录/SQLite)             │   │
+│  │  - VocabularyService (词库管理)                 │   │
+│  │  - VocabularyLearningEngine (词库学习)          │   │
+│  │  - GlobalHotkeyService (全局热键)               │   │
+│  │  - TrayService (系统托盘)                       │   │
+│  │  - ModelDownloadService (模型下载)              │   │
+│  │  - SpeechRecognitionService (语音识别客户端)     │   │
+│  └─────────────────────────────────────────────────┘   │
+│                          ↓ HTTP                        │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │          Python ASR 服务 (独立进程)              │   │
+│  │  - Sherpa-ONNX 语音识别                         │   │
+│  │  - 模型加载/切换                                 │   │
+│  │  - 音频预处理                                   │   │
+│  └─────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -139,28 +193,36 @@ WordFlow.exe 所在目录/
 1. 检查网络连接是否正常
 2. 尝试重新启动程序
 3. 手动下载模型文件（见上方「方式二」）
+4. 在模型管理页面点击"刷新"按钮重试
 
-### Q3: 识别不准确怎么办？
+### Q3: 下载完模型后为什么不能使用？
+
+v2.0 已优化此问题：
+- 下载完成后会自动尝试加载模型
+- 如 ASR 服务未启动，会提示是否启动
+- 如仍无法使用，请重启程序或手动点击"连接服务"按钮
+
+### Q4: 识别不准确怎么办？
 
 1. 检查麦克风是否正常工作
 2. 在安静环境下使用
 3. 吐字清晰，语速适中
 4. 可以在个人词典中添加常用词汇
 
-### Q4: 某些程序无法输入文字？
+### Q5: 某些程序无法输入文字？
 
 某些程序可能限制外部输入，可以尝试：
 1. 以管理员身份运行 WordFlow
 2. 在目标程序中先点击文本框获得焦点
 3. 检查是否有安全软件拦截
 
-### Q5: 如何修改热键？
+### Q6: 如何修改热键？
 
 1. 右键点击系统托盘图标
 2. 选择"设置"
 3. 在"热键设置"中修改
 
-### Q6: 开机后没有自动启动？
+### Q7: 开机后没有自动启动？
 
 1. 检查是否勾选了"开机自启动"选项
 2. 检查安全软件是否拦截了自启动
@@ -169,6 +231,35 @@ WordFlow.exe 所在目录/
 ---
 
 ## 📋 更新日志
+
+### v2.0.0 (2026-02-28)
+
+**架构重构**
+- 🏗️ 基于 .NET 8 WPF 全面重构
+- 🏗️ 采用模块化服务架构
+- 🏗️ 优化内存占用和启动速度
+
+**新增功能**
+- ✨ 模型管理窗口，可视化管理已安装模型
+- ✨ 一键下载模型，无需重复选择
+- ✨ 下载完成后自动加载模型
+- ✨ ASR 服务未启动时提示用户
+- ✨ 模型状态实时显示（已安装/未下载/已加载）
+- ✨ 下载进度条百分比显示
+
+**功能优化**
+- 🔧 优化模型下载流程
+- 🔧 优化模型加载逻辑
+- 🔧 优化 UI 响应速度
+- 🔧 改进错误检测和日志记录
+
+**部署优化**
+- 🚀 安装包结构优化
+- 🚀 支持断点续传下载
+- 🚀 模型配置文件独立
+
+**已知问题**
+- 某些应用程序可能不完全兼容语音输入上屏功能
 
 ### v1.0.0 (2025-02-27)
 
@@ -187,19 +278,15 @@ WordFlow.exe 所在目录/
 - 🚀 模型下载移至首次启动，支持断点续传
 - 🚀 简化安装流程，提升安装成功率
 
-**已知问题**
-- 某些应用程序可能不完全兼容语音输入上屏功能
-- 首次启动需要下载模型文件（约 206MB），请保持网络畅通
-
 ---
 
 ## 🔗 项目链接
 
 | 平台 | 链接 |
 |------|------|
-| 📂 **GitHub 源码仓库** | https://github.com/wandream/WordFlow |
+| 📂 **GitHub 源码仓库** | https://github.com/wanddream/WordFlowV2 |
 | 📦 **Gitee 发布版本** | https://gitee.com/cheng-yanlin/WordFlow-Release |
-| 🐛 **问题反馈 (GitHub)** | https://github.com/wanddream/WordFlow/issues |
+| 🐛 **问题反馈 (GitHub)** | https://github.com/wanddream/WordFlowV2/issues |
 | 🐛 **问题反馈 (Gitee)** | https://gitee.com/cheng-yanlin/WordFlow-Release/issues |
 
 ---
@@ -210,4 +297,4 @@ MIT License
 
 ---
 
-**WordFlow** - 让语音输入更智能、更便捷
+**WordFlow v2.0** - 全面重构，让语音输入更智能、更便捷

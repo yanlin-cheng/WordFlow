@@ -9,9 +9,11 @@
     <UseWindowsForms>false</UseWindowsForms>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     
-    <!-- 框架依赖发布 - 需要 .NET 8 Runtime，但体积小（安装程序会自动检测并安装） -->
-    <SelfContained>false</SelfContained>
-    <PublishSingleFile>false</PublishSingleFile>
+    <!-- 自包含发布 - 无需 .NET 8 Runtime，安装包更大但安装成功率高 -->
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SingleFile>true</SingleFile>
     
     <!-- 注意：WPF 不支持裁剪 -->
     <PublishTrimmed>false</PublishTrimmed>

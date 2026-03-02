@@ -1,23 +1,40 @@
+# ===========================
 # 编译输出
+# ===========================
 bin/
 obj/
 
-# Visual Studio
-.vs/
-*.suo
-*.user
-
-# VS Code
-.vscode/
-
-# 发布测试目录（不纳入版本控制）
+# .NET 发布目录（体积大，可重新生成）
 publish/
 publish_final/
 publish_fix/
 publish_self_contained/
 publish_test/
 publish_v2/
+publish_installer/
 
+# ===========================
+# IDE 和编辑器
+# ===========================
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.suo.docstates
+
+# VS Code
+.vscode/
+
+# JetBrains Rider
+.idea/
+
+# 本地工作区配置（不推送）
+*.code-workspace
+
+# ===========================
+# 安装包和输出
+# ===========================
 # 安装包输出（不纳入版本控制）
 Output/
 
@@ -28,20 +45,47 @@ Output/
 WordFlowInstaller/bin/
 WordFlowInstaller/obj/
 
+# Inno Setup 编译输出
+Installer/Output/
+
+# ===========================
+# Python 相关
+# ===========================
 # Python 缓存
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Python 虚拟环境
 PythonASR/venv/
+PythonASR/env/
+venv/
+ENV/
+
+# Python 嵌入环境（体积过大，约 50MB）
+PythonASR/python/
+
+# Python 包
 PythonASR/python/Lib/site-packages/
 
+# ===========================
 # 模型文件（体积过大，单独下载）
+# ===========================
 PythonASR/models/*.tar.bz2
 PythonASR/models/*.part*
+PythonASR/models/*.tar
 Data/models/*.tar.bz2
+Data/models/*.part*
 
+# ONNX 模型文件
+*.onnx
+*.bin
+
+# ===========================
+# 日志和临时文件
+# ===========================
 # 日志文件
 Logs/
 *.log
@@ -49,20 +93,37 @@ Logs/
 # 临时文件
 *.tmp
 Thumbs.db
-
-# 数据库文件（用户数据）
-Data/*.db
-*.db
+~$*.doc*
+~$*.xls*
 
 # 调试日志
 debug_log.txt
 
-# Python 嵌入环境（体积过大）
-PythonASR/python/
+# ===========================
+# 数据库文件（用户数据）
+# ===========================
+Data/*.db
+*.db
+*.sqlite
+*.sqlite3
 
-# ONNX 模型文件
-*.onnx
-*.bin
+# ===========================
+# AI 辅助工具（本地配置）
+# ===========================
+.codebuddy/
+.qoder/
+.cursor/
 
-# Inno Setup 编译输出
-Installer/Output/
+# ===========================
+# 其他
+# ===========================
+# 系统文件
+.DS_Store
+desktop.ini
+
+# 缩略图缓存
+Thumbs.db
+
+# 备份文件
+*.bak
+*~

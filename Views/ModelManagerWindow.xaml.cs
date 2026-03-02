@@ -21,6 +21,9 @@ namespace WordFlow.Views
         private readonly ModelDownloadService _downloadService;
         private CancellationTokenSource? _downloadCts;
         private bool _isDownloading = false;
+        
+        // 记录最后下载的模型 ID
+        private string? _lastDownloadedModelId;
 
         public ModelManagerWindow()
         {
@@ -36,7 +39,7 @@ namespace WordFlow.Views
         }
 
         /// <summary>
-        /// 加载模型列表 - 直接扫描本地目录，不依赖配置文件
+        /// 加载模型列表 - 扫描本地目录 + 配置文件中的可下载模型
         /// </summary>
         private async Task LoadModelsAsync()
         {
@@ -49,8 +52,8 @@ namespace WordFlow.Views
                 
                 Logger.Log($"加载模型列表：输出目录模型路径={outputModelsDir}");
                 
-                // 直接扫描输出目录中的模型
-                var localModels = new List<string>();
+                // 扫描本地已安装的模型
+                var installedModelIds = new HashSet<string>();
                 
                 if (Directory.Exists(outputModelsDir))
                 {
@@ -60,47 +63,63 @@ namespace WordFlow.Views
                         if (IsValidModel(modelDir))
                         {
                             var modelId = Path.GetFileName(modelDir);
-                            localModels.Add(modelId);
+                            installedModelIds.Add(modelId);
                             Logger.Log($"发现本地模型：{modelId}");
+                            
+                            // 获取模型目录大小
+                            var size = GetDirectorySize(modelDir);
+                            var sizeStr = FormatSize(size);
+                            
+                            var modelItem = CreateModelItem(
+                                modelId,
+                                modelId,
+                                "本地已安装模型",
+                                sizeStr,
+                                true,   // 已安装
+                                false); // 不显示下载按钮
+                            ModelListPanel.Children.Add(modelItem);
                         }
                     }
                 }
                 
-                Logger.Log($"本地模型数量：{localModels.Count}");
+                Logger.Log($"已安装模型数量：{installedModelIds.Count}");
                 
-                if (localModels.Count == 0)
+                // 从配置文件获取可下载的模型列表
+                var availableModels = await _downloadService.GetAvailableModelsAsync();
+                Logger.Log($"可用模型配置数量：{availableModels.Count}");
+                
+                // 添加未安装的模型到列表
+                foreach (var model in availableModels)
                 {
-                    // 没有本地模型，显示提示
+                    if (!installedModelIds.Contains(model.Id))
+                    {
+                        Logger.Log($"添加可下载模型：{model.Id}");
+                        var modelItem = CreateModelItem(
+                            model.Id,
+                            model.Name,
+                            model.Description,
+                            model.Size,
+                            false,  // 未安装
+                            true);  // 显示下载按钮
+                        ModelListPanel.Children.Add(modelItem);
+                    }
+                }
+                
+                // 如果没有任何模型（本地和配置都没有）
+                if (installedModelIds.Count == 0 && availableModels.Count == 0)
+                {
                     var noModelText = new TextBlock
                     {
-                        Text = "暂无可用模型\n\n请点击「下载」按钮下载语音模型",
+                        Text = "暂无可用模型\n\n请检查网络连接或确认模型配置正确",
                         FontSize = 14,
                         Foreground = new SolidColorBrush(Colors.Gray),
                         HorizontalAlignment = HorizontalAlignment.Center,
                         Margin = new Thickness(20)
                     };
                     ModelListPanel.Children.Add(noModelText);
-                    return;
                 }
                 
-                // 为每个本地模型创建 UI 项
-                foreach (var modelId in localModels)
-                {
-                    // 获取模型目录大小
-                    var modelPath = Path.Combine(outputModelsDir, modelId);
-                    var size = GetDirectorySize(modelPath);
-                    var sizeStr = FormatSize(size);
-                    
-                    var modelItem = CreateModelItem(
-                        modelId,
-                        modelId,  // 使用目录名作为显示名
-                        "本地已安装模型",
-                        sizeStr,
-                        true);  // 已安装
-                    ModelListPanel.Children.Add(modelItem);
-                }
-                
-                Logger.Log($"模型列表加载完成：{localModels.Count} 个模型");
+                Logger.Log($"模型列表加载完成");
             }
             catch (Exception ex)
             {
@@ -155,9 +174,15 @@ namespace WordFlow.Views
         }
 
         /// <summary>
-        /// 创建模型项UI
+        /// 创建模型项 UI
         /// </summary>
-        private Grid CreateModelItem(string modelId, string name, string description, string size, bool isInstalled)
+        /// <param name="modelId">模型 ID</param>
+        /// <param name="name">模型名称</param>
+        /// <param name="description">模型描述</param>
+        /// <param name="size">模型大小</param>
+        /// <param name="isInstalled">是否已安装</param>
+        /// <param name="showDownloadButton">是否显示下载按钮（用于未安装的模型）</param>
+        private Grid CreateModelItem(string modelId, string name, string description, string size, bool isInstalled, bool showDownloadButton = false)
         {
             var grid = new Grid
             {
@@ -256,12 +281,12 @@ namespace WordFlow.Views
                 buttonPanel.Children.Add(useButton);
                 buttonPanel.Children.Add(deleteButton);
             }
-            else
+            else if (showDownloadButton)
             {
                 // 未下载：显示下载按钮
                 var downloadButton = new Button
                 {
-                    Content = "下载",
+                    Content = "📥 下载",
                     Style = (Style)FindResource("PrimaryButton"),
                     Padding = new Thickness(12, 6, 12, 6),
                     Tag = modelId
@@ -324,7 +349,7 @@ namespace WordFlow.Views
         }
 
         /// <summary>
-        /// 下载按钮点击 - 从配置文件获取模型列表供用户选择下载
+        /// 下载按钮点击 - 直接下载点击的模型
         /// </summary>
         private async void DownloadButton_Click(object sender, RoutedEventArgs e)
         {
@@ -335,110 +360,31 @@ namespace WordFlow.Views
                 return;
             }
             
-            // 从配置文件获取可下载的模型列表
-            var availableModels = await _downloadService.GetAvailableModelsAsync();
+            // 直接获取点击的模型 ID
+            var modelId = (string)((Button)sender).Tag;
             
-            if (availableModels.Count == 0)
+            // 从配置文件获取模型信息
+            var availableModels = await _downloadService.GetAvailableModelsAsync();
+            var model = availableModels.FirstOrDefault(m => m.Id == modelId);
+            
+            if (model == null)
             {
-                MessageBox.Show("暂无可用模型配置，请检查网络连接", "提示", 
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"未找到模型配置：{modelId}", "错误", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             
-            // 显示模型选择对话框
-            var dialog = new Window
+            // 确认下载
+            var confirmResult = MessageBox.Show(
+                $"确定要下载 {model.Name} 吗？\n\n大小：{model.Size}\n\n下载完成后将自动尝试加载模型。",
+                "确认下载",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+            
+            if (confirmResult == MessageBoxResult.Yes)
             {
-                Title = "选择要下载的模型",
-                Width = 500,
-                Height = 400,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                Owner = this,
-                ResizeMode = ResizeMode.NoResize
-            };
-
-            var grid = new Grid { Margin = new Thickness(20) };
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-            var titleText = new TextBlock
-            {
-                Text = "选择要下载的模型：",
-                FontSize = 14,
-                Margin = new Thickness(0, 0, 0, 15),
-                TextWrapping = TextWrapping.Wrap
-            };
-            Grid.SetRow(titleText, 0);
-            grid.Children.Add(titleText);
-
-            var listBox = new System.Windows.Controls.ListBox { Margin = new Thickness(0, 0, 0, 15) };
-            foreach (var model in availableModels)
-            {
-                var item = new StackPanel { Margin = new Thickness(5) };
-                item.Children.Add(new TextBlock 
-                { 
-                    Text = $"{model.Name} ({model.Size})", 
-                    FontWeight = FontWeights.SemiBold,
-                    FontSize = 14
-                });
-                item.Children.Add(new TextBlock 
-                { 
-                    Text = model.Description,
-                    FontSize = 12,
-                    Foreground = Brushes.Gray
-                });
-                
-                listBox.Items.Add(new { Model = model, Display = item });
+                await StartDownloadAsync(model);
             }
-            Grid.SetRow(listBox, 1);
-            grid.Children.Add(listBox);
-
-            var buttonPanel = new StackPanel 
-            { 
-                Orientation = Orientation.Horizontal,
-                HorizontalAlignment = HorizontalAlignment.Right
-            };
-            
-            var cancelButton = new Button 
-            { 
-                Content = "取消", 
-                Padding = new Thickness(15, 8, 15, 8),
-                Margin = new Thickness(5, 0, 0, 0)
-            };
-            cancelButton.Click += (s, args) => dialog.Close();
-            
-            var okButton = new Button 
-            { 
-                Content = "下载", 
-                Padding = new Thickness(15, 8, 15, 8),
-                Margin = new Thickness(5, 0, 0, 0),
-                IsDefault = true
-            };
-            okButton.Click += async (s, args) =>
-            {
-                if (listBox.SelectedItem == null)
-                {
-                    MessageBox.Show("请选择一个模型", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
-
-                var selected = listBox.SelectedItem.GetType().GetProperty("Model")?.GetValue(listBox.SelectedItem) 
-                    as ModelInfo;
-                
-                if (selected != null)
-                {
-                    dialog.Close();
-                    await StartDownloadAsync(selected);
-                }
-            };
-
-            buttonPanel.Children.Add(cancelButton);
-            buttonPanel.Children.Add(okButton);
-            Grid.SetRow(buttonPanel, 2);
-            grid.Children.Add(buttonPanel);
-
-            dialog.Content = grid;
-            dialog.ShowDialog();
         }
 
         /// <summary>
@@ -475,8 +421,9 @@ namespace WordFlow.Views
                 {
                     DownloadStatusText.Text = "下载完成！";
                     DownloadProgressText.Text = "100%";
-                    MessageBox.Show($"{model.Name} 下载并安装成功！", "成功", 
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    
+                    // 记录下载的模型 ID，用于关闭窗口后自动加载
+                    _lastDownloadedModelId = model.Id;
                     
                     // 刷新列表
                     await LoadModelsAsync();
@@ -484,6 +431,9 @@ namespace WordFlow.Views
                     // 隐藏进度
                     DownloadProgressGrid.Visibility = Visibility.Collapsed;
                     BackgroundDownloadButton.Visibility = Visibility.Collapsed;
+                    
+                    // 尝试自动加载模型
+                    await TryAutoLoadModelAsync(model.Id);
                 }
                 else
                 {
@@ -513,13 +463,114 @@ namespace WordFlow.Views
                 _downloadCts = null;
             }
         }
+        
+        /// <summary>
+        /// 尝试自动加载模型
+        /// </summary>
+        private async Task TryAutoLoadModelAsync(string modelId)
+        {
+            try
+            {
+                Logger.Log($"尝试自动加载模型：{modelId}");
+                
+                // 创建 SpeechRecognitionService 客户端
+                var speechService = new SpeechRecognitionService("http://127.0.0.1:5000");
+                
+                // 检查服务是否连接
+                bool isConnected = await speechService.CheckConnectionAsync();
+                
+                if (isConnected)
+                {
+                    // 服务已连接，尝试加载模型
+                    Logger.Log("ASR 服务已连接，尝试加载模型...");
+                    var loaded = await speechService.SwitchModelAsync(modelId);
+                    
+                    if (loaded)
+                    {
+                        Logger.Log($"模型加载成功：{modelId}");
+                        MessageBox.Show(
+                            $"模型下载并加载成功！\n\n现在可以开始使用语音输入了。",
+                            "成功",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        Logger.Log($"模型加载失败：{modelId}");
+                        MessageBox.Show(
+                            $"模型已下载完成，但加载失败。\n\n请检查 ASR 服务是否正常运行。",
+                            "提示",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                    }
+                }
+                else
+                {
+                    // 服务未连接，提示用户
+                    Logger.Log("ASR 服务未连接，提示用户");
+                    var result = MessageBox.Show(
+                        $"模型已下载完成！\n\n但 ASR 服务未启动，是否现在启动服务？",
+                        "启动服务",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+                    
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // 尝试启动服务
+                        var started = await speechService.TryStartServerAsync();
+                        if (started)
+                        {
+                            // 服务启动成功，加载模型
+                            var loaded = await speechService.SwitchModelAsync(modelId);
+                            if (loaded)
+                            {
+                                MessageBox.Show(
+                                    $"服务已启动并加载模型：{modelId}\n\n现在可以开始使用语音输入了。",
+                                    "成功",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Information);
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show(
+                                $"服务启动失败，请手动启动 ASR 服务。\n\n启动方法：\n双击 PythonASR/start_server.bat",
+                                "提示",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                        }
+                    }
+                }
+                
+                speechService.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"自动加载模型失败：{ex.Message}");
+            }
+        }
 
         /// <summary>
         /// 下载进度更新
         /// </summary>
         private void OnDownloadProgressChanged(object? sender, DownloadProgressEventArgs e)
         {
-            // 已在 Progress 中处理
+            Dispatcher.Invoke(() =>
+            {
+                // 更新进度条
+                DownloadProgressBar.Value = e.ProgressPercentage;
+                
+                // 更新进度百分比文本
+                DownloadProgressText.Text = $"{e.ProgressPercentage:F1}%";
+                
+                // 可选：显示速度和剩余时间
+                if (e.Speed > 0 && e.RemainingTime.TotalSeconds > 0)
+                {
+                    var speedMB = e.Speed / 1024 / 1024.0;
+                    var remainingSec = (int)e.RemainingTime.TotalSeconds;
+                    Logger.Log($"下载进度：{e.ProgressPercentage:F1}% - 速度：{speedMB:F2} MB/s - 剩余：{remainingSec}秒");
+                }
+            });
         }
 
         /// <summary>
@@ -530,6 +581,7 @@ namespace WordFlow.Views
             Dispatcher.Invoke(() =>
             {
                 DownloadStatusText.Text = status;
+                Logger.Log($"下载状态：{status}");
             });
         }
 

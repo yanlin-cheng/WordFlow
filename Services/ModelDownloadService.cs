@@ -18,7 +18,7 @@ namespace WordFlow.Services
     {
         private readonly HttpClient _httpClient;
         private readonly string _modelsDir;
-        private readonly string _configPath;
+        private string _configPath;
         private ModelsConfig? _config;
 
         public event EventHandler<DownloadProgressEventArgs>? ProgressChanged;
@@ -49,7 +49,7 @@ namespace WordFlow.Services
             try
             {
                 Directory.CreateDirectory(_modelsDir);
-                Logger.Log($"ModelDownloadService: 确保模型目录存在: {_modelsDir}");
+                Logger.Log($"ModelDownloadService: 确保模型目录存在：{_modelsDir}");
             }
             catch (Exception ex)
             {
@@ -232,7 +232,7 @@ namespace WordFlow.Services
             }
             catch (Exception ex)
             {
-                Logger.Log($"获取模型列表失败: {ex.Message}");
+                Logger.Log($"获取模型列表失败：{ex.Message}");
                 return new List<ModelInfo>();
             }
         }
@@ -244,22 +244,82 @@ namespace WordFlow.Services
         {
             try
             {
+                Logger.Log($"尝试加载配置文件：{_configPath}");
+                
                 if (!File.Exists(_configPath))
                 {
-                    Logger.Log($"配置文件不存在: {_configPath}");
-                    _config = new ModelsConfig { Models = new List<ModelInfo>() };
-                    return;
+                    Logger.Log($"配置文件不存在：{_configPath}");
+                    // 尝试备用路径
+                    var exeDir = AppDomain.CurrentDomain.BaseDirectory;
+                    var alternatePath = Path.Combine(exeDir, "models.json");
+                    
+                    if (File.Exists(alternatePath))
+                    {
+                        Logger.Log($"从备用路径加载：{alternatePath}");
+                        _configPath = alternatePath;
+                    }
+                    else
+                    {
+                        // 使用内置默认配置
+                        Logger.Log("使用内置默认模型配置");
+                        _config = GetDefaultModelsConfig();
+                        return;
+                    }
                 }
                 
                 var json = await File.ReadAllTextAsync(_configPath);
+                Logger.Log($"配置文件内容：{json.Substring(0, Math.Min(200, json.Length))}...");
+                
                 _config = JsonSerializer.Deserialize<ModelsConfig>(json);
                 Logger.Log($"已加载 {_config?.Models?.Count ?? 0} 个模型配置");
+                
+                // 如果加载的配置为空，使用默认配置
+                if (_config?.Models?.Count == 0)
+                {
+                    Logger.Log("配置文件中没有模型，使用默认配置");
+                    _config = GetDefaultModelsConfig();
+                }
             }
             catch (Exception ex)
             {
-                Logger.Log($"加载模型配置失败: {ex.Message}");
-                _config = new ModelsConfig { Models = new List<ModelInfo>() };
+                Logger.Log($"加载模型配置失败：{ex.Message}");
+                Logger.Log($"堆栈跟踪：{ex.StackTrace}");
+                _config = GetDefaultModelsConfig();
             }
+        }
+        
+        /// <summary>
+        /// 获取默认模型配置（硬编码备用）
+        /// </summary>
+        private ModelsConfig GetDefaultModelsConfig()
+        {
+            return new ModelsConfig
+            {
+                Version = "1.0",
+                Description = "WordFlow 默认模型配置",
+                BaseUrl = "https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v1.0.0",
+                MirrorUrl = "https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v1.0.0",
+                Models = new List<ModelInfo>
+                {
+                    new ModelInfo
+                    {
+                        Id = "paraformer-zh",
+                        Name = "Paraformer 中文",
+                        Size = "200 MB",
+                        SizeBytes = 209715200,
+                        Description = "中文语音识别模型，准确率高，适合中文场景",
+                        Default = true,
+                        Files = new ModelFiles
+                        {
+                            Archive = "paraformer-zh.tar.bz2",
+                            Parts = new[] { "paraformer-zh.tar.bz2.part1", "paraformer-zh.tar.bz2.part2", "paraformer-zh.tar.bz2.part3" }
+                        },
+                        RequiredFiles = new List<string> { "model.int8.onnx", "tokens.txt" }
+                    }
+                    // SenseVoice 小模型 - 待开发
+                    // 未来将支持多语种模型，支持中英日韩粤
+                }
+            };
         }
 
         /// <summary>
@@ -276,6 +336,107 @@ namespace WordFlow.Services
         #region 下载模型
 
         /// <summary>
+        /// 下载并安装模型（支持 Gitee 分卷下载）
+        /// </summary>
+        public async Task<DownloadResult> DownloadModelAsync(
+            ModelInfo model, 
+            bool useMirror = true, 
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                Logger.Log($"开始下载模型：{model.Id} ({model.Name})");
+                StatusChanged?.Invoke(this, $"准备下载 {model.Name}...");
+                
+                // 确保模型目录存在
+                Directory.CreateDirectory(_modelsDir);
+                
+                // 检查是否有分卷文件（Gitee 分卷下载）
+                if (model.Files.Parts != null && model.Files.Parts.Length > 0)
+                {
+                    Logger.Log($"使用分卷下载：{model.Files.Parts.Length} 个分包");
+                    return await DownloadModelFromGiteeAsync(
+                        model.Id,
+                        "cheng-yanlin",  // Gitee 用户名
+                        "WordFlow-Release",  // 仓库名
+                        "v1.0.0",  // 版本
+                        model.Files.Parts,
+                        model.SizeBytes,
+                        cancellationToken);
+                }
+                
+                // 标准单文件下载
+                var baseUrl = useMirror && !string.IsNullOrEmpty(_config?.MirrorUrl) 
+                    ? _config.MirrorUrl 
+                    : _config?.BaseUrl ?? "";
+                
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    Logger.Log("未配置下载基础 URL，使用默认 Gitee 地址");
+                    baseUrl = "https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v1.0.0";
+                }
+                
+                var archiveUrl = $"{baseUrl}/{model.Files.Archive}";
+                var archivePath = Path.Combine(_modelsDir, model.Files.Archive);
+                
+                Logger.Log($"下载地址：{archiveUrl}");
+                Logger.Log($"保存路径：{archivePath}");
+                
+                // 下载
+                StatusChanged?.Invoke(this, "正在下载...");
+                var downloadResult = await DownloadFileWithResumeAsync(
+                    archiveUrl, 
+                    archivePath, 
+                    model.SizeBytes,
+                    cancellationToken);
+                
+                if (!downloadResult)
+                {
+                    return new DownloadResult { Success = false, Error = "下载失败或被取消" };
+                }
+                
+                // 解压
+                StatusChanged?.Invoke(this, "正在解压...");
+                var extractResult = await ExtractModelAsync(archivePath, model.Id);
+                
+                if (!extractResult.Success)
+                {
+                    return new DownloadResult { Success = false, Error = extractResult.Error ?? "解压失败" };
+                }
+                
+                // 验证
+                StatusChanged?.Invoke(this, "正在验证模型...");
+                var modelPath = Path.Combine(_modelsDir, model.Id);
+                if (!ValidateModelIntegrity(modelPath, model))
+                {
+                    return new DownloadResult { Success = false, Error = "模型文件验证失败" };
+                }
+                
+                // 删除压缩包
+                try
+                {
+                    File.Delete(archivePath);
+                }
+                catch { /* 忽略删除失败 */ }
+                
+                StatusChanged?.Invoke(this, "模型安装完成！");
+                Logger.Log($"模型安装成功：{model.Id}");
+                
+                return new DownloadResult { Success = true, ModelPath = modelPath };
+            }
+            catch (OperationCanceledException)
+            {
+                Logger.Log("下载被取消");
+                return new DownloadResult { Success = false, Error = "用户取消下载" };
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"下载模型失败：{ex.Message}");
+                return new DownloadResult { Success = false, Error = ex.Message };
+            }
+        }
+
+        /// <summary>
         /// 从 Gitee Release 下载模型（支持分包）
         /// </summary>
         public async Task<DownloadResult> DownloadModelFromGiteeAsync(
@@ -289,7 +450,7 @@ namespace WordFlow.Services
         {
             try
             {
-                Logger.Log($"开始从 Gitee 下载模型: {modelId}");
+                Logger.Log($"开始从 Gitee 下载模型：{modelId}");
                 StatusChanged?.Invoke(this, $"准备下载 {modelId}...");
                 
                 // 确保模型目录存在
@@ -355,7 +516,7 @@ namespace WordFlow.Services
                 }
                 
                 StatusChanged?.Invoke(this, "模型安装完成！");
-                Logger.Log($"模型安装成功: {modelId}");
+                Logger.Log($"模型安装成功：{modelId}");
                 
                 return new DownloadResult { Success = true, ModelPath = Path.Combine(_modelsDir, modelId) };
             }
@@ -366,7 +527,7 @@ namespace WordFlow.Services
             }
             catch (Exception ex)
             {
-                Logger.Log($"下载模型失败: {ex.Message}");
+                Logger.Log($"下载模型失败：{ex.Message}");
                 return new DownloadResult { Success = false, Error = ex.Message };
             }
         }
@@ -389,87 +550,6 @@ namespace WordFlow.Services
         }
 
         /// <summary>
-        /// 下载并安装模型（标准方式）
-        /// </summary>
-        public async Task<DownloadResult> DownloadModelAsync(
-            ModelInfo model, 
-            bool useMirror = true, 
-            CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                Logger.Log($"开始下载模型: {model.Id} ({model.Name})");
-                StatusChanged?.Invoke(this, $"准备下载 {model.Name}...");
-                
-                // 确保模型目录存在
-                Directory.CreateDirectory(_modelsDir);
-                
-                // 构建下载 URL
-                var baseUrl = useMirror && !string.IsNullOrEmpty(_config?.MirrorUrl) 
-                    ? _config.MirrorUrl 
-                    : _config?.BaseUrl ?? "";
-                
-                var archiveUrl = $"{baseUrl}/{model.Files.Archive}";
-                var archivePath = Path.Combine(_modelsDir, model.Files.Archive);
-                
-                Logger.Log($"下载地址: {archiveUrl}");
-                Logger.Log($"保存路径: {archivePath}");
-                
-                // 下载
-                StatusChanged?.Invoke(this, "正在下载...");
-                var downloadResult = await DownloadFileWithResumeAsync(
-                    archiveUrl, 
-                    archivePath, 
-                    model.SizeBytes,
-                    cancellationToken);
-                
-                if (!downloadResult)
-                {
-                    return new DownloadResult { Success = false, Error = "下载失败或被取消" };
-                }
-                
-                // 解压
-                StatusChanged?.Invoke(this, "正在解压...");
-                var extractResult = await ExtractModelAsync(archivePath, model.Id);
-                
-                if (!extractResult.Success)
-                {
-                    return new DownloadResult { Success = false, Error = extractResult.Error ?? "解压失败" };
-                }
-                
-                // 验证
-                StatusChanged?.Invoke(this, "正在验证模型...");
-                var modelPath = Path.Combine(_modelsDir, model.Id);
-                if (!ValidateModelIntegrity(modelPath, model))
-                {
-                    return new DownloadResult { Success = false, Error = "模型文件验证失败" };
-                }
-                
-                // 删除压缩包
-                try
-                {
-                    File.Delete(archivePath);
-                }
-                catch { /* 忽略删除失败 */ }
-                
-                StatusChanged?.Invoke(this, "模型安装完成！");
-                Logger.Log($"模型安装成功: {model.Id}");
-                
-                return new DownloadResult { Success = true, ModelPath = modelPath };
-            }
-            catch (OperationCanceledException)
-            {
-                Logger.Log("下载被取消");
-                return new DownloadResult { Success = false, Error = "用户取消下载" };
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"下载模型失败: {ex.Message}");
-                return new DownloadResult { Success = false, Error = ex.Message };
-            }
-        }
-
-        /// <summary>
         /// 带断点续传的文件下载
         /// </summary>
         private async Task<bool> DownloadFileWithResumeAsync(
@@ -486,7 +566,7 @@ namespace WordFlow.Services
                 if (File.Exists(filePath))
                 {
                     existingLength = new FileInfo(filePath).Length;
-                    Logger.Log($"发现已下载部分: {existingLength} bytes");
+                    Logger.Log($"发现已下载部分：{existingLength} bytes");
                 }
                 
                 // 检查是否已完成
@@ -513,7 +593,7 @@ namespace WordFlow.Services
                 var totalBytes = response.Content.Headers.ContentLength ?? (expectedSize - existingLength);
                 var totalToDownload = existingLength + totalBytes;
                 
-                Logger.Log($"下载: 已有 {existingLength}, 需下载 {totalBytes}, 总计 {totalToDownload}");
+                Logger.Log($"下载：已有 {existingLength}, 需下载 {totalBytes}, 总计 {totalToDownload}");
                 
                 // 打开文件流（追加模式）
                 using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -573,7 +653,7 @@ namespace WordFlow.Services
                     RemainingTime = TimeSpan.Zero
                 });
                 
-                Logger.Log($"下载完成: {totalRead} bytes");
+                Logger.Log($"下载完成：{totalRead} bytes");
                 return true;
             }
             catch (OperationCanceledException)
@@ -582,7 +662,7 @@ namespace WordFlow.Services
             }
             catch (Exception ex)
             {
-                Logger.Log($"下载失败: {ex.Message}");
+                Logger.Log($"下载失败：{ex.Message}");
                 return false;
             }
         }
@@ -599,8 +679,8 @@ namespace WordFlow.Services
             try
             {
                 var modelsDir = _modelsDir;
-                Logger.Log($"开始解压: {archivePath}");
-                Logger.Log($"目标目录: {modelsDir}");
+                Logger.Log($"开始解压：{archivePath}");
+                Logger.Log($"目标目录：{modelsDir}");
                 
                 // 使用 SharpZipLib 解压 tar.bz2
                 await Task.Run(() =>
@@ -635,12 +715,12 @@ namespace WordFlow.Services
                 
                 if (extractedDir != null)
                 {
-                    Logger.Log($"找到解压目录: {extractedDir}");
+                    Logger.Log($"找到解压目录：{extractedDir}");
                     
                     // 如果目标目录已存在，先删除
                     if (Directory.Exists(targetDir))
                     {
-                        Logger.Log($"删除已存在的目标目录: {targetDir}");
+                        Logger.Log($"删除已存在的目标目录：{targetDir}");
                         Directory.Delete(targetDir, true);
                     }
                     
@@ -648,7 +728,7 @@ namespace WordFlow.Services
                     if (!extractedDir.Equals(targetDir, StringComparison.OrdinalIgnoreCase))
                     {
                         Directory.Move(extractedDir, targetDir);
-                        Logger.Log($"重命名: {extractedDir} -> {targetDir}");
+                        Logger.Log($"重命名：{extractedDir} -> {targetDir}");
                     }
                     else
                     {
@@ -657,7 +737,7 @@ namespace WordFlow.Services
                 }
                 else
                 {
-                    Logger.Log($"未找到需要重命名的目录，检查是否已存在目标目录: {targetDir}");
+                    Logger.Log($"未找到需要重命名的目录，检查是否已存在目标目录：{targetDir}");
                     // 如果目标目录已存在，说明解压成功
                     if (!Directory.Exists(targetDir))
                     {
@@ -673,7 +753,7 @@ namespace WordFlow.Services
                         if (newDir != null)
                         {
                             Directory.Move(newDir, targetDir);
-                            Logger.Log($"重命名: {newDir} -> {targetDir}");
+                            Logger.Log($"重命名：{newDir} -> {targetDir}");
                         }
                     }
                 }
@@ -683,9 +763,9 @@ namespace WordFlow.Services
             }
             catch (Exception ex)
             {
-                Logger.Log($"解压异常: {ex.Message}");
-                Logger.Log($"堆栈跟踪: {ex.StackTrace}");
-                return (false, $"解压失败: {ex.Message}");
+                Logger.Log($"解压异常：{ex.Message}");
+                Logger.Log($"堆栈跟踪：{ex.StackTrace}");
+                return (false, $"解压失败：{ex.Message}");
             }
         }
 
@@ -702,7 +782,7 @@ namespace WordFlow.Services
             {
                 if (!Directory.Exists(modelPath))
                 {
-                    Logger.Log($"模型目录不存在: {modelPath}");
+                    Logger.Log($"模型目录不存在：{modelPath}");
                     return false;
                 }
                 
@@ -716,7 +796,7 @@ namespace WordFlow.Services
                                       File.Exists(Path.Combine(modelPath, "model.int8.onnx"));
                         if (!hasModel)
                         {
-                            Logger.Log($"缺少模型文件: {requiredFile}");
+                            Logger.Log($"缺少模型文件：{requiredFile}");
                             return false;
                         }
                     }
@@ -725,18 +805,18 @@ namespace WordFlow.Services
                         var filePath = Path.Combine(modelPath, requiredFile);
                         if (!File.Exists(filePath))
                         {
-                            Logger.Log($"缺少必需文件: {requiredFile}");
+                            Logger.Log($"缺少必需文件：{requiredFile}");
                             return false;
                         }
                     }
                 }
                 
-                Logger.Log($"模型验证通过: {modelPath}");
+                Logger.Log($"模型验证通过：{modelPath}");
                 return true;
             }
             catch (Exception ex)
             {
-                Logger.Log($"验证失败: {ex.Message}");
+                Logger.Log($"验证失败：{ex.Message}");
                 return false;
             }
         }
@@ -779,6 +859,7 @@ namespace WordFlow.Services
     public class ModelFiles
     {
         public string Archive { get; set; } = "";
+        public string[]? Parts { get; set; }
     }
 
     /// <summary>
