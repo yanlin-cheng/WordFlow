@@ -1,8 +1,72 @@
-WordFlow 语音输入工具
-版权所有 (c) 2024 WordFlow Team
+MIT License
 
-本软件免费提供给个人用户使用。
+Copyright (c) 2026 WordFlow Team
 
-免责声明：
-本软件按"原样"提供，不提供任何明示或暗示的担保。
-使用本软件产生的任何风险由用户自行承担。
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## 补充条款
+
+### 基础功能 (MIT License)
+
+本软件的基础功能部分采用 MIT 许可证开源，包括：
+- 核心语音输入功能
+- 离线模型下载和使用
+- 本地词库管理
+- 历史记录
+- 系统托盘/热键
+- 基础 UI 界面
+
+您可以自由使用、修改、分发这部分代码，只需保留上述版权声明。
+
+### 增值服务 (专有许可)
+
+本软件的以下增值服务部分采用专有许可，保留所有权利：
+- 用户登录系统
+- 云词库同步 API
+- 词库交易市场
+- AI 增强服务接口
+- 收益分成系统
+
+这部分功能仅供个人使用，禁止以下行为：
+- 反向工程、反编译或反汇编
+- 用于训练其他 AI 模型
+- 用于商业目的的再分发
+- 绕过付费验证机制
+
+### 词库交易平台规则
+
+使用 WordFlow 词库交易平台，即表示您同意以下规则：
+
+**对于词库创作者：**
+- 创作者可自主设定词库价格（建议¥1-5 元）
+- 创作者获得下载收入的 80% 分成
+- 平台收取 20% 服务费，用于服务器和运营成本
+- 创作者需保证词库质量，不上传侵权内容
+
+**对于词库购买者：**
+- 购买后永久使用该词库
+- 仅限个人使用，禁止转售或分发
+- 可在个人设备间同步使用
+
+---
+
+**WordFlow 团队**
+https://github.com/wanddream/WordFlowV2
