@@ -39,7 +39,7 @@ namespace WordFlow.Views
         }
 
         /// <summary>
-        /// 加载模型列表 - 扫描本地目录 + 配置文件中的可下载模型
+        /// 加载模型列表 - 优先从 ASR 服务获取已安装模型，再扫描本地目录 + 配置文件
         /// </summary>
         private async Task LoadModelsAsync()
         {
@@ -47,44 +47,107 @@ namespace WordFlow.Views
             {
                 ModelListPanel.Children.Clear();
                 
-                var outputDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                var outputModelsDir = Path.Combine(outputDir ?? "", "PythonASR", "models");
-                
-                Logger.Log($"加载模型列表：输出目录模型路径={outputModelsDir}");
-                
-                // 扫描本地已安装的模型
+                // 1. 首先尝试从 ASR 服务获取已安装模型列表（最准确）
                 var installedModelIds = new HashSet<string>();
+                var currentModelId = "";
+                bool serviceConnected = false;
                 
-                if (Directory.Exists(outputModelsDir))
+                try
                 {
-                    var modelDirs = Directory.GetDirectories(outputModelsDir);
-                    foreach (var modelDir in modelDirs)
+                    var speechService = new SpeechRecognitionService("http://127.0.0.1:5000");
+                    bool isConnected = await speechService.CheckConnectionAsync();
+                    
+                    if (isConnected)
                     {
-                        if (IsValidModel(modelDir))
-                        {
-                            var modelId = Path.GetFileName(modelDir);
-                            installedModelIds.Add(modelId);
-                            Logger.Log($"发现本地模型：{modelId}");
-                            
-                            // 获取模型目录大小
-                            var size = GetDirectorySize(modelDir);
-                            var sizeStr = FormatSize(size);
-                            
-                            var modelItem = CreateModelItem(
-                                modelId,
-                                modelId,
-                                "本地已安装模型",
-                                sizeStr,
-                                true,   // 已安装
-                                false); // 不显示下载按钮
-                            ModelListPanel.Children.Add(modelItem);
-                        }
+                        serviceConnected = true;
+                        Logger.Log("ASR 服务已连接，从服务获取模型列表...");
+                        
+                        // 获取健康检查信息（包含已安装模型和当前模型）
+                        var healthResponse = await speechService.GetHealthAsync();
+                        currentModelId = healthResponse?.current_model ?? "";
+                        installedModelIds = new HashSet<string>(healthResponse?.installed_models ?? new List<string>());
+                        
+                        Logger.Log($"从服务获取到 {installedModelIds.Count} 个已安装模型，当前模型：{currentModelId}");
                     }
+                    
+                    speechService.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"从 ASR 服务获取模型列表失败：{ex.Message}，将扫描本地目录");
                 }
                 
-                Logger.Log($"已安装模型数量：{installedModelIds.Count}");
+                // 2. 如果服务未连接或没有获取到模型，扫描本地目录
+                if (!serviceConnected || installedModelIds.Count == 0)
+                {
+                    Logger.Log("扫描本地模型目录...");
+                    var outputDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                    var outputModelsDir = Path.Combine(outputDir ?? "", "PythonASR", "models");
+                    
+                    Logger.Log($"加载模型列表：输出目录模型路径={outputModelsDir}");
+                    
+                    if (Directory.Exists(outputModelsDir))
+                    {
+                        var modelDirs = Directory.GetDirectories(outputModelsDir);
+                        foreach (var modelDir in modelDirs)
+                        {
+                            if (IsValidModel(modelDir))
+                            {
+                                var modelId = Path.GetFileName(modelDir);
+                                installedModelIds.Add(modelId);
+                                Logger.Log($"发现本地模型：{modelId}");
+                            }
+                        }
+                    }
+                    
+                    Logger.Log($"本地扫描已安装模型数量：{installedModelIds.Count}");
+                }
                 
-                // 从配置文件获取可下载的模型列表
+                // 3. 显示已安装的模型
+                foreach (var modelId in installedModelIds)
+                {
+                    // 获取模型详细信息（从配置文件或默认）
+                    var modelInfo = await GetModelInfoAsync(modelId);
+                    
+                    // 如果配置文件中没有大小信息，扫描本地目录计算实际大小
+                    string sizeStr;
+                    if (modelInfo != null && !string.IsNullOrEmpty(modelInfo.Size) && modelInfo.Size != "未知")
+                    {
+                        sizeStr = modelInfo.Size;
+                    }
+                    else
+                    {
+                        // 扫描本地目录计算大小
+                        var outputDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                        var outputModelsDir = Path.Combine(outputDir ?? "", "PythonASR", "models");
+                        var modelDirPath = Path.Combine(outputModelsDir, modelId);
+                        
+                        if (Directory.Exists(modelDirPath))
+                        {
+                            var sizeBytes = GetDirectorySize(modelDirPath);
+                            sizeStr = FormatSize(sizeBytes);
+                        }
+                        else
+                        {
+                            sizeStr = modelInfo?.Size ?? "未知";
+                        }
+                    }
+                    
+                    var description = modelInfo?.Description ?? "本地已安装模型";
+                    bool isCurrentModel = (modelId == currentModelId);
+                    
+                    var modelItem = CreateModelItem(
+                        modelId,
+                        modelInfo?.Name ?? modelId,
+                        description,
+                        sizeStr,
+                        true,       // 已安装
+                        false,      // 不显示下载按钮
+                        isCurrentModel); // 是否当前模型
+                    ModelListPanel.Children.Add(modelItem);
+                }
+                
+                // 4. 从配置文件获取可下载的模型列表
                 var availableModels = await _downloadService.GetAvailableModelsAsync();
                 Logger.Log($"可用模型配置数量：{availableModels.Count}");
                 
@@ -100,7 +163,8 @@ namespace WordFlow.Views
                             model.Description,
                             model.Size,
                             false,  // 未安装
-                            true);  // 显示下载按钮
+                            true,   // 显示下载按钮
+                            false); // 不是当前模型
                         ModelListPanel.Children.Add(modelItem);
                     }
                 }
@@ -119,7 +183,7 @@ namespace WordFlow.Views
                     ModelListPanel.Children.Add(noModelText);
                 }
                 
-                Logger.Log($"模型列表加载完成");
+                Logger.Log($"模型列表加载完成，共 {installedModelIds.Count + availableModels.Count} 个模型");
             }
             catch (Exception ex)
             {
@@ -127,6 +191,22 @@ namespace WordFlow.Views
                 Logger.Log($"堆栈跟踪：{ex.StackTrace}");
                 MessageBox.Show($"加载模型列表失败：{ex.Message}", "错误", 
                     MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 获取模型信息（从配置文件）
+        /// </summary>
+        private async Task<ModelInfo?> GetModelInfoAsync(string modelId)
+        {
+            try
+            {
+                var availableModels = await _downloadService.GetAvailableModelsAsync();
+                return availableModels.FirstOrDefault(m => m.Id == modelId);
+            }
+            catch
+            {
+                return null;
             }
         }
         
@@ -182,7 +262,8 @@ namespace WordFlow.Views
         /// <param name="size">模型大小</param>
         /// <param name="isInstalled">是否已安装</param>
         /// <param name="showDownloadButton">是否显示下载按钮（用于未安装的模型）</param>
-        private Grid CreateModelItem(string modelId, string name, string description, string size, bool isInstalled, bool showDownloadButton = false)
+        /// <param name="isCurrentModel">是否当前正在使用的模型</param>
+        private Grid CreateModelItem(string modelId, string name, string description, string size, bool isInstalled, bool showDownloadButton = false, bool isCurrentModel = false)
         {
             var grid = new Grid
             {
@@ -235,10 +316,29 @@ namespace WordFlow.Views
             grid.Children.Add(sizeText);
             
             // 状态
+            string statusTextContent;
+            SolidColorBrush statusTextColor;
+            
+            if (!isInstalled)
+            {
+                statusTextContent = "⬇️ 未下载";
+                statusTextColor = new SolidColorBrush(Colors.Orange);
+            }
+            else if (isCurrentModel)
+            {
+                statusTextContent = "✅ 当前使用";
+                statusTextColor = new SolidColorBrush(Color.FromRgb(25, 118, 210)); // Blue
+            }
+            else
+            {
+                statusTextContent = "✅ 已安装";
+                statusTextColor = new SolidColorBrush(Colors.Green);
+            }
+            
             var statusText = new TextBlock 
             { 
-                Text = isInstalled ? "✅ 已安装" : "⬇️ 未下载",
-                Foreground = isInstalled ? new SolidColorBrush(Colors.Green) : new SolidColorBrush(Colors.Orange),
+                Text = statusTextContent,
+                Foreground = statusTextColor,
                 VerticalAlignment = VerticalAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 FontWeight = FontWeights.Medium,
@@ -303,14 +403,84 @@ namespace WordFlow.Views
         /// <summary>
         /// 使用模型按钮点击
         /// </summary>
-        private void UseButton_Click(object sender, RoutedEventArgs e)
+        private async void UseButton_Click(object sender, RoutedEventArgs e)
         {
             var modelId = (string)((Button)sender).Tag;
-            // TODO: 切换到该模型
-            MessageBox.Show($"已切换到模型: {modelId}", "提示", 
-                MessageBoxButton.OK, MessageBoxImage.Information);
-            DialogResult = true;
-            Close();
+            
+            try
+            {
+                // 创建 SpeechRecognitionService 客户端
+                var speechService = new SpeechRecognitionService("http://127.0.0.1:5000");
+                
+                // 检查服务是否连接
+                bool isConnected = await speechService.CheckConnectionAsync();
+                
+                if (!isConnected)
+                {
+                    // 服务未连接，尝试自动启动
+                    var result = MessageBox.Show(
+                        $"ASR 服务未启动，是否现在启动服务？\n\n启动后可以加载模型：{modelId}",
+                        "启动服务",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+                    
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        var started = await speechService.TryStartServerAsync();
+                        if (!started)
+                        {
+                            MessageBox.Show(
+                                $"服务启动失败，请手动启动 ASR 服务。\n\n启动方法：\n双击 PythonASR/start_server.bat",
+                                "提示",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                            speechService.Dispose();
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        speechService.Dispose();
+                        return;
+                    }
+                }
+                
+                // 切换模型
+                Logger.Log($"正在切换模型：{modelId}");
+                bool loaded = await speechService.SwitchModelAsync(modelId);
+                
+                if (loaded)
+                {
+                    Logger.Log($"模型加载成功：{modelId}");
+                    MessageBox.Show(
+                        $"✅ 已切换到模型：{modelId}\n\n现在可以开始使用语音输入了。",
+                        "成功",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    DialogResult = true;
+                    Close();
+                }
+                else
+                {
+                    Logger.Log($"模型加载失败：{modelId}");
+                    MessageBox.Show(
+                        $"❌ 切换模型失败\n\n请检查 ASR 服务日志确认模型是否正确安装。",
+                        "失败",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+                
+                speechService.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"切换模型失败：{ex.Message}");
+                MessageBox.Show(
+                    $"切换模型失败：{ex.Message}",
+                    "错误",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
 
         /// <summary>

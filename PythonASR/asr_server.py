@@ -28,37 +28,18 @@ class SherpaASRService:
     """Sherpa-ONNX语音识别服务"""
     
     # 支持的模型配置（下载地址等）
-    # 使用ModelScope国内镜像，下载更快
+    # 使用 ModelScope 国内镜像，下载更快
     AVAILABLE_MODELS = {
-        "paraformer-zh": {
-            "name": "Paraformer-中文",
-            "size": "200MB",
-            "url": "https://www.modelscope.cn/models/pkufool/sherpa-onnx-paraformer-zh-2024-04-25/resolve/master/sherpa-onnx-paraformer-zh-2024-04-25.tar.bz2",
-            "description": "中文语音识别，准确率高",
+        "sensevoice-small-onnx": {
+            "name": "SenseVoice 官方 ONNX",
+            "size": "238MB",
+            "description": "通义实验室官方 ONNX 版本，带标点，支持多语种",
             "files": {
-                "model": "model.onnx",
+                "model": "model.int8.onnx",
                 "tokens": "tokens.txt"
-            }
-        },
-        "sensevoice-small": {
-            "name": "SenseVoice-Small",
-            "size": "100MB", 
-            "url": "https://www.modelscope.cn/models/pkufool/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/resolve/master/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17.tar.bz2",
-            "description": "多语种小模型，支持中英日韩粤",
-            "files": {
-                "model": "model.onnx",
-                "tokens": "tokens.txt"
-            }
-        },
-        "sensevoice-large": {
-            "name": "SenseVoice-Large",
-            "size": "500MB",
-            "url": "https://www.modelscope.cn/models/pkufool/sherpa-onnx-sense-voice-large-zh-en-ja-ko-yue-2024-07-17/resolve/master/sherpa-onnx-sense-voice-large-zh-en-ja-ko-yue-2024-07-17.tar.bz2", 
-            "description": "多语种大模型，准确率最高",
-            "files": {
-                "model": "model.onnx",
-                "tokens": "tokens.txt"
-            }
+            },
+            "type": "sensevoice",
+            "localOnly": True
         }
     }
     
@@ -113,7 +94,7 @@ class SherpaASRService:
         加载指定模型
         
         Args:
-            model_id: 模型ID
+            model_id: 模型 ID
             
         Returns:
             是否加载成功
@@ -122,41 +103,64 @@ class SherpaASRService:
             from sherpa_onnx import OfflineRecognizer
             
             if model_id not in self.AVAILABLE_MODELS:
-                logger.error(f"未知模型: {model_id}")
+                logger.error(f"未知模型：{model_id}")
                 return False
             
             model_path = self.models_dir / model_id
             if not model_path.exists():
-                logger.error(f"模型未安装: {model_id}")
+                logger.error(f"模型未安装：{model_id}")
                 return False
             
             # 释放旧模型
             if self.recognizer:
                 self.recognizer = None
             
-            logger.info(f"正在加载模型: {model_id}")
+            logger.info(f"正在加载模型：{model_id}")
             
-            # 自动检测模型文件（优先使用int8量化版）
+            # 自动检测模型文件（优先使用 int8 量化版）
             model_file = model_path / "model.int8.onnx"
             if not model_file.exists():
                 model_file = model_path / "model.onnx"
             
-            logger.info(f"使用模型文件: {model_file.name}")
+            if not model_file.exists():
+                logger.error(f"模型文件不存在：{model_path}")
+                return False
             
-            # 使用 Paraformer 专用工厂方法
-            self.recognizer = OfflineRecognizer.from_paraformer(
-                paraformer=str(model_file),
-                tokens=str(model_path / "tokens.txt"),
-                num_threads=4
-            )
+            logger.info(f"使用模型文件：{model_file.name}")
+            
+            # 获取模型类型
+            model_info = self.AVAILABLE_MODELS.get(model_id, {})
+            model_type = model_info.get("type", "paraformer")
+            
+            # 根据模型类型使用不同的加载方法
+            if model_type == "sensevoice":
+                logger.info(f"使用 SenseVoice 方式加载模型")
+                
+                # 使用 SenseVoice 专用工厂方法
+                # use_itn=True: 启用逆文本正则化，自动输出带标点符号的文本
+                self.recognizer = OfflineRecognizer.from_sense_voice(
+                    model=str(model_file),
+                    tokens=str(model_path / "tokens.txt"),
+                    num_threads=4,
+                    use_itn=True
+                )
+            else:
+                logger.info(f"使用 Paraformer 方式加载模型")
+                # 使用 Paraformer 专用工厂方法
+                self.recognizer = OfflineRecognizer.from_paraformer(
+                    paraformer=str(model_file),
+                    tokens=str(model_path / "tokens.txt"),
+                    num_threads=4
+                )
+            
             self.current_model_id = model_id
             
-            logger.info(f"模型加载完成: {model_id}")
+            logger.info(f"模型加载完成：{model_id}")
             logger.info(f" recognizer={self.recognizer is not None}, current_model_id={self.current_model_id}")
             return True
             
         except Exception as e:
-            logger.error(f"加载模型失败: {e}")
+            logger.error(f"加载模型失败：{e}")
             import traceback
             logger.error(traceback.format_exc())
             return False

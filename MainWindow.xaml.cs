@@ -990,7 +990,7 @@ namespace WordFlow
         }
         
         /// <summary>
-        /// 刷新模型状态显示
+        /// 刷新模型状态显示 - 直接从 ASR 服务获取最新状态
         /// </summary>
         private async Task RefreshModelStatusAsync()
         {
@@ -1003,8 +1003,11 @@ namespace WordFlow
                     
                     if (isConnected)
                     {
-                        // 获取当前模型
-                        string currentModel = _speechService.CurrentModel;
+                        // 直接从 ASR 服务获取最新状态
+                        var health = await _speechService.GetHealthAsync();
+                        string currentModel = health?.current_model ?? _speechService.CurrentModel;
+                        
+                        Logger.Log($"刷新模型状态 - 从服务获取当前模型：{currentModel}");
                         
                         // 如果当前没有加载模型，尝试自动加载
                         if (string.IsNullOrEmpty(currentModel))

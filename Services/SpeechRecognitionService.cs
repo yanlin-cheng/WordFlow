@@ -86,6 +86,25 @@ namespace WordFlow.Services
             }
         }
 
+        /// <summary>
+        /// 获取健康检查信息（包含已安装模型和当前模型）
+        /// </summary>
+        public async Task<HealthResponse?> GetHealthAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{_serviceUrl}/health");
+                response.EnsureSuccessStatusCode();
+                
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<HealthResponse>(json);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         #endregion
 
         #region 模型管理
@@ -478,7 +497,7 @@ namespace WordFlow.Services
             public bool IsNewVocabulary { get; set; }
         }
 
-        private class HealthResponse
+        public class HealthResponse
         {
             public string status { get; set; } = "";
             public string current_model { get; set; } = "";
