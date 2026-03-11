@@ -164,22 +164,20 @@
   </ItemGroup>
   
   <ItemGroup>
+    <!-- 主资源文件（需要生成代码） -->
     <EmbeddedResource Update="Resources\Strings\Strings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <LogicalName>WordFlow.Resources.Strings.Strings.resources</LogicalName>
     </EmbeddedResource>
+    <!-- 卫星资源文件（多语言，不需要生成代码） -->
     <EmbeddedResource Update="Resources\Strings\Strings.en.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LogicalName>WordFlow.Resources.Strings.Strings.resources</LogicalName>
+      <Generator></Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Strings\Strings.ja.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LogicalName>WordFlow.Resources.Strings.Strings.resources</LogicalName>
+      <Generator></Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Strings\Strings.ko.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LogicalName>WordFlow.Resources.Strings.Strings.resources</LogicalName>
+      <Generator></Generator>
     </EmbeddedResource>
   </ItemGroup>
 
