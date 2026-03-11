@@ -1,10 +1,13 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using WordFlow.Infrastructure;
+using WordFlow.Resources.Strings;
 using WordFlow.Services;
+using WordFlow.Utils;
 
 namespace WordFlow.Views
 {
@@ -14,6 +17,7 @@ namespace WordFlow.Views
         private readonly GlobalHotkeyServiceV2 _hotkeyService;
         private int _selectedHotkeyCode;
         private bool _isSaved = false;
+        private string _selectedLanguageCode;
 
         public SettingsWindow(SettingsService settingsService, GlobalHotkeyServiceV2 hotkeyService)
         {
@@ -51,6 +55,43 @@ namespace WordFlow.Views
             // 加载启动设置
             AutoStartCheckBox.IsChecked = AutoStartService.IsAutoStartEnabled();
             StartMinimizedCheckBox.IsChecked = _settingsService.Settings.StartMinimized;
+
+            // 加载语言设置
+            _selectedLanguageCode = _settingsService.Settings.LanguageCode ?? "zh-CN";
+            var languageIndex = GetLanguageIndexByCode(_selectedLanguageCode);
+            LanguageComboBox.SelectedIndex = languageIndex;
+        }
+
+        private int GetLanguageIndexByCode(string code)
+        {
+            return code switch
+            {
+                "zh-CN" => 0,
+                "en-US" => 1,
+                "ja-JP" => 2,
+                "ko-KR" => 3,
+                _ => 0
+            };
+        }
+
+        private string GetLanguageCodeByIndex(int index)
+        {
+            return index switch
+            {
+                0 => "zh-CN",
+                1 => "en-US",
+                2 => "ja-JP",
+                3 => "ko-KR",
+                _ => "zh-CN"
+            };
+        }
+
+        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (LanguageComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                _selectedLanguageCode = selectedItem.Tag?.ToString() ?? "zh-CN";
+            }
         }
 
         private void HotkeyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -93,7 +134,7 @@ namespace WordFlow.Views
                 NewValue = _selectedHotkeyCode
             });
             
-            MessageBox.Show("设置已保存", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Strings.Message_SaveSuccess, Strings.SettingsWindow_Title, MessageBoxButton.OK, MessageBoxImage.Information);
             DialogResult = true;
             _isSaved = true;
             Close();
@@ -106,11 +147,50 @@ namespace WordFlow.Views
             _hotkeyService.HotkeyCode = _selectedHotkeyCode;
             Utils.Logger.Log($"设置窗口：热键已更新为 {_selectedHotkeyCode}");
 
+            // 保存语言设置
+            var oldLanguageCode = _settingsService.Settings.LanguageCode ?? "zh-CN";
+            _settingsService.Settings.LanguageCode = _selectedLanguageCode;
+
             // 保存其他设置
             _settingsService.Settings.AutoStart = AutoStartCheckBox.IsChecked ?? false;
             _settingsService.Settings.StartMinimized = StartMinimizedCheckBox.IsChecked ?? false;
             _settingsService.Save();
             _isSaved = true;
+
+            // 如果语言改变了，提示重启
+            if (oldLanguageCode != _selectedLanguageCode)
+            {
+                // 检查是否在调试模式下
+                if (Debugger.IsAttached)
+                {
+                    // 调试模式下不重启，只提示用户
+                    MessageBox.Show(
+                        $"语言设置已保存。\n\n{Strings.Message_RestartRequired}",
+                        Strings.Message_SaveSuccess,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    var result = MessageBox.Show(
+                        Strings.Message_RestartRequired,
+                        Strings.Message_SaveSuccess,
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // 重启应用 - 使用 AppContext.BaseDirectory 替代 Assembly.Location
+                        var appPath = AppContext.BaseDirectory + "\\WordFlow.exe";
+                        System.Diagnostics.Process.Start(new ProcessStartInfo
+                        {
+                            FileName = appPath,
+                            UseShellExecute = true
+                        });
+                        Application.Current.Shutdown();
+                    }
+                }
+            }
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

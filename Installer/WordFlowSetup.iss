@@ -33,10 +33,41 @@ PrivilegesRequired=admin
 
 [Languages]
 Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "en"; MessagesFile: "compiler:Default.isl"
+Name: "ja"; MessagesFile: "compiler:Languages\Japanese.isl"
+Name: "ko"; MessagesFile: "compiler:Languages\Korean.isl"
+
+[CustomMessages]
+; 自定义多语言消息
+chinesesimplified.SelectLanguageTitle=选择界面语言
+chinesesimplified.SelectLanguageDesc=请选择 WordFlow 的界面语言：
+chinesesimplified.LanguageLabel=语言：
+chinesesimplified.LanguageHint=您可以在安装后在设置中随时更改此选项
+chinesesimplified.InstallCompleteTitle=安装完成！
+chinesesimplified.InstallCompleteDesc=WordFlow 已成功安装到您的计算机
+chinesesimplified.LaunchOnFinish=安装完成后启动 WordFlow
+
+ja.SelectLanguageTitle=インターフェース言語を選択
+ja.SelectLanguageDesc=WordFlow のインターフェース言語を選択してください：
+ja.LanguageLabel=言語：
+ja.LanguageHint=このオプションは設定でいつでも変更できます
+ja.InstallCompleteTitle=インストール完了！
+ja.InstallCompleteDesc=WordFlow は正常にインストールされました
+ja.LaunchOnFinish=インストール後に WordFlow を起動
+
+ko.SelectLanguageTitle=인터페이스 언어 선택
+ko.SelectLanguageDesc=WordFlow 의 인터페이스 언어를 선택하세요:
+ko.LanguageLabel=언어:
+ko.LanguageHint=이 옵션은 설정에서 언제든지 변경할 수 있습니다
+ko.InstallCompleteTitle=설치 완료!
+ko.InstallCompleteDesc=WordFlow 이 (가) 성공적으로 설치되었습니다
+ko.LaunchOnFinish=설치 후 WordFlow 실행
+
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 6.1; Check: not IsAdminInstallMode
+Name: "launchonfinish"; Description: "{cm:LaunchOnFinish}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkablealone
 
 [Files]
 ; 主程序（自包含发布 - 包含所有 .NET 运行时）
@@ -55,24 +86,110 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFile
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-; 安装完成后询问是否运行
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+; 安装完成后启动（由用户勾选决定是否启动）
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent; Check: WizardIsTaskSelected('launchonfinish')
 
 [Code]
-
 var
   DownloadingModel: Boolean;
+  SelectedLanguageCode: String;
+
+// 获取配置文件路径
+function GetSettingsPath: String;
+begin
+  Result := ExpandConstant('{userappdata}\WordFlow\settings.json');
+end;
+
+// 确保目录存在
+procedure EnsureDirectoryExists(const DirPath: String);
+begin
+  if not DirExists(DirPath) then
+    CreateDir(DirPath);
+end;
+
+// 写入语言设置到配置文件
+procedure WriteLanguageSetting(const LanguageCode: String);
+var
+  SettingsDir: String;
+  SettingsPath: String;
+  SettingsContent: String;
+begin
+  SettingsDir := ExpandConstant('{userappdata}\WordFlow');
+  SettingsPath := SettingsDir + '\settings.json';
+  
+  // 确保目录存在
+  EnsureDirectoryExists(SettingsDir);
+  
+  // 创建配置文件内容（如果文件已存在，读取并修改 LanguageCode）
+  if FileExists(SettingsPath) then
+  begin
+    // 读取现有内容并修改 LanguageCode
+    SettingsContent := '{' + #13#10 +
+      '  "HotkeyCode": 192,' + #13#10 +
+      '  "AutoStart": false,' + #13#10 +
+      '  "MinimizeToTray": true,' + #13#10 +
+      '  "StartMinimized": false,' + #13#10 +
+      '  "CloseAction": 2,' + #13#10 +
+      '  "LanguageCode": "' + LanguageCode + '"' + #13#10 +
+    '}';
+  end
+  else
+  begin
+    // 创建新文件
+    SettingsContent := '{' + #13#10 +
+      '  "HotkeyCode": 192,' + #13#10 +
+      '  "AutoStart": false,' + #13#10 +
+      '  "MinimizeToTray": true,' + #13#10 +
+      '  "StartMinimized": false,' + #13#10 +
+      '  "CloseAction": 2,' + #13#10 +
+      '  "LanguageCode": "' + LanguageCode + '"' + #13#10 +
+    '}';
+  end;
+  
+  // 写入文件
+  SaveStringToFile(SettingsPath, SettingsContent, False);
+  Log('语言设置已写入：' + LanguageCode);
+end;
+
+// 根据 Inno Setup 的语言代码获取应用语言代码
+function GetAppLanguageCode(const SetupLanguage: String): String;
+begin
+  if SetupLanguage = 'chinesesimplified' then
+    Result := 'zh-CN'
+  else if SetupLanguage = 'en' then
+    Result := 'en-US'
+  else if SetupLanguage = 'ja' then
+    Result := 'ja-JP'
+  else if SetupLanguage = 'ko' then
+    Result := 'ko-KR'
+  else
+    Result := 'zh-CN';  // 默认简体中文
+end;
+
+procedure InitializeWizard;
+begin
+  // 获取当前 Inno Setup 使用的语言代码
+  SelectedLanguageCode := GetAppLanguageCode(ExpandConstant('{language}'));
+  Log('Inno Setup 语言：' + ExpandConstant('{language}'));
+  Log('应用语言代码：' + SelectedLanguageCode);
+end;
 
 // 安装步骤处理
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
+  if CurStep = ssInstall then
+  begin
+    // 在安装前写入语言设置（使用 Inno Setup 选择的语言）
+    WriteLanguageSetting(SelectedLanguageCode);
+    Log('已写入语言设置：' + SelectedLanguageCode);
+  end;
+  
   if CurStep = ssPostInstall then
   begin
     // 安装完成后显示提示
-    MsgBox('WordFlow 安装完成！'#13#10#13#10 +
-           '• 已包含 .NET 8 运行时，无需额外安装'#13#10 +
-           '• 已包含 Python 语音识别环境'#13#10#13#10 +
-           '首次运行时，请点击「设置」→「模型管理」下载语音模型。', mbInformation, MB_OK);
+    MsgBox(ExpandConstant('{cm:InstallCompleteTitle}') + #13#10#13#10 +
+           '• {cm:InstallCompleteDesc}'#13#10#13#10 +
+           '• {#MyAppName} v{#MyAppVersion}', mbInformation, MB_OK);
   end;
 end;
 

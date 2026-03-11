@@ -76,6 +76,97 @@ namespace WordFlow.Services
         /// </summary>
         public string GetModelsDir() => _modelsDir;
 
+        /// <summary>
+        /// 检测用户所在区域（国内或国际）
+        /// </summary>
+        /// <returns>"cn" 表示国内，"global" 表示国际</returns>
+        public string DetectRegion()
+        {
+            try
+            {
+                // 方法 1：检查系统区域设置
+                var region = System.Globalization.RegionInfo.CurrentRegion.Name;
+                Logger.Log($"系统区域：{region}");
+                
+                if (region == "CN" || region == "ZH")
+                {
+                    Logger.Log("检测到国内用户，优先使用国内下载源");
+                    return "cn";
+                }
+                
+                // 方法 2：检查系统语言
+                var uiCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+                if (uiCulture.StartsWith("zh-") && !uiCulture.Contains("TW") && !uiCulture.Contains("HK"))
+                {
+                    Logger.Log("检测到简体中文语言，优先使用国内下载源");
+                    return "cn";
+                }
+                
+                Logger.Log("检测到国际用户，优先使用国际下载源");
+                return "global";
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"区域检测失败，使用默认设置：{ex.Message}");
+                return "global";
+            }
+        }
+
+        /// <summary>
+        /// 获取最优下载源列表（按区域优先级排序）
+        /// </summary>
+        /// <param name="model">模型信息</param>
+        /// <param name="region">用户区域（cn 或 global）</param>
+        /// <returns>按优先级排序的下载源列表</returns>
+        public List<DownloadSource> GetOptimalDownloadSources(ModelInfo model, string? region = null)
+        {
+            region ??= DetectRegion();
+            
+            if (model.DownloadSources == null || model.DownloadSources.Count == 0)
+            {
+                // 如果没有配置多下载源，使用默认的 baseUrl
+                var defaultSources = new List<DownloadSource>();
+                if (!string.IsNullOrEmpty(_config?.BaseUrl))
+                {
+                    defaultSources.Add(new DownloadSource
+                    {
+                        Name = "Default",
+                        Url = _config.BaseUrl,
+                        Region = "global",
+                        Priority = 1
+                    });
+                }
+                return defaultSources;
+            }
+            
+            // 按区域分组
+            var cnSources = model.DownloadSources
+                .Where(s => s.Region == "cn")
+                .OrderBy(s => s.Priority)
+                .ToList();
+            
+            var globalSources = model.DownloadSources
+                .Where(s => s.Region == "global")
+                .OrderBy(s => s.Priority)
+                .ToList();
+            
+            // 根据用户区域返回排序后的列表
+            if (region == "cn")
+            {
+                // 国内用户：国内源优先
+                cnSources.AddRange(globalSources);
+                Logger.Log($"为国内用户推荐下载源：{string.Join(", ", cnSources.Select(s => s.Name))}");
+                return cnSources;
+            }
+            else
+            {
+                // 国际用户：国际源优先
+                globalSources.AddRange(cnSources);
+                Logger.Log($"为国际用户推荐下载源：{string.Join(", ", globalSources.Select(s => s.Name))}");
+                return globalSources;
+            }
+        }
+
         #region 首次设置检测
 
         /// <summary>
@@ -336,7 +427,7 @@ namespace WordFlow.Services
         #region 下载模型
 
         /// <summary>
-        /// 下载并安装模型（支持 Gitee 分卷下载）
+        /// 下载并安装模型（支持多下载源自动切换）
         /// </summary>
         public async Task<DownloadResult> DownloadModelAsync(
             ModelInfo model, 
@@ -357,72 +448,62 @@ namespace WordFlow.Services
                     Logger.Log($"使用分卷下载：{model.Files.Parts.Length} 个分包");
                     return await DownloadModelFromGiteeAsync(
                         model.Id,
-                        "cheng-yanlin",  // Gitee 用户名
-                        "WordFlow-Release",  // 仓库名
+                        "wanddream",  // Gitee 用户名
+                        "WordFlow",  // 仓库名
                         "v1.0.0",  // 版本
                         model.Files.Parts,
                         model.SizeBytes,
                         cancellationToken);
                 }
                 
-                // 标准单文件下载
-                var baseUrl = useMirror && !string.IsNullOrEmpty(_config?.MirrorUrl) 
-                    ? _config.MirrorUrl 
-                    : _config?.BaseUrl ?? "";
+                // 获取最优下载源列表（按区域优先级排序）
+                var sources = GetOptimalDownloadSources(model);
                 
-                if (string.IsNullOrEmpty(baseUrl))
+                if (sources.Count == 0)
                 {
-                    Logger.Log("未配置下载基础 URL，使用默认 Gitee 地址");
-                    baseUrl = "https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v1.0.0";
+                    // 如果没有配置多下载源，使用默认 baseUrl
+                    var baseUrl = useMirror && !string.IsNullOrEmpty(_config?.MirrorUrl) 
+                        ? _config.MirrorUrl 
+                        : _config?.BaseUrl ?? "";
+                    
+                    if (string.IsNullOrEmpty(baseUrl))
+                    {
+                        Logger.Log("未配置下载基础 URL，使用默认 Gitee 地址");
+                        baseUrl = "https://gitee.com/wanddream/WordFlow/releases/download/v1.0.0";
+                    }
+                    
+                    return await DownloadFromSingleSourceAsync(model, baseUrl, cancellationToken);
                 }
                 
-                var archiveUrl = $"{baseUrl}/{model.Files.Archive}";
-                var archivePath = Path.Combine(_modelsDir, model.Files.Archive);
+                // 尝试从多个下载源下载
+                Logger.Log($"尝试从 {sources.Count} 个下载源下载...");
                 
-                Logger.Log($"下载地址：{archiveUrl}");
-                Logger.Log($"保存路径：{archivePath}");
-                
-                // 下载
-                StatusChanged?.Invoke(this, "正在下载...");
-                var downloadResult = await DownloadFileWithResumeAsync(
-                    archiveUrl, 
-                    archivePath, 
-                    model.SizeBytes,
-                    cancellationToken);
-                
-                if (!downloadResult)
+                foreach (var source in sources)
                 {
-                    return new DownloadResult { Success = false, Error = "下载失败或被取消" };
+                    try
+                    {
+                        StatusChanged?.Invoke(this, $"正在从 {source.Name} 下载...");
+                        Logger.Log($"尝试从下载源下载：{source.Name} - {source.Url}");
+                        
+                        var result = await DownloadFromSingleSourceAsync(model, source.Url, cancellationToken, source.Name);
+                        
+                        if (result.Success)
+                        {
+                            Logger.Log($"从 {source.Name} 下载成功");
+                            return result;
+                        }
+                        
+                        Logger.Log($"从 {source.Name} 下载失败：{result.Error}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log($"从 {source.Name} 下载异常：{ex.Message}");
+                        // 继续尝试下一个下载源
+                    }
                 }
                 
-                // 解压
-                StatusChanged?.Invoke(this, "正在解压...");
-                var extractResult = await ExtractModelAsync(archivePath, model.Id);
-                
-                if (!extractResult.Success)
-                {
-                    return new DownloadResult { Success = false, Error = extractResult.Error ?? "解压失败" };
-                }
-                
-                // 验证
-                StatusChanged?.Invoke(this, "正在验证模型...");
-                var modelPath = Path.Combine(_modelsDir, model.Id);
-                if (!ValidateModelIntegrity(modelPath, model))
-                {
-                    return new DownloadResult { Success = false, Error = "模型文件验证失败" };
-                }
-                
-                // 删除压缩包
-                try
-                {
-                    File.Delete(archivePath);
-                }
-                catch { /* 忽略删除失败 */ }
-                
-                StatusChanged?.Invoke(this, "模型安装完成！");
-                Logger.Log($"模型安装成功：{model.Id}");
-                
-                return new DownloadResult { Success = true, ModelPath = modelPath };
+                // 所有下载源都失败
+                return new DownloadResult { Success = false, Error = "所有下载源都失败，请检查网络连接或稍后重试" };
             }
             catch (OperationCanceledException)
             {
@@ -434,6 +515,64 @@ namespace WordFlow.Services
                 Logger.Log($"下载模型失败：{ex.Message}");
                 return new DownloadResult { Success = false, Error = ex.Message };
             }
+        }
+
+        /// <summary>
+        /// 从单个下载源下载模型
+        /// </summary>
+        private async Task<DownloadResult> DownloadFromSingleSourceAsync(
+            ModelInfo model,
+            string sourceUrl,
+            CancellationToken cancellationToken,
+            string sourceName = "Default")
+        {
+            var archiveUrl = $"{sourceUrl}/{model.Files.Archive}";
+            var archivePath = Path.Combine(_modelsDir, model.Files.Archive);
+            
+            Logger.Log($"下载地址：{archiveUrl}");
+            Logger.Log($"保存路径：{archivePath}");
+            
+            // 下载
+            StatusChanged?.Invoke(this, $"正在从 {sourceName} 下载...");
+            var downloadResult = await DownloadFileWithResumeAsync(
+                archiveUrl, 
+                archivePath, 
+                model.SizeBytes,
+                cancellationToken);
+            
+            if (!downloadResult)
+            {
+                return new DownloadResult { Success = false, Error = $"从 {sourceName} 下载失败" };
+            }
+            
+            // 解压
+            StatusChanged?.Invoke(this, "正在解压...");
+            var extractResult = await ExtractModelAsync(archivePath, model.Id);
+            
+            if (!extractResult.Success)
+            {
+                return new DownloadResult { Success = false, Error = extractResult.Error ?? "解压失败" };
+            }
+            
+            // 验证
+            StatusChanged?.Invoke(this, "正在验证模型...");
+            var modelPath = Path.Combine(_modelsDir, model.Id);
+            if (!ValidateModelIntegrity(modelPath, model))
+            {
+                return new DownloadResult { Success = false, Error = "模型文件验证失败" };
+            }
+            
+            // 删除压缩包
+            try
+            {
+                File.Delete(archivePath);
+            }
+            catch { /* 忽略删除失败 */ }
+            
+            StatusChanged?.Invoke(this, "模型安装完成！");
+            Logger.Log($"模型安装成功：{model.Id}");
+            
+            return new DownloadResult { Success = true, ModelPath = modelPath };
         }
 
         /// <summary>
@@ -835,7 +974,30 @@ namespace WordFlow.Services
         public string Description { get; set; } = "";
         public string BaseUrl { get; set; } = "";
         public string? MirrorUrl { get; set; }
+        public List<DownloadMirror> Mirrors { get; set; } = new();
         public List<ModelInfo> Models { get; set; } = new();
+    }
+
+    /// <summary>
+    /// 下载镜像配置
+    /// </summary>
+    public class DownloadMirror
+    {
+        public string Name { get; set; } = "";
+        public string Url { get; set; } = "";
+        public int Priority { get; set; }
+        public string Region { get; set; } = "global"; // "cn" 或 "global"
+    }
+
+    /// <summary>
+    /// 下载源配置
+    /// </summary>
+    public class DownloadSource
+    {
+        public string Name { get; set; } = "";
+        public string Url { get; set; } = "";
+        public string Region { get; set; } = "global"; // "cn" 或 "global"
+        public int Priority { get; set; }
     }
 
     /// <summary>
@@ -848,9 +1010,13 @@ namespace WordFlow.Services
         public string Size { get; set; } = "";
         public long SizeBytes { get; set; }
         public string Description { get; set; } = "";
+        public List<string> Languages { get; set; } = new();
         public ModelFiles Files { get; set; } = new();
         public List<string> RequiredFiles { get; set; } = new();
         public bool Default { get; set; }
+        public bool LocalOnly { get; set; }
+        public string? Note { get; set; }
+        public List<DownloadSource> DownloadSources { get; set; } = new();
     }
 
     /// <summary>

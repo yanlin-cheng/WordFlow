@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- 主窗口 -->
+  <data name="MainWindow_Title" xml:space="preserve">
+    <value>WordFlow - 语音输入</value>
+  </data>
+  <data name="MainWindow_RecordHint" xml:space="preserve">
+    <value>按住 {0} 说话，松开后自动识别</value>
+  </data>
+  <data name="MainWindow_Recording" xml:space="preserve">
+    <value>正在录音...</value>
+  </data>
+  <data name="MainWindow_Ready" xml:space="preserve">
+    <value>准备就绪</value>
+  </data>
+  
+  <!-- 设置窗口 -->
+  <data name="SettingsWindow_Title" xml:space="preserve">
+    <value>WordFlow 设置</value>
+  </data>
+  <data name="SettingsWindow_HotkeysTab" xml:space="preserve">
+    <value>热键设置</value>
+  </data>
+  <data name="SettingsWindow_LanguageTab" xml:space="preserve">
+    <value>语言设置</value>
+  </data>
+  <data name="SettingsWindow_AboutTab" xml:space="preserve">
+    <value>关于</value>
+  </data>
+  <data name="SettingsWindow_RecordHotkeyGroup" xml:space="preserve">
+    <value>录音热键</value>
+  </data>
+  <data name="SettingsWindow_SelectHotkey" xml:space="preserve">
+    <value>选择录音触发键：</value>
+  </data>
+  <data name="SettingsWindow_HotkeyHint" xml:space="preserve">
+    <value>按住选中的键说话，松开后自动识别</value>
+  </data>
+  <data name="SettingsWindow_StartupGroup" xml:space="preserve">
+    <value>启动设置</value>
+  </data>
+  <data name="SettingsWindow_AutoStart" xml:space="preserve">
+    <value>开机自启动</value>
+  </data>
+  <data name="SettingsWindow_StartMinimized" xml:space="preserve">
+    <value>启动时最小化到托盘</value>
+  </data>
+  <data name="SettingsWindow_LanguageLabel" xml:space="preserve">
+    <value>选择界面语言：</value>
+  </data>
+  <data name="SettingsWindow_LanguageHint" xml:space="preserve">
+    <value>💡 更改后需要重启应用生效</value>
+  </data>
+  <data name="SettingsWindow_SaveButton" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="SettingsWindow_CancelButton" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="SettingsWindow_AppTitle" xml:space="preserve">
+    <value>WordFlow - 智能语音输入工具</value>
+  </data>
+  <data name="SettingsWindow_Version" xml:space="preserve">
+    <value>版本：2.0.0</value>
+  </data>
+  <data name="SettingsWindow_RelatedLinks" xml:space="preserve">
+    <value>相关链接</value>
+  </data>
+  <data name="SettingsWindow_GitHubLink" xml:space="preserve">
+    <value>GitHub 项目地址</value>
+  </data>
+  <data name="SettingsWindow_GiteeLink" xml:space="preserve">
+    <value>Gitee 发布页面</value>
+  </data>
+  <data name="SettingsWindow_ToolsTitle" xml:space="preserve">
+    <value>工具</value>
+  </data>
+  <data name="SettingsWindow_RunWizard" xml:space="preserve">
+    <value>🎯 重新运行首次向导</value>
+  </data>
+  <data name="SettingsWindow_WizardHint" xml:space="preserve">
+    <value>查看功能介绍和下载语音模型</value>
+  </data>
+  <data name="SettingsWindow_ManageModel" xml:space="preserve">
+    <value>📦 模型管理</value>
+  </data>
+  <data name="SettingsWindow_ModelHint" xml:space="preserve">
+    <value>下载、切换或删除语音模型</value>
+  </data>
+  
+  <!-- 语言选项 -->
+  <data name="Language_zhCN" xml:space="preserve">
+    <value>🇨🇳 简体中文</value>
+  </data>
+  <data name="Language_enUS" xml:space="preserve">
+    <value>🇺🇸 English</value>
+  </data>
+  <data name="Language_jaJP" xml:space="preserve">
+    <value>🇯🇵 日本語</value>
+  </data>
+  <data name="Language_koKR" xml:space="preserve">
+    <value>🇰🇷 한국어</value>
+  </data>
+  
+  <!-- 首次运行向导 - 欢迎页面 -->
+  <data name="FirstRunWizard_Title" xml:space="preserve">
+    <value>欢迎使用 WordFlow</value>
+  </data>
+  <data name="FirstRunWizard_WelcomeTitle" xml:space="preserve">
+    <value>🎉 欢迎使用 WordFlow！</value>
+  </data>
+  <data name="FirstRunWizard_WelcomeSubtitle" xml:space="preserve">
+    <value>您的智能语音输入助手</value>
+  </data>
+  <data name="FirstRunWizard_WelcomeText" xml:space="preserve">
+    <value>欢迎使用 WordFlow - 智能语音输入工具！
+
+本工具可以将您的语音实时转换为文字，并输入到任何应用程序中。
+
+点击"下一步"开始设置。</value>
+  </data>
+  <data name="FirstRunWizard_LanguageTitle" xml:space="preserve">
+    <value>选择语言</value>
+  </data>
+  <data name="FirstRunWizard_LanguageText" xml:space="preserve">
+    <value>请选择您希望使用的界面语言：</value>
+  </data>
+  
+  <!-- 首次运行向导 - 卡片 1 -->
+  <data name="Wizard_Card1_EfficiencyTitle" xml:space="preserve">
+    <value>⏱️ 效率提升</value>
+  </data>
+  <data name="Wizard_Card1_EfficiencyText" xml:space="preserve">
+    <value>每次输入 300 字，约节省 7 分钟</value>
+  </data>
+  <data name="Wizard_Card1_EfficiencyHint" xml:space="preserve">
+    <value>计算依据：普通人打字速度约 40 字/分钟，输入 300 字需 7.5 分钟；语音输入识别速度快，修正时间约 30 秒，综合节省约 7 分钟。</value>
+  </data>
+  <data name="Wizard_Card1_QuickStartTitle" xml:space="preserve">
+    <value>快速开始</value>
+  </data>
+  <data name="Wizard_Card1_Step1" xml:space="preserve">
+    <value>1. 按住热键（` 键 或 右 Alt 键）说话</value>
+  </data>
+  <data name="Wizard_Card1_Step2" xml:space="preserve">
+    <value>2. 松开热键，文字自动输入到当前光标位置</value>
+  </data>
+  <data name="Wizard_Card1_Step3" xml:space="preserve">
+    <value>3. 在设置中可修改热键和更多选项</value>
+  </data>
+  <data name="Wizard_Card1_Step4" xml:space="preserve">
+    <value>4. 在个人词库中管理专业词汇</value>
+  </data>
+  <data name="Wizard_Card1_NextHint" xml:space="preserve">
+    <value>点击「下一步」了解更多功能</value>
+  </data>
+  
+  <!-- 首次运行向导 - 卡片 2 -->
+  <data name="Wizard_Card2_Title" xml:space="preserve">
+    <value>语音输入方法</value>
+  </data>
+  <data name="Wizard_Card2_Step1" xml:space="preserve">
+    <value>1. 按住热键说话</value>
+  </data>
+  <data name="Wizard_Card2_Step1Detail" xml:space="preserve">
+    <value>默认热键：` 键（ESC 下方、数字 1 左侧）</value>
+  </data>
+  <data name="Wizard_Card2_Step1Alt" xml:space="preserve">
+    <value>备选热键：右 Alt 键</value>
+  </data>
+  <data name="Wizard_Card2_Step2" xml:space="preserve">
+    <value>2. 松开热键，语音自动转文字</value>
+  </data>
+  <data name="Wizard_Card2_Step3" xml:space="preserve">
+    <value>3. 文字直接输入到当前光标位置</value>
+  </data>
+  
+  <!-- 首次运行向导 - 卡片 3 -->
+  <data name="Wizard_Card3_Title" xml:space="preserve">
+    <value>热键设置</value>
+  </data>
+  <data name="Wizard_Card3_Item1" xml:space="preserve">
+    <value>• 录音热键：按住说话</value>
+  </data>
+  <data name="Wizard_Card3_Item1Detail" xml:space="preserve">
+    <value>当前默认：` 键 或 右 Alt 键</value>
+  </data>
+  <data name="Wizard_Card3_Item2" xml:space="preserve">
+    <value>• 可在设置中自由切换热键</value>
+  </data>
+  <data name="Wizard_Card3_Item3" xml:space="preserve">
+    <value>• 开机自启动，最小化到系统托盘</value>
+  </data>
+  <data name="Wizard_Card3_Item4" xml:space="preserve">
+    <value>• 后台运行，不干扰正常工作</value>
+  </data>
+  
+  <!-- 首次运行向导 - 卡片 4 -->
+  <data name="Wizard_Card4_Title" xml:space="preserve">
+    <value>设置方法</value>
+  </data>
+  <data name="Wizard_Card4_Item1" xml:space="preserve">
+    <value>• 右键点击系统托盘图标</value>
+  </data>
+  <data name="Wizard_Card4_Item2" xml:space="preserve">
+    <value>• 选择「设置」进入设置界面</value>
+  </data>
+  <data name="Wizard_Card4_Item3" xml:space="preserve">
+    <value>• 可修改热键、启动选项等</value>
+  </data>
+  <data name="Wizard_Card4_Item4" xml:space="preserve">
+    <value>• 在「关于」页面可重新打开本向导</value>
+  </data>
+  
+  <!-- 首次运行向导 - 卡片 5 -->
+  <data name="Wizard_Card5_Title" xml:space="preserve">
+    <value>个人词库训练</value>
+  </data>
+  <data name="Wizard_Card5_Item1" xml:space="preserve">
+    <value>• 自动从您的修正记录中学习</value>
+  </data>
+  <data name="Wizard_Card5_Item2" xml:space="preserve">
+    <value>• 支持导入导出专业词库</value>
+  </data>
+  <data name="Wizard_Card5_Item3" xml:space="preserve">
+    <value>• 医疗、法律、编程等专业词汇优化</value>
+  </data>
+  <data name="Wizard_Card5_Item4" xml:space="preserve">
+    <value>• 越用越懂你的表达习惯</value>
+  </data>
+  
+  <!-- 首次运行向导 - 卡片 6 -->
+  <data name="Wizard_Card6_Title" xml:space="preserve">
+    <value>下载语音模型</value>
+  </data>
+  <data name="Wizard_Card6_Important" xml:space="preserve">
+    <value>重要提示：</value>
+  </data>
+  <data name="Wizard_Card6_Text1" xml:space="preserve">
+    <value>首次使用前，需要下载语音识别模型。</value>
+  </data>
+  <data name="Wizard_Card6_Recommend" xml:space="preserve">
+    <value>• 推荐模型：Paraformer 中文（约 200MB）</value>
+  </data>
+  <data name="Wizard_Card6_MultiLang" xml:space="preserve">
+    <value>• 多语种模型：SenseVoice（支持中英日韩粤）</value>
+  </data>
+  <data name="Wizard_Card6_ButtonHint" xml:space="preserve">
+    <value>点击「打开模型管理」按钮开始下载</value>
+  </data>
+  
+  <!-- 首次运行向导 - 完成页面 -->
+  <data name="Wizard_Complete_Title" xml:space="preserve">
+    <value>设置完成！</value>
+  </data>
+  <data name="Wizard_Complete_ModelStatus" xml:space="preserve">
+    <value>模型已安装，开始使用语音输入吧！</value>
+  </data>
+  <data name="Wizard_Complete_RememberTitle" xml:space="preserve">
+    <value>记住快速开始</value>
+  </data>
+  <data name="Wizard_Complete_Step1" xml:space="preserve">
+    <value>1. 按住热键（` 键 或 右 Alt 键）说话</value>
+  </data>
+  <data name="Wizard_Complete_Step2" xml:space="preserve">
+    <value>2. 松开热键，文字自动输入</value>
+  </data>
+  <data name="Wizard_Complete_Step3" xml:space="preserve">
+    <value>3. 在设置中可修改热键和更多选项</value>
+  </data>
+  <data name="Wizard_Complete_Step4" xml:space="preserve">
+    <value>4. 在个人词库中管理专业词汇</value>
+  </data>
+  
+  <!-- 首次运行向导 - 按钮 -->
+  <data name="Wizard_BackButton" xml:space="preserve">
+    <value>上一步</value>
+  </data>
+  <data name="Wizard_NextButton" xml:space="preserve">
+    <value>下一步</value>
+  </data>
+  <data name="Wizard_FinishButton" xml:space="preserve">
+    <value>开始使用</value>
+  </data>
+  <data name="Wizard_ModelManagerButton" xml:space="preserve">
+    <value>打开模型管理</value>
+  </data>
+  <data name="FirstRunWizard_FeaturesTitle" xml:space="preserve">
+    <value>功能介绍</value>
+  </data>
+  <data name="FirstRunWizard_Feature1" xml:space="preserve">
+    <value>🎤 智能语音输入
+按住说话，松手自动识别上屏</value>
+  </data>
+  <data name="FirstRunWizard_Feature2" xml:space="preserve">
+    <value>🧠 本地 ASR 识别
+使用阿里达摩院 Paraformer 模型，离线可用</value>
+  </data>
+  <data name="FirstRunWizard_Feature3" xml:space="preserve">
+    <value>📚 个人词库
+支持自定义词汇，AI 智能纠错</value>
+  </data>
+  <data name="FirstRunWizard_Feature4" xml:space="preserve">
+    <value>📝 历史记录
+自动保存输入历史，方便查阅</value>
+  </data>
+  <data name="FirstRunWizard_DownloadTitle" xml:space="preserve">
+    <value>下载模型</value>
+  </data>
+  <data name="FirstRunWizard_DownloadText" xml:space="preserve">
+    <value>需要下载语音模型才能使用语音识别功能。
+
+模型大小约 238MB，请保持网络连接。</value>
+  </data>
+  <data name="FirstRunWizard_DownloadButton" xml:space="preserve">
+    <value>开始下载</value>
+  </data>
+  <data name="FirstRunWizard_Downloading" xml:space="preserve">
+    <value>正在下载...</value>
+  </data>
+  <data name="FirstRunWizard_DownloadComplete" xml:space="preserve">
+    <value>下载完成</value>
+  </data>
+  <data name="FirstRunWizard_NextButton" xml:space="preserve">
+    <value>下一步</value>
+  </data>
+  <data name="FirstRunWizard_BackButton" xml:space="preserve">
+    <value>上一步</value>
+  </data>
+  <data name="FirstRunWizard_FinishButton" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="FirstRunWizard_SkipButton" xml:space="preserve">
+    <value>稍后下载</value>
+  </data>
+  
+  <!-- 模型管理窗口 -->
+  <data name="ModelManager_Title" xml:space="preserve">
+    <value>模型管理</value>
+  </data>
+  <data name="ModelManager_ModelName" xml:space="preserve">
+    <value>模型名称</value>
+  </data>
+  <data name="ModelManager_ModelSize" xml:space="preserve">
+    <value>模型大小</value>
+  </data>
+  <data name="ModelManager_ModelStatus" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="ModelManager_Actions" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="ModelManager_Download" xml:space="preserve">
+    <value>下载</value>
+  </data>
+  <data name="ModelManager_Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="ModelManager_Load" xml:space="preserve">
+    <value>加载</value>
+  </data>
+  <data name="ModelManager_Status_Installed" xml:space="preserve">
+    <value>已安装</value>
+  </data>
+  <data name="ModelManager_Status_NotDownloaded" xml:space="preserve">
+    <value>未下载</value>
+  </data>
+  <data name="ModelManager_Status_Loaded" xml:space="preserve">
+    <value>已加载</value>
+  </data>
+  <data name="ModelManager_CloseButton" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  
+  <!-- 词库管理窗口 -->
+  <data name="VocabularyManager_Title" xml:space="preserve">
+    <value>个人词库管理</value>
+  </data>
+  <data name="VocabularyManager_AddButton" xml:space="preserve">
+    <value>添加词汇</value>
+  </data>
+  <data name="VocabularyManager_DeleteButton" xml:space="preserve">
+    <value>删除选中</value>
+  </data>
+  <data name="VocabularyManager_ExportButton" xml:space="preserve">
+    <value>导出</value>
+  </data>
+  <data name="VocabularyManager_ImportButton" xml:space="preserve">
+    <value>导入</value>
+  </data>
+  <data name="VocabularyManager_CloseButton" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="VocabularyManager_Word" xml:space="preserve">
+    <value>词汇</value>
+  </data>
+  <data name="VocabularyManager_Pinyin" xml:space="preserve">
+    <value>拼音</value>
+  </data>
+  <data name="VocabularyManager_Frequency" xml:space="preserve">
+    <value>使用次数</value>
+  </data>
+  
+  <!-- 消息提示 -->
+  <data name="Message_SaveSuccess" xml:space="preserve">
+    <value>设置已保存</value>
+  </data>
+  <data name="Message_SaveFailed" xml:space="preserve">
+    <value>保存失败，请重试</value>
+  </data>
+  <data name="Message_DownloadComplete" xml:space="preserve">
+    <value>下载完成</value>
+  </data>
+  <data name="Message_DownloadFailed" xml:space="preserve">
+    <value>下载失败，请检查网络连接</value>
+  </data>
+  <data name="Message_ConfirmDelete" xml:space="preserve">
+    <value>确定要删除吗？</value>
+  </data>
+  <data name="Message_RestartRequired" xml:space="preserve">
+    <value>需要重启应用才能生效，是否立即重启？</value>
+  </data>
+  
+  <!-- 系统托盘 -->
+  <data name="Tray_ShowWindow" xml:space="preserve">
+    <value>显示窗口</value>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Tray_VocabularyManager" xml:space="preserve">
+    <value>词库管理</value>
+  </data>
+  <data name="Tray_History" xml:space="preserve">
+    <value>历史记录</value>
+  </data>
+  <data name="Tray_StartOnBoot" xml:space="preserve">
+    <value>开机自启</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>退出</value>
+  </data>
+</root>

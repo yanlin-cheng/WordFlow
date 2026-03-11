@@ -15,13 +15,13 @@ namespace WordFlow.Views
     public partial class FirstRunWizard : Window
     {
         private readonly ModelDownloadService _downloadService;
-        private int _currentCardIndex = 0; // 0-5 为功能卡片，6 为完成页面
+        private int _currentCardIndex = 1; // 1-6 为功能卡片，7 为完成页面
         private bool _modelDownloaded = false;
         
         // 卡片总数（不包括完成页面）
         private const int FeatureCardCount = 6;
-        private const int CompleteCardIndex = 6;
-        private const int ModelManagerCardIndex = 5; // 下载模型卡片索引
+        private const int CompleteCardIndex = 7;
+        private const int ModelManagerCardIndex = 6; // 下载模型卡片索引
 
         /// <summary>
         /// 下载是否成功完成
@@ -82,17 +82,17 @@ namespace WordFlow.Views
         {
             CardIndicators.Children.Clear();
             
-            for (int i = 0; i < FeatureCardCount; i++)
+            for (int i = 1; i <= FeatureCardCount; i++)
             {
                 var ellipse = new Ellipse
                 {
                     Width = 10,
                     Height = 10,
                     Margin = new Thickness(5, 0, 5, 0),
-                    Fill = i == 0 ? Brushes.Blue : Brushes.LightGray
+                    Fill = i == _currentCardIndex ? Brushes.Blue : Brushes.LightGray
                 };
                 
-                // 存储索引信息
+                // 存储索引信息（实际索引）
                 ellipse.Tag = i;
                 
                 // 点击切换卡片
@@ -147,23 +147,23 @@ namespace WordFlow.Views
             // 显示当前卡片
             switch (_currentCardIndex)
             {
-                case 0:
+                case 1:
                     Card1.Visibility = Visibility.Visible;
                     NextButton.Content = "下一步";
                     break;
-                case 1:
+                case 2:
                     Card2.Visibility = Visibility.Visible;
                     NextButton.Content = "下一步";
                     break;
-                case 2:
+                case 3:
                     Card3.Visibility = Visibility.Visible;
                     NextButton.Content = "下一步";
                     break;
-                case 3:
+                case 4:
                     Card4.Visibility = Visibility.Visible;
                     NextButton.Content = "下一步";
                     break;
-                case 4:
+                case 5:
                     Card5.Visibility = Visibility.Visible;
                     NextButton.Content = "下一步";
                     break;
@@ -180,7 +180,7 @@ namespace WordFlow.Views
             }
 
             // 更新按钮状态
-            BackButton.Visibility = _currentCardIndex > 0 ? Visibility.Visible : Visibility.Collapsed;
+            BackButton.Visibility = _currentCardIndex > 1 ? Visibility.Visible : Visibility.Collapsed;
             
             // 在下载模型卡片隐藏下一步按钮，显示打开模型管理按钮
             if (_currentCardIndex == ModelManagerCardIndex)
@@ -257,7 +257,7 @@ namespace WordFlow.Views
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentCardIndex > 0)
+            if (_currentCardIndex > 1)
             {
                 _currentCardIndex--;
                 UpdateCardDisplay();
@@ -281,7 +281,7 @@ namespace WordFlow.Views
             // 向上滚动（Delta > 0）- 上一页
             else if (e.Delta > 0)
             {
-                if (_currentCardIndex > 0)
+                if (_currentCardIndex > 1)
                 {
                     _currentCardIndex--;
                     UpdateCardDisplay();

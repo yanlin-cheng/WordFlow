@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Markup;
 using WordFlow.Infrastructure;
 using WordFlow.Services;
 using WordFlow.Utils;
@@ -43,6 +45,9 @@ namespace WordFlow
 
             // 1. 初始化设置服务（优先初始化，因为其他服务依赖它）
             _settingsService = new SettingsService();
+
+            // 2. 初始化 UI 语言（在创建任何 UI 元素之前）
+            InitializeUICulture();
 
             // 3. 初始化历史服务（延迟初始化，避免启动时加载 SQLite 原生库）
             // HistoryService 现在使用延迟初始化，构造函数不会抛出异常
@@ -327,6 +332,35 @@ namespace WordFlow
             _trayService?.Dispose();
             _speechService?.Dispose();
             base.OnExit(e);
+        }
+
+        /// <summary>
+        /// 初始化 UI 语言
+        /// </summary>
+        private void InitializeUICulture()
+        {
+            try
+            {
+                var languageCode = _settingsService?.Settings.LanguageCode ?? "zh-CN";
+                Logger.Log($"初始化 UI 语言：{languageCode}");
+
+                // 解析语言代码
+                var cultureInfo = new CultureInfo(languageCode);
+
+                // 设置当前线程的文化特性
+                System.Threading.Thread.CurrentThread.CurrentCulture = cultureInfo;
+                System.Threading.Thread.CurrentThread.CurrentUICulture = cultureInfo;
+
+                // 设置 WPF 的默认语言
+                FrameworkElement.LanguageProperty.OverrideMetadata(
+                    typeof(FrameworkElement),
+                    new FrameworkPropertyMetadata(
+                        XmlLanguage.GetLanguage(cultureInfo.IetfLanguageTag)));
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"初始化 UI 语言失败：{ex.Message}");
+            }
         }
 
         [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Auto)]

@@ -12,11 +12,15 @@
     <!-- 自包含发布 - 无需 .NET 8 Runtime，安装包更大但安装成功率高 -->
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SingleFile>true</SingleFile>
+    <!-- 关闭单文件发布以支持多语言资源文件 -->
+    <PublishSingleFile>false</PublishSingleFile>
+    <SingleFile>false</SingleFile>
     
     <!-- 注意：WPF 不支持裁剪 -->
     <PublishTrimmed>false</PublishTrimmed>
+    
+    <!-- 包含卫星程序集 -->
+    <IncludeSatelliteAssemblies>true</IncludeSatelliteAssemblies>
     
     <!-- 应用程序图标 -->
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
@@ -149,5 +153,56 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <!-- 包含多语言资源文件 -->
+  <ItemGroup>
+    <Compile Update="Resources\Strings\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <LogicalName>WordFlow.Resources.Strings.Strings.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Strings\Strings.en.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LogicalName>WordFlow.Resources.Strings.Strings.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Strings\Strings.ja.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LogicalName>WordFlow.Resources.Strings.Strings.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Strings\Strings.ko.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LogicalName>WordFlow.Resources.Strings.Strings.resources</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- 在发布后复制卫星程序集到发布目录 -->
+  <Target Name="CopySatelliteAssemblies" AfterTargets="Publish">
+    <!-- 复制整个语言目录 -->
+    <Copy SourceFiles="$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\ja\WordFlow.resources.dll" 
+          DestinationFiles="$(PublishDir)ja\WordFlow.resources.dll" 
+          SkipUnchangedFiles="true" 
+          Condition="Exists('$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\ja\WordFlow.resources.dll')" />
+    <Copy SourceFiles="$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\en\WordFlow.resources.dll" 
+          DestinationFiles="$(PublishDir)en\WordFlow.resources.dll" 
+          SkipUnchangedFiles="true" 
+          Condition="Exists('$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\en\WordFlow.resources.dll')" />
+    <Copy SourceFiles="$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\ko\WordFlow.resources.dll" 
+          DestinationFiles="$(PublishDir)ko\WordFlow.resources.dll" 
+          SkipUnchangedFiles="true" 
+          Condition="Exists('$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\ko\WordFlow.resources.dll')" />
+    <Copy SourceFiles="$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\zh-Hans\WordFlow.resources.dll" 
+          DestinationFiles="$(PublishDir)zh-Hans\WordFlow.resources.dll" 
+          SkipUnchangedFiles="true" 
+          Condition="Exists('$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\zh-Hans\WordFlow.resources.dll')" />
+    <Message Importance="high" Text="Copied satellite assemblies to $(PublishDir)" />
+  </Target>
 
 </Project>

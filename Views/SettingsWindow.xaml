@@ -1,7 +1,8 @@
 <Window x:Class="WordFlow.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WordFlow 设置" Height="500" Width="550"
+        xmlns:res="clr-namespace:WordFlow.Resources.Strings"
+        Title="{x:Static res:Strings.SettingsWindow_Title}" Height="500" Width="550"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
     <Grid Margin="20">
@@ -14,7 +15,7 @@
         <TabControl x:Name="SettingsTabControl" Grid.Row="0">
             
             <!-- 热键设置 -->
-            <TabItem Header="热键设置">
+            <TabItem Header="{x:Static res:Strings.SettingsWindow_HotkeysTab}">
                 <Grid Margin="15">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -53,8 +54,37 @@
                 </Grid>
             </TabItem>
 
+            <!-- 语言设置 -->
+            <TabItem Header="{x:Static res:Strings.SettingsWindow_LanguageTab}">
+                <Grid Margin="15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <GroupBox Header="{x:Static res:Strings.SettingsWindow_LanguageLabel}" Grid.Row="0" Padding="10" Margin="0,0,0,15">
+                        <StackPanel>
+                            <ComboBox x:Name="LanguageComboBox" 
+                                      SelectionChanged="LanguageComboBox_SelectionChanged"
+                                      Padding="8,5"
+                                      FontSize="14">
+                                <ComboBoxItem Content="{x:Static res:Strings.Language_zhCN}" Tag="zh-CN"/>
+                                <ComboBoxItem Content="{x:Static res:Strings.Language_enUS}" Tag="en-US"/>
+                                <ComboBoxItem Content="{x:Static res:Strings.Language_jaJP}" Tag="ja-JP"/>
+                                <ComboBoxItem Content="{x:Static res:Strings.Language_koKR}" Tag="ko-KR"/>
+                            </ComboBox>
+                            <TextBlock Text="{x:Static res:Strings.SettingsWindow_LanguageHint}" 
+                                       Foreground="Gray" 
+                                       FontSize="11"
+                                       Margin="0,10,0,0"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
             <!-- 关于 -->
-            <TabItem Header="关于">
+            <TabItem Header="{x:Static res:Strings.SettingsWindow_AboutTab}">
                 <Grid Margin="15">
                     <StackPanel>
                         <TextBlock Text="WordFlow - 智能语音输入工具" FontSize="16" FontWeight="Bold"/>

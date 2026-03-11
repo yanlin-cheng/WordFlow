@@ -125,6 +125,11 @@ namespace WordFlow.Services
         /// 关闭按钮行为：0=最小化到托盘，1=退出程序，2=每次询问（默认）
         /// </summary>
         public int CloseAction { get; set; } = 2;
+
+        /// <summary>
+        /// 界面语言代码（默认 zh-CN）
+        /// </summary>
+        public string LanguageCode { get; set; } = "zh-CN";
     }
 
     /// <summary>

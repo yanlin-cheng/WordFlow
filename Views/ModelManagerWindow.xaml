@@ -128,7 +128,7 @@
                 <!-- 列表标题 -->
                 <Grid Grid.Row="0" Background="#F8F8F8" Height="40">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="120"/>
                         <ColumnDefinition Width="180"/>

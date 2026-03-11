@@ -267,12 +267,12 @@ namespace WordFlow.Views
         {
             var grid = new Grid
             {
-                Height = 60,
+                Height = 80,  // 增加高度以显示更多描述
                 Margin = new Thickness(0, 2, 0, 2),
                 Background = isInstalled ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Color.FromRgb(250, 250, 250))
             };
             
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(180) });
@@ -294,10 +294,10 @@ namespace WordFlow.Views
             var descText = new TextBlock 
             { 
                 Text = description, 
-                FontSize = 11, 
+                FontSize = 12, 
                 Foreground = new SolidColorBrush(Colors.Gray),
-                TextTrimming = TextTrimming.CharacterEllipsis,
-                Margin = new Thickness(0, 3, 0, 0)
+                TextWrapping = TextWrapping.Wrap,  // 允许换行
+                Margin = new Thickness(0, 5, 0, 0)
             };
             
             infoPanel.Children.Add(nameText);

@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Main Window -->
+  <data name="MainWindow_Title" xml:space="preserve">
+    <value>WordFlow - Voice Input</value>
+  </data>
+  <data name="MainWindow_RecordHint" xml:space="preserve">
+    <value>Hold {0} to speak, release to recognize</value>
+  </data>
+  <data name="MainWindow_Recording" xml:space="preserve">
+    <value>Recording...</value>
+  </data>
+  <data name="MainWindow_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  
+  <!-- Settings Window -->
+  <data name="SettingsWindow_Title" xml:space="preserve">
+    <value>WordFlow Settings</value>
+  </data>
+  <data name="SettingsWindow_HotkeysTab" xml:space="preserve">
+    <value>Hotkeys</value>
+  </data>
+  <data name="SettingsWindow_LanguageTab" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="SettingsWindow_AboutTab" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="SettingsWindow_RecordHotkeyGroup" xml:space="preserve">
+    <value>Recording Hotkey</value>
+  </data>
+  <data name="SettingsWindow_SelectHotkey" xml:space="preserve">
+    <value>Select recording trigger key:</value>
+  </data>
+  <data name="SettingsWindow_HotkeyHint" xml:space="preserve">
+    <value>Hold the selected key to speak, release to recognize automatically</value>
+  </data>
+  <data name="SettingsWindow_StartupGroup" xml:space="preserve">
+    <value>Startup Settings</value>
+  </data>
+  <data name="SettingsWindow_AutoStart" xml:space="preserve">
+    <value>Auto-start on boot</value>
+  </data>
+  <data name="SettingsWindow_StartMinimized" xml:space="preserve">
+    <value>Minimize to tray on startup</value>
+  </data>
+  <data name="SettingsWindow_LanguageLabel" xml:space="preserve">
+    <value>Select interface language:</value>
+  </data>
+  <data name="SettingsWindow_LanguageHint" xml:space="preserve">
+    <value>💡 Restart required for changes to take effect</value>
+  </data>
+  <data name="SettingsWindow_SaveButton" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SettingsWindow_CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="SettingsWindow_AppTitle" xml:space="preserve">
+    <value>WordFlow - Smart Voice Input Tool</value>
+  </data>
+  <data name="SettingsWindow_Version" xml:space="preserve">
+    <value>Version: 2.0.0</value>
+  </data>
+  <data name="SettingsWindow_RelatedLinks" xml:space="preserve">
+    <value>Related Links</value>
+  </data>
+  <data name="SettingsWindow_GitHubLink" xml:space="preserve">
+    <value>GitHub Repository</value>
+  </data>
+  <data name="SettingsWindow_GiteeLink" xml:space="preserve">
+    <value>Gitee Releases</value>
+  </data>
+  <data name="SettingsWindow_ToolsTitle" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="SettingsWindow_RunWizard" xml:space="preserve">
+    <value>🎯 Run First-Time Wizard</value>
+  </data>
+  <data name="SettingsWindow_WizardHint" xml:space="preserve">
+    <value>View feature introduction and download speech model</value>
+  </data>
+  <data name="SettingsWindow_ManageModel" xml:space="preserve">
+    <value>📦 Model Manager</value>
+  </data>
+  <data name="SettingsWindow_ModelHint" xml:space="preserve">
+    <value>Download, switch, or delete speech models</value>
+  </data>
+  
+  <!-- Language Options -->
+  <data name="Language_zhCN" xml:space="preserve">
+    <value>🇨🇳 简体中文</value>
+  </data>
+  <data name="Language_enUS" xml:space="preserve">
+    <value>🇺🇸 English</value>
+  </data>
+  <data name="Language_jaJP" xml:space="preserve">
+    <value>🇯 日本語</value>
+  </data>
+  <data name="Language_koKR" xml:space="preserve">
+    <value>🇰🇷 한국어</value>
+  </data>
+  
+  <!-- First Run Wizard - Welcome Page -->
+  <data name="FirstRunWizard_Title" xml:space="preserve">
+    <value>Welcome to WordFlow</value>
+  </data>
+  <data name="FirstRunWizard_WelcomeTitle" xml:space="preserve">
+    <value>🎉 Welcome to WordFlow!</value>
+  </data>
+  <data name="FirstRunWizard_WelcomeSubtitle" xml:space="preserve">
+    <value>Your Smart Voice Input Assistant</value>
+  </data>
+  <data name="FirstRunWizard_WelcomeText" xml:space="preserve">
+    <value>Welcome to WordFlow - Smart Voice Input Tool!
+
+This tool can convert your speech to text in real-time and input it into any application.
+
+Click "Next" to start setup.</value>
+  </data>
+  <data name="FirstRunWizard_LanguageTitle" xml:space="preserve">
+    <value>Select Language</value>
+  </data>
+  <data name="FirstRunWizard_LanguageText" xml:space="preserve">
+    <value>Please select your preferred interface language:</value>
+  </data>
+  
+  <!-- First Run Wizard - Card 1 -->
+  <data name="Wizard_Card1_EfficiencyTitle" xml:space="preserve">
+    <value>⏱️ Efficiency Boost</value>
+  </data>
+  <data name="Wizard_Card1_EfficiencyText" xml:space="preserve">
+    <value>Save about 7 minutes per 300 characters</value>
+  </data>
+  <data name="Wizard_Card1_EfficiencyHint" xml:space="preserve">
+    <value>Based on: Average typing speed is ~40 chars/min, typing 300 chars takes 7.5 min; Voice input is faster, with ~30 sec correction time, saving about 7 min total.</value>
+  </data>
+  <data name="Wizard_Card1_QuickStartTitle" xml:space="preserve">
+    <value>Quick Start</value>
+  </data>
+  <data name="Wizard_Card1_Step1" xml:space="preserve">
+    <value>1. Hold hotkey (` key or Right Alt) to speak</value>
+  </data>
+  <data name="Wizard_Card1_Step2" xml:space="preserve">
+    <value>2. Release, text auto-inputs at cursor</value>
+  </data>
+  <data name="Wizard_Card1_Step3" xml:space="preserve">
+    <value>3. Modify hotkey and more in Settings</value>
+  </data>
+  <data name="Wizard_Card1_Step4" xml:space="preserve">
+    <value>4. Manage vocabulary in Personal Dictionary</value>
+  </data>
+  <data name="Wizard_Card1_NextHint" xml:space="preserve">
+    <value>Click 'Next' to learn more</value>
+  </data>
+  
+  <!-- First Run Wizard - Card 2 -->
+  <data name="Wizard_Card2_Title" xml:space="preserve">
+    <value>Voice Input</value>
+  </data>
+  <data name="Wizard_Card2_Step1" xml:space="preserve">
+    <value>1. Hold hotkey to speak</value>
+  </data>
+  <data name="Wizard_Card2_Step1Detail" xml:space="preserve">
+    <value>Default: ` key (below ESC, left of 1)</value>
+  </data>
+  <data name="Wizard_Card2_Step1Alt" xml:space="preserve">
+    <value>Alternative: Right Alt</value>
+  </data>
+  <data name="Wizard_Card2_Step2" xml:space="preserve">
+    <value>2. Release, speech auto-converts to text</value>
+  </data>
+  <data name="Wizard_Card2_Step3" xml:space="preserve">
+    <value>3. Text inputs directly at cursor position</value>
+  </data>
+  
+  <!-- First Run Wizard - Card 3 -->
+  <data name="Wizard_Card3_Title" xml:space="preserve">
+    <value>Hotkey Settings</value>
+  </data>
+  <data name="Wizard_Card3_Item1" xml:space="preserve">
+    <value>• Recording hotkey: Hold to speak</value>
+  </data>
+  <data name="Wizard_Card3_Item1Detail" xml:space="preserve">
+    <value>Current default: ` key or Right Alt</value>
+  </data>
+  <data name="Wizard_Card3_Item2" xml:space="preserve">
+    <value>• Switch hotkey freely in Settings</value>
+  </data>
+  <data name="Wizard_Card3_Item3" xml:space="preserve">
+    <value>• Auto-start on boot, minimize to tray</value>
+  </data>
+  <data name="Wizard_Card3_Item4" xml:space="preserve">
+    <value>• Runs in background, doesn't interfere with work</value>
+  </data>
+  
+  <!-- First Run Wizard - Card 4 -->
+  <data name="Wizard_Card4_Title" xml:space="preserve">
+    <value>How to Settings</value>
+  </data>
+  <data name="Wizard_Card4_Item1" xml:space="preserve">
+    <value>• Right-click system tray icon</value>
+  </data>
+  <data name="Wizard_Card4_Item2" xml:space="preserve">
+    <value>• Select 'Settings' to open settings window</value>
+  </data>
+  <data name="Wizard_Card4_Item3" xml:space="preserve">
+    <value>• Modify hotkey, startup options, etc.</value>
+  </data>
+  <data name="Wizard_Card4_Item4" xml:space="preserve">
+    <value>• Re-open this wizard from 'About' page</value>
+  </data>
+  
+  <!-- First Run Wizard - Card 5 -->
+  <data name="Wizard_Card5_Title" xml:space="preserve">
+    <value>Personal Vocabulary</value>
+  </data>
+  <data name="Wizard_Card5_Item1" xml:space="preserve">
+    <value>• Automatically learns from your corrections</value>
+  </data>
+  <data name="Wizard_Card5_Item2" xml:space="preserve">
+    <value>• Support import/export professional vocabulary</value>
+  </data>
+  <data name="Wizard_Card5_Item3" xml:space="preserve">
+    <value>• Optimized for medical, legal, programming terms</value>
+  </data>
+  <data name="Wizard_Card5_Item4" xml:space="preserve">
+    <value>• Understands your expression habits better over time</value>
+  </data>
+  
+  <!-- First Run Wizard - Card 6 -->
+  <data name="Wizard_Card6_Title" xml:space="preserve">
+    <value>Download Speech Model</value>
+  </data>
+  <data name="Wizard_Card6_Important" xml:space="preserve">
+    <value>Important:</value>
+  </data>
+  <data name="Wizard_Card6_Text1" xml:space="preserve">
+    <value>You need to download a speech model before first use.</value>
+  </data>
+  <data name="Wizard_Card6_Recommend" xml:space="preserve">
+    <value>• Recommended: Paraformer Chinese (~200MB)</value>
+  </data>
+  <data name="Wizard_Card6_MultiLang" xml:space="preserve">
+    <value>• Multi-language: SenseVoice (Supports Chinese, English, Japanese, Korean, Cantonese)</value>
+  </data>
+  <data name="Wizard_Card6_ButtonHint" xml:space="preserve">
+    <value>Click 'Open Model Manager' button to start download</value>
+  </data>
+  
+  <!-- First Run Wizard - Complete Page -->
+  <data name="Wizard_Complete_Title" xml:space="preserve">
+    <value>Setup Complete!</value>
+  </data>
+  <data name="Wizard_Complete_ModelStatus" xml:space="preserve">
+    <value>Model installed, start using voice input!</value>
+  </data>
+  <data name="Wizard_Complete_RememberTitle" xml:space="preserve">
+    <value>Remember Quick Start</value>
+  </data>
+  <data name="Wizard_Complete_Step1" xml:space="preserve">
+    <value>1. Hold hotkey (` key or Right Alt) to speak</value>
+  </data>
+  <data name="Wizard_Complete_Step2" xml:space="preserve">
+    <value>2. Release, text auto-inputs</value>
+  </data>
+  <data name="Wizard_Complete_Step3" xml:space="preserve">
+    <value>3. Modify hotkey and more in Settings</value>
+  </data>
+  <data name="Wizard_Complete_Step4" xml:space="preserve">
+    <value>4. Manage vocabulary in Personal Dictionary</value>
+  </data>
+  
+  <!-- First Run Wizard - Buttons -->
+  <data name="Wizard_BackButton" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Wizard_NextButton" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Wizard_FinishButton" xml:space="preserve">
+    <value>Start Using</value>
+  </data>
+  <data name="Wizard_ModelManagerButton" xml:space="preserve">
+    <value>Open Model Manager</value>
+  </data>
+  <data name="FirstRunWizard_FeaturesTitle" xml:space="preserve">
+    <value>Features</value>
+  </data>
+  <data name="FirstRunWizard_Feature1" xml:space="preserve">
+    <value>🎤 Smart Voice Input
+Hold to speak, release to recognize and input</value>
+  </data>
+  <data name="FirstRunWizard_Feature2" xml:space="preserve">
+    <value>🧠 Local ASR Recognition
+Uses Alibaba DAMO Academy Paraformer model, works offline</value>
+  </data>
+  <data name="FirstRunWizard_Feature3" xml:space="preserve">
+    <value>📚 Personal Vocabulary
+Support custom vocabulary, AI smart correction</value>
+  </data>
+  <data name="FirstRunWizard_Feature4" xml:space="preserve">
+    <value>📝 History
+Automatically saves input history for reference</value>
+  </data>
+  <data name="FirstRunWizard_DownloadTitle" xml:space="preserve">
+    <value>Download Model</value>
+  </data>
+  <data name="FirstRunWizard_DownloadText" xml:space="preserve">
+    <value>You need to download the speech model to use speech recognition.
+
+Model size is about 238MB, please keep network connection.</value>
+  </data>
+  <data name="FirstRunWizard_DownloadButton" xml:space="preserve">
+    <value>Start Download</value>
+  </data>
+  <data name="FirstRunWizard_Downloading" xml:space="preserve">
+    <value>Downloading...</value>
+  </data>
+  <data name="FirstRunWizard_DownloadComplete" xml:space="preserve">
+    <value>Download Complete</value>
+  </data>
+  <data name="FirstRunWizard_NextButton" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="FirstRunWizard_BackButton" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="FirstRunWizard_FinishButton" xml:space="preserve">
+    <value>Finish</value>
+  </data>
+  <data name="FirstRunWizard_SkipButton" xml:space="preserve">
+    <value>Download Later</value>
+  </data>
+  
+  <!-- Model Manager -->
+  <data name="ModelManager_Title" xml:space="preserve">
+    <value>Model Manager</value>
+  </data>
+  <data name="ModelManager_ModelName" xml:space="preserve">
+    <value>Model Name</value>
+  </data>
+  <data name="ModelManager_ModelSize" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="ModelManager_ModelStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="ModelManager_Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="ModelManager_Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="ModelManager_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ModelManager_Load" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="ModelManager_Status_Installed" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="ModelManager_Status_NotDownloaded" xml:space="preserve">
+    <value>Not Downloaded</value>
+  </data>
+  <data name="ModelManager_Status_Loaded" xml:space="preserve">
+    <value>Loaded</value>
+  </data>
+  <data name="ModelManager_CloseButton" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  
+  <!-- Vocabulary Manager -->
+  <data name="VocabularyManager_Title" xml:space="preserve">
+    <value>Personal Vocabulary</value>
+  </data>
+  <data name="VocabularyManager_AddButton" xml:space="preserve">
+    <value>Add Word</value>
+  </data>
+  <data name="VocabularyManager_DeleteButton" xml:space="preserve">
+    <value>Delete Selected</value>
+  </data>
+  <data name="VocabularyManager_ExportButton" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="VocabularyManager_ImportButton" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="VocabularyManager_CloseButton" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="VocabularyManager_Word" xml:space="preserve">
+    <value>Word</value>
+  </data>
+  <data name="VocabularyManager_Pinyin" xml:space="preserve">
+    <value>Pinyin</value>
+  </data>
+  <data name="VocabularyManager_Frequency" xml:space="preserve">
+    <value>Frequency</value>
+  </data>
+  
+  <!-- Messages -->
+  <data name="Message_SaveSuccess" xml:space="preserve">
+    <value>Settings saved</value>
+  </data>
+  <data name="Message_SaveFailed" xml:space="preserve">
+    <value>Save failed, please try again</value>
+  </data>
+  <data name="Message_DownloadComplete" xml:space="preserve">
+    <value>Download complete</value>
+  </data>
+  <data name="Message_DownloadFailed" xml:space="preserve">
+    <value>Download failed, please check network connection</value>
+  </data>
+  <data name="Message_ConfirmDelete" xml:space="preserve">
+    <value>Are you sure you want to delete?</value>
+  </data>
+  <data name="Message_RestartRequired" xml:space="preserve">
+    <value>Restart required for changes to take effect. Restart now?</value>
+  </data>
+  
+  <!-- System Tray -->
+  <data name="Tray_ShowWindow" xml:space="preserve">
+    <value>Show Window</value>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Tray_VocabularyManager" xml:space="preserve">
+    <value>Vocabulary</value>
+  </data>
+  <data name="Tray_History" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="Tray_StartOnBoot" xml:space="preserve">
+    <value>Start on Boot</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+</root>
