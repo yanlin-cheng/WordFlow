@@ -8,22 +8,21 @@ WordFlow is an intelligent voice input tool that supports local ASR speech recog
 
 ## 📥 Download Now
 
-### Option 1: Installer (Recommended)
+### Installer
 
 | Download | Size | Description |
 |----------|------|-------------|
-| [⬇️ WordFlow_Setup.exe](https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/WordFlow_Setup.exe) | ~350 MB | **Complete installer** (includes .NET 8 Runtime and Python environment, no additional installation required) |
+| [⬇️ WordFlow_Setup.exe](https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/WordFlow_Setup.exe) | ~95 MB | **Complete installer** (includes .NET 8 Runtime and Python environment, no additional installation required) |
 
-### Option 2: Manual Model Download (Optional)
+### Model Files (Required)
 
-If automatic download fails, manually download model files to `PythonASR/models/` directory:
+Voice recognition model is required before first use:
 
 | Download | Size | Description |
 |----------|------|-------------|
-| [🧠 SenseVoice Model (1/2)](https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/sensevoice-small-onnx.zip.001) | 90 MB | Voice model part 1 |
-| [🧠 SenseVoice Model (2/2)](https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/sensevoice-small-onnx.zip.002) | 57 MB | Voice model part 2 |
+| [🧠 SenseVoice Model](https://github.com/yanlin-cheng/WordFlow/releases/download/models-v1.0.0/sensevoice-small-onnx.zip) | ~150 MB | Voice recognition model (ZIP format) |
 
-> **💡 Tip**: We recommend using the installer. Models will be downloaded automatically on first launch.
+> **💡 Tip**: After installing, launch WordFlow to download the model within the application.
 
 ---
 
@@ -33,24 +32,25 @@ If automatic download fails, manually download model files to `PythonASR/models/
 
 1. **Download the installer**: Download `WordFlow_Setup.exe`
 2. **Run the installer**: Double-click and follow the prompts
-   - The installer will automatically detect and install .NET 8 Runtime if needed
-   - You can choose to launch WordFlow immediately after installation
-3. **Launch the application**: Start using WordFlow after installation
+3. **Launch the application**: Start WordFlow after installation
 
 ### Model Installation
 
-**Recommended**: The application will prompt you to download models on first launch
-
-**Alternative**: If automatic download fails:
+**Option 1: Download within application (Recommended)**
 1. Launch WordFlow
 2. Click the "Model Manager" button
-3. Click the "Download" button for the desired model
+3. Click the "Download" button for the model
 4. The model will be loaded automatically after download completes
+
+**Option 2: Manual download**
+1. Download the model file from above
+2. Extract to `PythonASR/models/sensevoice-small-onnx/` directory
+3. Restart WordFlow
 
 ### Usage
 
 1. **Launch WordFlow** - The application minimizes to the system tray
-2. **Hold to Speak** - Hold the voice input hotkey (default: `CapsLock`) to start recording
+2. **Hold to Speak** - Hold the voice input hotkey to start recording
 3. **Release to Input** - Release the hotkey to recognize and input text to the target application
 
 ---
@@ -72,16 +72,13 @@ If automatic download fails, manually download model files to `PythonASR/models/
 
 ### Hotkey Settings
 
-WordFlow supports various hotkey configurations to meet different usage habits:
+WordFlow supports customizable hotkeys to meet different usage habits:
 
-| Hotkey Type | Default | Description |
-|-------------|---------|-------------|
-| Voice Input Hotkey | CapsLock | Hold to speak, release to recognize |
+| Hotkey Type | Description |
+|-------------|-------------|
+| Voice Input Hotkey | Customizable in settings, default is ` key (grave accent) |
 
-> **💡 Tip**: We recommend using CapsLock as the voice input hotkey because:
-> - Centrally located, easy to operate with either hand
-> - Large key surface, less prone to accidental touches
-> - Clear physical feedback when pressed
+> **💡 Tip**: We recommend using a key that's easy to operate with one hand as the voice input hotkey.
 
 ### Model Manager
 
@@ -100,7 +97,7 @@ WordFlow provides model management features:
 | Operating System | Windows 10/11 64-bit |
 | Runtime Environment | .NET 8.0 Runtime (included in installer) |
 | Disk Space | At least 500MB free space (including model files) |
-| Network | Internet connection required for initial model download |
+| Network | Internet connection required for model download |
 | Microphone | Available audio input device required |
 | Memory | 4GB RAM recommended |
 
@@ -110,16 +107,13 @@ WordFlow provides model management features:
 
 ### Technology Stack
 
-| Component | Technology | Description |
-|-----------|------------|-------------|
-| UI Framework | .NET 8 WPF | Mature and stable, native Windows support |
-| Database | SQLite | Lightweight, no additional services required |
-| ORM | Dapper | Lightweight ORM with good performance |
-| Speech Recognition | Sherpa-ONNX | Next-Gen K2 speech recognition toolkit |
-| Audio Processing | NAudio | Mature .NET audio library |
-| Segmentation Engine | Jieba.NET | Chinese word segmentation |
-| Pinyin Conversion | TinyPinyin | Chinese character to Pinyin conversion |
-| Logging | Built-in Logger | Structured logging |
+| Component | Technology |
+|-----------|------------|
+| UI Framework | .NET 8 WPF |
+| Database | SQLite |
+| Speech Recognition | Sherpa-ONNX |
+| Audio Processing | NAudio |
+| Chinese Segmentation | Jieba.NET |
 
 ### Directory Structure
 
@@ -132,70 +126,30 @@ WordFlow/
 │   ├── asr_server.py         # ASR server
 │   ├── start_server.bat      # Startup script
 │   └── models/
-│       └── sensevoice-small-onnx/  # Voice model (downloaded on first launch)
-│           ├── model.int8.onnx
-│           └── tokens.txt
-├── Resources/
-│   └── icon.ico              # Application icon
-└── Logs/                     # Log files
-```
-
-### Service Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    WordFlow Client                       │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │              .NET WPF UI Layer                   │   │
-│  │  - Main Window (MainWindow)                     │   │
-│  │  - Settings Window (SettingsWindow)             │   │
-│  │  - Vocabulary Manager (VocabularyManagerWindow) │   │
-│  │  - Model Manager (ModelManagerWindow)           │   │
-│  │  - First Run Wizard (FirstRunWizard)            │   │
-│  └─────────────────────────────────────────────────┘   │
-│                          ↓                               │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │              .NET Service Layer                  │   │
-│  │  - SettingsService (Settings management)        │   │
-│  │  - HistoryService (History log/SQLite)          │   │
-│  │  - VocabularyService (Vocabulary management)    │   │
-│  │  - VocabularyLearningEngine (Vocabulary learning)│  │
-│  │  - GlobalHotkeyService (Global hotkeys)         │   │
-│  │  - TrayService (System tray)                    │   │
-│  │  - ModelDownloadService (Model download)        │   │
-│  │  - SpeechRecognitionService (ASR client)        │   │
-│  └─────────────────────────────────────────────────┘   │
-│                          ↓ HTTP                        │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │          Python ASR Service (Separate Process)   │   │
-│  │  - Sherpa-ONNX Speech Recognition               │   │
-│  │  - Model loading/switching                      │   │
-│  │  - Audio preprocessing                          │   │
-│  └─────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────┘
+│       └── sensevoice-small-onnx/  # Voice model
+└── Resources/
+    └── icon.ico              # Application icon
 ```
 
 ---
 
 ## ❓ FAQ
 
-### Q1: What do I need to download on first launch?
+### Q1: What do I need to do on first launch?
 
-On first launch, the application will automatically download voice model files (~156MB). Please ensure you have a stable internet connection. Once downloaded, you can use the application normally without downloading again.
+On first launch, you need to download the voice model file (~150MB). You can download it within the application by clicking "Model Manager" → "Download", or manually download the model file.
 
 ### Q2: What should I do if model download fails?
 
-If automatic download fails:
+If download within the application fails:
 1. Check if your network connection is working
-2. Try restarting the application
-3. Manually download model files (see "Option 2" above)
-4. Click the "Refresh" button in the Model Manager page
+2. Manually download the model file (see "Model Files" above)
+3. Extract to `PythonASR/models/sensevoice-small-onnx/` directory
 
 ### Q3: Why can't I use it after downloading the model?
 
-WordFlow has optimized this issue:
-- Automatically attempts to load the model after download
-- Prompts to start ASR service if not running
+- The application automatically attempts to load the model after download
+- If ASR service is not running, you'll be prompted to start it
 - If still not working, restart the application or manually click the "Connect Service" button
 
 ### Q4: What should I do if recognition is inaccurate?
@@ -237,18 +191,12 @@ Some applications may restrict external input. Try:
 - 🎉 Implemented system tray integration
 - 🎉 Implemented auto-start on boot
 - 🎉 Implemented global hotkeys
+- 🎉 Implemented model management
 
 **Technical Features**
 - 🏗️ Built with .NET 8 WPF
 - 🏗️ Modular service architecture
 - 🏗️ Built-in Python environment and ASR service
-- 🏗️ Support for multiple model download and management
-
-**Deployment Optimization**
-- 🚀 Self-contained deployment, no .NET Runtime installation required
-- 🚀 Installer size ~350MB, includes all dependencies
-- 🚀 Model download moved to first launch, supports resume on break
-- 🚀 Simplified installation process, improved success rate
 
 **Known Issues**
 - Some applications may not fully support voice input screen feature
@@ -261,12 +209,13 @@ Some applications may restrict external input. Try:
 |----------|------|
 | 📂 **GitHub Repository** | https://github.com/yanlin-cheng/WordFlow |
 | 🐛 **Issue Tracker** | https://github.com/yanlin-cheng/WordFlow/issues |
+| ⬇️ **Downloads** | https://github.com/yanlin-cheng/WordFlow/releases |
 
 ### Multi-language Versions
 
 - [🇨🇳 中文](README.md)
 - [🇬🇧 English](README.en.md)
-- [🇯🇵 日本語](README.ja.md)
+- [🇯 日本語](README.ja.md)
 - [🇰🇷 한국어](README.ko.md)
 
 ---
@@ -276,23 +225,9 @@ Some applications may restrict external input. Try:
 This project uses a **MIT + Proprietary** dual-mode license:
 
 - **Basic Features** (MIT License): Core voice input, offline models, local vocabulary management, etc.
-- **Premium Features** (Proprietary License): User login, cloud sync, vocabulary marketplace, AI enhancement services, etc.
+- **Premium Features** (Proprietary License): Cloud sync, AI enhancement services, etc.
 
 See [LICENSE.txt](LICENSE.txt) for details.
-
----
-
-## 🗺️ Roadmap
-
-WordFlow's future development plan includes:
-
-- **Phase 1** (March 2026): Foundation improvement, open source release
-- **Phase 2** (April-May 2026): User system, payment integration
-- **Phase 3** (June-July 2026): Vocabulary marketplace launch
-- **Phase 4** (August-September 2026): AI enhancement services
-- **Phase 5** (October 2026+): Continuous optimization, multi-platform support
-
-See [Roadmap Document](产品路线/WordFlow 产品路线与商业化规划.md) for details.
 
 ---
 
