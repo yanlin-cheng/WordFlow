@@ -6,8 +6,8 @@
         Background="Transparent"
         Topmost="True"
         ShowInTaskbar="False"
-        Width="200"
-        Height="80"
+        Width="220"
+        Height="130"
         ResizeMode="NoResize">
     <Border Background="#CC000000" 
             CornerRadius="8" 
@@ -16,19 +16,34 @@
         <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             
             <!-- 标题 -->
             <TextBlock Grid.Row="0" 
+                       x:Name="TitleText"
                        Text="正在录音..." 
                        Foreground="White" 
-                       FontSize="12"
+                       FontSize="13"
+                       FontWeight="SemiBold"
                        HorizontalAlignment="Center"
-                       Margin="0,0,0,5"/>
+                       Margin="0,0,0,8"/>
+            
+            <!-- 状态文本（模型切换等） -->
+            <TextBlock Grid.Row="1" 
+                       x:Name="StatusText"
+                       Text="" 
+                       Foreground="#AAAAAA" 
+                       FontSize="11"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,8"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       MaxWidth="180"/>
             
             <!-- 波形显示区域 -->
-            <Canvas Grid.Row="1" x:Name="WaveformCanvas" Background="Transparent">
+            <Canvas Grid.Row="2" x:Name="WaveformCanvas" Background="Transparent">
                 <!-- 中间的基准线 -->
                 <Line x:Name="BaseLine"
                       Stroke="#444444" 

@@ -12,7 +12,7 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 
 | 下载项 | 文件大小 | 说明 |
 |--------|---------|------|
-| [⬇️ WordFlow_Setup.exe](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v2.0.0/WordFlow_Setup.exe) | 约 60 MB | **安装程序**（自动检测并安装 .NET 8 环境） |
+| [⬇️ WordFlow_Setup.exe](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/WordFlow_Setup.exe) | 约 60 MB | **安装程序**（自动检测并安装 .NET 8 环境） |
 
 ### 方式二：手动下载模型（可选）
 
@@ -20,9 +20,9 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 
 | 下载项 | 文件大小 | 说明 |
 |--------|---------|------|
-| [🧠 模型文件 1/3](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v2.0.0/paraformer-zh.tar.bz2.part1) | 90 MB | 语音模型分卷 1 |
-| [🧠 模型文件 2/3](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v2.0.0/paraformer-zh.tar.bz2.part2) | 90 MB | 语音模型分卷 2 |
-| [🧠 模型文件 3/3](https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v2.0.0/paraformer-zh.tar.bz2.part3) | 26 MB | 语音模型分卷 3 |
+| [🧠 模型文件 1/3](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/paraformer-zh.tar.bz2.part1) | 90 MB | 语音模型分卷 1 |
+| [🧠 模型文件 2/3](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/paraformer-zh.tar.bz2.part2) | 90 MB | 语音模型分卷 2 |
+| [🧠 模型文件 3/3](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/paraformer-zh.tar.bz2.part3) | 26 MB | 语音模型分卷 3 |
 
 > **💡 提示**: 推荐使用安装程序安装，首次启动时会自动下载模型。
 
@@ -284,10 +284,10 @@ v2.0 已优化此问题：
 
 | 平台 | 链接 |
 |------|------|
-| 📂 **GitHub 源码仓库** | https://github.com/wanddream/WordFlowV2 |
-| 📦 **Gitee 发布版本** | https://gitee.com/cheng-yanlin/WordFlow-Release |
-| 🐛 **问题反馈 (GitHub)** | https://github.com/wanddream/WordFlowV2/issues |
-| 🐛 **问题反馈 (Gitee)** | https://gitee.com/cheng-yanlin/WordFlow-Release/issues |
+| 📂 **GitHub 源码仓库** | https://github.com/yanlin-cheng/WordFlow |
+| 📦 **Gitee 发布版本** | https://gitee.com/yanlin-cheng/wordflow |
+| 🐛 **问题反馈 (GitHub)** | https://github.com/yanlin-cheng/WordFlow/issues |
+| 🐛 **问题反馈 (Gitee)** | https://gitee.com/yanlin-cheng/wordflow/issues |
 
 ---
 

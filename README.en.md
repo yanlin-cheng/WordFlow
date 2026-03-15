@@ -12,7 +12,7 @@
 
 | Download | Size | Description |
 |----------|------|-------------|
-| [⬇️ WordFlow_Setup.exe](https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/WordFlow_Setup.exe) | ~60 MB | **Installer** (Auto-detects and installs .NET 8 runtime) |
+| [⬇️ WordFlow_Setup.exe](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/WordFlow_Setup.exe) | ~60 MB | **Installer** (Auto-detects and installs .NET 8 runtime) |
 
 ### Option 2: Manual Model Download (Optional)
 
@@ -20,9 +20,9 @@ If automatic download fails, manually download model files to `PythonASR/models/
 
 | Download | Size | Description |
 |----------|------|-------------|
-| [🧠 Model File 1/3](https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/paraformer-zh.tar.bz2.part1) | 90 MB | Voice model part 1 |
-| [🧠 Model File 2/3](https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/paraformer-zh.tar.bz2.part2) | 90 MB | Voice model part 2 |
-| [🧠 Model File 3/3](https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/paraformer-zh.tar.bz2.part3) | 26 MB | Voice model part 3 |
+| [🧠 Model File 1/3](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/paraformer-zh.tar.bz2.part1) | 90 MB | Voice model part 1 |
+| [🧠 Model File 2/3](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/paraformer-zh.tar.bz2.part2) | 90 MB | Voice model part 2 |
+| [🧠 Model File 3/3](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/paraformer-zh.tar.bz2.part3) | 26 MB | Voice model part 3 |
 
 > **💡 Tip**: We recommend using the installer, which automatically downloads models on first launch.
 
@@ -285,9 +285,9 @@ Some applications may restrict external input. Try:
 | Platform | Link |
 |----------|------|
 | 📂 **GitHub Source Repository** | https://github.com/yanlin-cheng/WordFlow |
-| 📦 **Gitee Release Versions** | https://gitee.com/yanlin-cheng/WordFlow/releases |
+| 📦 **Gitee Release Versions** | https://gitee.com/yanlin-cheng/wordflow/releases |
 | 🐛 **Issue Tracker (GitHub)** | https://github.com/yanlin-cheng/WordFlow/issues |
-| 🐛 **Issue Tracker (Gitee)** | https://gitee.com/yanlin-cheng/WordFlow/issues |
+| 🐛 **Issue Tracker (Gitee)** | https://gitee.com/yanlin-cheng/wordflow/issues |
 
 ---
 

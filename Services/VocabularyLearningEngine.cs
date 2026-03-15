@@ -214,6 +214,84 @@ namespace WordFlow.Services
             return result;
         }
         
+        /// <summary>
+        /// 自动学习 - 从所有未处理的历史记录中学习
+        /// 用于定期后台学习，无需用户手动触发
+        /// </summary>
+        /// <param name="maxBatchSize">最大处理记录数，默认 500</param>
+        /// <returns>学习结果</returns>
+        public async Task<LearningResult> AutoLearnAsync(int maxBatchSize = 500)
+        {
+            var result = new LearningResult();
+            
+            try
+            {
+                // 1. 学习输入历史中的高频词
+                var historyResult = await LearnFromHistoryAsync(maxBatchSize);
+                result.LearnedFromHistory = historyResult.NewVocabularies;
+                result.UpdatedFromHistory = historyResult.UpdatedVocabularies;
+                
+                // 2. 学习修正记录
+                var correctionResult = await LearnFromCorrectionsAsync(maxBatchSize);
+                result.LearnedFromCorrections = correctionResult.NewVocabularies;
+                result.GeneratedRules = correctionResult.NewRules;
+                
+                result.TotalLearned = result.LearnedFromHistory.Count 
+                    + result.LearnedFromCorrections.Count;
+                result.Success = true;
+                
+                // 3. 如果学习了新词，导出热词文件到 ASR 服务目录
+                if (result.TotalLearned > 0)
+                {
+                    await ExportHotwordsForASRAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = ex.Message;
+                System.Diagnostics.Debug.WriteLine($"[VocabularyLearningEngine] AutoLearnAsync 失败：{ex}");
+            }
+            
+            return result;
+        }
+        
+        /// <summary>
+        /// 导出热词文件到 ASR 服务目录
+        /// </summary>
+        private async Task ExportHotwordsForASRAsync()
+        {
+            try
+            {
+                // 获取 ASR 服务目录（假设在 PythonASR 目录下）
+                var appPath = AppContext.BaseDirectory;
+                var pythonAsrPath = System.IO.Path.Combine(appPath, "..", "..", "PythonASR");
+                
+                if (!System.IO.Directory.Exists(pythonAsrPath))
+                {
+                    pythonAsrPath = System.IO.Path.Combine(appPath, "PythonASR");
+                }
+                
+                if (!System.IO.Directory.Exists(pythonAsrPath))
+                {
+                    System.Diagnostics.Debug.WriteLine("[VocabularyLearningEngine] 未找到 PythonASR 目录");
+                    return;
+                }
+                
+                var hotwordsPath = System.IO.Path.Combine(pythonAsrPath, "hotwords.txt");
+                
+                // 导出热词
+                await _historyService.ExportHotwordsFileAsync(hotwordsPath);
+                
+                System.Diagnostics.Debug.WriteLine($"[VocabularyLearningEngine] 热词已导出到：{hotwordsPath}");
+                System.Diagnostics.Debug.WriteLine("[VocabularyLearningEngine] 请重启 ASR 服务以加载新热词");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[VocabularyLearningEngine] 导出热词失败：{ex.Message}");
+            }
+        }
+        
         #endregion
         
         #region 从输入历史学习
@@ -576,6 +654,7 @@ namespace WordFlow.Services
     {
         public bool Success { get; set; }
         public int TotalLearned { get; set; }
+        public string? ErrorMessage { get; set; }
         public List<PersonalVocabulary> LearnedFromHistory { get; set; } = new();
         public List<PersonalVocabulary> UpdatedFromHistory { get; set; } = new();
         public List<PersonalVocabulary> LearnedFromCorrections { get; set; } = new();

@@ -76,8 +76,12 @@ PythonASR/python/Lib/site-packages/
 PythonASR/models/*.tar.bz2
 PythonASR/models/*.part*
 PythonASR/models/*.tar
+PythonASR/models/*.zip.*
+PythonASR/models/*.zip
 Data/models/*.tar.bz2
 Data/models/*.part*
+Data/models/*.zip.*
+Data/models/*.zip
 
 # ONNX 模型文件
 *.onnx
@@ -115,6 +119,32 @@ Data/*.db
 .cursor/
 
 # ===========================
+# 隐私/内部文档（不推送到 GitHub）
+# ===========================
+# 开发日志（内部记录）
+开发日志/
+
+# 产品路线（内部规划）
+产品路线/
+
+# 打包和发布文档（内部使用）
+打包检查清单.md
+打包说明文档.md
+发布清单.md
+
+# 备份文件夹
+备份_*/
+
+# ===========================
+# 临时计划和文档（不推送）
+# ===========================
+implementation_plan.md
+optimization_plan.md
+localization_fix_plan.md
+git_diff_output.txt
+exclude_numpy.txt
+
+# ===========================
 # 其他
 # ===========================
 # 系统文件
@@ -127,3 +157,7 @@ Thumbs.db
 # 备份文件
 *.bak
 *~
+
+# 压缩文件（模型文件除外）
+*.rar
+*.7z

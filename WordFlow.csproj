@@ -22,6 +22,10 @@
     <!-- 包含卫星程序集 -->
     <IncludeSatelliteAssemblies>true</IncludeSatelliteAssemblies>
     
+    <!-- 只保留英文语言包，中文是默认语言已包含在主程序中 -->
+    <!-- 注意：SatelliteResourceLanguages 在自包含发布模式下可能不生效，由 build_installer.bat 清理 -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    
     <!-- 应用程序图标 -->
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
@@ -102,7 +106,7 @@
           Condition="Exists('PythonASR\models\sensevoice-small\tokens.txt')" />
   </Target>
 
-  <!-- 复制嵌入的 Python 环境（包括 site-packages） -->
+  <!-- 复制嵌入的 Python 环境（包括 site-packages）- 构建时 -->
   <Target Name="CopyPythonEnvironment" BeforeTargets="Build">
     <ItemGroup>
       <!-- Python 根目录文件 -->
@@ -147,6 +151,52 @@
           SkipUnchangedFiles="true" />
   </Target>
 
+  <!-- 复制嵌入的 Python 环境（包括 site-packages）- 发布时 -->
+  <Target Name="CopyPythonEnvironmentForPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <!-- Python 根目录文件 -->
+      <PythonExeFiles Include="PythonASR\python\*.exe" />
+      <PythonDllFiles Include="PythonASR\python\*.dll" />
+      <PythonPydFiles Include="PythonASR\python\*.pyd" />
+      <PythonDatFiles Include="PythonASR\python\*.dat" />
+      <PythonBinFiles Include="PythonASR\python\*.bin" />
+      <PythonPthFiles Include="PythonASR\python\*.pth" />
+      <PythonZipFiles Include="PythonASR\python\*.zip" />
+      <PythonOtherFiles Include="PythonASR\python\*.cat;PythonASR\python\LICENSE.txt;PythonASR\python\*._pth" />
+      <!-- Lib/site-packages 目录（包含所有依赖包） -->
+      <PythonSitePackages Include="PythonASR\python\Lib\site-packages\**\*" 
+                          Exclude="PythonASR\python\Lib\site-packages\**\__pycache__\**;**\*.pyc" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PythonExeFiles)" 
+          DestinationFiles="@(PythonExeFiles->'$(PublishDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonDllFiles)" 
+          DestinationFiles="@(PythonDllFiles->'$(PublishDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonPydFiles)" 
+          DestinationFiles="@(PythonPydFiles->'$(PublishDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonDatFiles)" 
+          DestinationFiles="@(PythonDatFiles->'$(PublishDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonBinFiles)" 
+          DestinationFiles="@(PythonBinFiles->'$(PublishDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonPthFiles)" 
+          DestinationFiles="@(PythonPthFiles->'$(PublishDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonZipFiles)" 
+          DestinationFiles="@(PythonZipFiles->'$(PublishDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonOtherFiles)" 
+          DestinationFiles="@(PythonOtherFiles->'$(PublishDir)PythonASR\python\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PythonSitePackages)" 
+          DestinationFiles="@(PythonSitePackages->'$(PublishDir)PythonASR\python\Lib\site-packages\%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Message Importance="high" Text="Copied Python environment to $(PublishDir)PythonASR\python\" />
+  </Target>
+
   <!-- 包含 Data 文件夹中的配置文件 -->
   <ItemGroup>
     <None Include="Data\*.json">
@@ -173,34 +223,38 @@
     <EmbeddedResource Update="Resources\Strings\Strings.en.resx">
       <Generator></Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Strings\Strings.ja.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Strings\Strings.ko.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
   </ItemGroup>
 
-  <!-- 在发布后复制卫星程序集到发布目录 -->
+  <!-- 在发布后复制卫星程序集到发布目录（仅中英文） -->
   <Target Name="CopySatelliteAssemblies" AfterTargets="Publish">
-    <!-- 复制整个语言目录 -->
-    <Copy SourceFiles="$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\ja\WordFlow.resources.dll" 
-          DestinationFiles="$(PublishDir)ja\WordFlow.resources.dll" 
-          SkipUnchangedFiles="true" 
-          Condition="Exists('$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\ja\WordFlow.resources.dll')" />
+    <!-- 复制英文资源 -->
     <Copy SourceFiles="$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\en\WordFlow.resources.dll" 
           DestinationFiles="$(PublishDir)en\WordFlow.resources.dll" 
           SkipUnchangedFiles="true" 
           Condition="Exists('$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\en\WordFlow.resources.dll')" />
-    <Copy SourceFiles="$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\ko\WordFlow.resources.dll" 
-          DestinationFiles="$(PublishDir)ko\WordFlow.resources.dll" 
-          SkipUnchangedFiles="true" 
-          Condition="Exists('$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\ko\WordFlow.resources.dll')" />
-    <Copy SourceFiles="$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\zh-Hans\WordFlow.resources.dll" 
-          DestinationFiles="$(PublishDir)zh-Hans\WordFlow.resources.dll" 
-          SkipUnchangedFiles="true" 
-          Condition="Exists('$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\zh-Hans\WordFlow.resources.dll')" />
+    <!-- 中文是默认语言，资源已包含在主程序集中 -->
     <Message Importance="high" Text="Copied satellite assemblies to $(PublishDir)" />
+  </Target>
+
+  <!-- 在发布后清理不需要的语言包（节省安装包大小约 15MB） -->
+  <Target Name="CleanupSatelliteAssemblies" AfterTargets="Publish">
+    <ItemGroup>
+      <!-- 要删除的语言包目录 -->
+      <LanguagesToRemove Include="$(PublishDir)cs\" />
+      <LanguagesToRemove Include="$(PublishDir)de\" />
+      <LanguagesToRemove Include="$(PublishDir)es\" />
+      <LanguagesToRemove Include="$(PublishDir)fr\" />
+      <LanguagesToRemove Include="$(PublishDir)it\" />
+      <LanguagesToRemove Include="$(PublishDir)ja\" />
+      <LanguagesToRemove Include="$(PublishDir)ko\" />
+      <LanguagesToRemove Include="$(PublishDir)pl\" />
+      <LanguagesToRemove Include="$(PublishDir)pt-BR\" />
+      <LanguagesToRemove Include="$(PublishDir)ru\" />
+      <LanguagesToRemove Include="$(PublishDir)tr\" />
+      <LanguagesToRemove Include="$(PublishDir)zh-Hant\" />
+    </ItemGroup>
+    <RemoveDir Directories="@(LanguagesToRemove)" />
+    <Message Importance="high" Text="Removed unnecessary language packs to save ~15MB" />
   </Target>
 
 </Project>

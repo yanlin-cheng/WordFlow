@@ -320,102 +320,224 @@ namespace WordFlow.Services
                 // 使用 AppContext.BaseDirectory 替代 Assembly.Location（单文件模式下 Location 返回空）
                 var exeDir = AppContext.BaseDirectory;
                 
+                Utils.Logger.Log($"TryStartServerAsync: exeDir={exeDir}");
+                
                 // 尝试多个可能的路径
                 var possiblePaths = new[]
                 {
+                    // 直接检查当前目录（打包后的场景）
                     Path.Combine(exeDir, "PythonASR"),
+                    // 向上查找 1-5 层（调试模式或不同部署结构）
                     Path.Combine(exeDir, "..", "PythonASR"),
                     Path.Combine(exeDir, "..", "..", "PythonASR"),
                     Path.Combine(exeDir, "..", "..", "..", "PythonASR"),
+                    Path.Combine(exeDir, "..", "..", "..", "..", "PythonASR"),
+                    Path.Combine(exeDir, "..", "..", "..", "..", "..", "PythonASR"),
                 };
                 
                 string? serverDir = null;
                 foreach (var path in possiblePaths)
                 {
                     var fullPath = Path.GetFullPath(path);
+                    Utils.Logger.Log($"TryStartServerAsync: 检查路径={fullPath}, 存在={Directory.Exists(fullPath)}");
                     if (Directory.Exists(fullPath))
                     {
-                        serverDir = fullPath;
-                        break;
+                        // 额外检查：确认目录中包含 asr_server.py 或 start_server.bat
+                        if (File.Exists(Path.Combine(fullPath, "asr_server.py")) || 
+                            File.Exists(Path.Combine(fullPath, "start_server.bat")))
+                        {
+                            serverDir = fullPath;
+                            Utils.Logger.Log($"TryStartServerAsync: 找到 PythonASR 目录={serverDir}");
+                            break;
+                        }
+                        else
+                        {
+                            Utils.Logger.Log($"TryStartServerAsync: 路径 {fullPath} 存在但不是有效的 PythonASR 目录");
+                        }
                     }
                 }
                 
                 if (serverDir == null)
                 {
-                    StatusChanged?.Invoke(this, "找不到 PythonASR 目录");
-                    return false;
-                }
-                
-                StatusChanged?.Invoke(this, $"找到服务目录：{serverDir}");
-
-                // 直接启动 Python 脚本（而不是批处理文件）
-                var pythonScript = Path.Combine(serverDir, "asr_server.py");
-                if (!File.Exists(pythonScript))
-                {
-                    StatusChanged?.Invoke(this, $"找不到 asr_server.py: {pythonScript}");
-                    return false;
-                }
-
-                // 使用嵌入的 Python 解释器
-                var pythonExe = Path.Combine(serverDir, "python", "python.exe");
-                if (!File.Exists(pythonExe))
-                {
-                    StatusChanged?.Invoke(this, $"找不到嵌入的 Python: {pythonExe}");
-                    return false;
-                }
-
-                StatusChanged?.Invoke(this, "正在启动 ASR 服务...");
-
-                // 启动 Python 脚本（隐藏窗口）
-                var process = new System.Diagnostics.Process
-                {
-                    StartInfo = new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = pythonExe,
-                        Arguments = $"-u \"{pythonScript}\"",  // -u 禁用输出缓冲
-                        WorkingDirectory = serverDir,
-                        UseShellExecute = false,  // 不使用 Shell，以便隐藏窗口
-                        CreateNoWindow = true,    // 不创建窗口
-                        WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
-                        RedirectStandardOutput = true,  // 重定向输出以便日志记录
-                        RedirectStandardError = true
-                    }
-                };
-
-                process.Start();
-                
-                // 记录启动日志
-                _ = Task.Run(async () =>
-                {
+                    // 尝试使用进程位置作为备选方案
                     try
                     {
-                        while (!process.HasExited)
+                        var processPath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+                        if (!string.IsNullOrEmpty(processPath))
                         {
-                            var output = await process.StandardOutput.ReadLineAsync();
-                            if (!string.IsNullOrEmpty(output))
+                            var processDir = Path.GetDirectoryName(processPath);
+                            Utils.Logger.Log($"TryStartServerAsync: 进程路径={processDir}");
+                            
+                            var fallbackPaths = new[]
                             {
-                                Utils.Logger.Log($"[ASR] {output}");
+                                Path.Combine(processDir, "PythonASR"),
+                                Path.Combine(processDir, "..", "PythonASR"),
+                                Path.Combine(processDir, "..", "..", "PythonASR"),
+                            };
+                            
+                            foreach (var path in fallbackPaths)
+                            {
+                                var fullPath = Path.GetFullPath(path);
+                                Utils.Logger.Log($"TryStartServerAsync: 检查备选路径={fullPath}, 存在={Directory.Exists(fullPath)}");
+                                if (Directory.Exists(fullPath))
+                                {
+                                    if (File.Exists(Path.Combine(fullPath, "asr_server.py")) ||
+                                        File.Exists(Path.Combine(fullPath, "start_server.bat")))
+                                    {
+                                        serverDir = fullPath;
+                                        Utils.Logger.Log($"TryStartServerAsync: 通过备选路径找到 PythonASR 目录={serverDir}");
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
-                    catch { }
-                });
-
-                _ = Task.Run(async () =>
-                {
-                    try
+                    catch (Exception ex)
                     {
-                        while (!process.HasExited)
+                        Utils.Logger.Log($"TryStartServerAsync: 获取进程路径失败：{ex.Message}");
+                    }
+                }
+                
+                if (serverDir == null)
+                {
+                    string errorMsg = "找不到 PythonASR 目录";
+                    Utils.Logger.Log($"TryStartServerAsync: {errorMsg}");
+                    StatusChanged?.Invoke(this, errorMsg);
+                    return false;
+                }
+                
+                Utils.Logger.Log($"TryStartServerAsync: 找到 PythonASR 目录={serverDir}");
+                StatusChanged?.Invoke(this, $"正在启动 ASR 服务...");
+
+                // 优先使用 start_server.bat（因为它设置了正确的环境变量和工作目录）
+                var batchFile = Path.Combine(serverDir, "start_server.bat");
+                if (File.Exists(batchFile))
+                {
+                    Utils.Logger.Log($"TryStartServerAsync: 使用批处理文件启动：{batchFile}");
+                    
+                    // 启动批处理文件（隐藏窗口）
+                    var process = new System.Diagnostics.Process
+                    {
+                        StartInfo = new System.Diagnostics.ProcessStartInfo
                         {
-                            var error = await process.StandardError.ReadLineAsync();
-                            if (!string.IsNullOrEmpty(error))
+                            FileName = "cmd.exe",
+                            Arguments = $"/c \"{batchFile}\"",
+                            WorkingDirectory = serverDir,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true
+                        }
+                    };
+
+                    process.Start();
+                    
+                    // 记录启动日志
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            while (!process.HasExited)
                             {
-                                Utils.Logger.Log($"[ASR-ERR] {error}");
+                                var output = await process.StandardOutput.ReadLineAsync();
+                                if (!string.IsNullOrEmpty(output))
+                                {
+                                    Utils.Logger.Log($"[ASR] {output}");
+                                }
                             }
                         }
+                        catch { }
+                    });
+
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            while (!process.HasExited)
+                            {
+                                var error = await process.StandardError.ReadLineAsync();
+                                if (!string.IsNullOrEmpty(error))
+                                {
+                                    Utils.Logger.Log($"[ASR-ERR] {error}");
+                                }
+                            }
+                        }
+                        catch { }
+                    });
+                }
+                else
+                {
+                    // 备用：直接启动 Python 脚本
+                    var pythonScript = Path.Combine(serverDir, "asr_server.py");
+                    if (!File.Exists(pythonScript))
+                    {
+                        StatusChanged?.Invoke(this, $"找不到 asr_server.py: {pythonScript}");
+                        return false;
                     }
-                    catch { }
-                });
+
+                    // 使用嵌入的 Python 解释器
+                    var pythonExe = Path.Combine(serverDir, "python", "python.exe");
+                    if (!File.Exists(pythonExe))
+                    {
+                        StatusChanged?.Invoke(this, $"找不到嵌入的 Python: {pythonExe}");
+                        return false;
+                    }
+
+                    Utils.Logger.Log($"TryStartServerAsync: 使用 Python 脚本启动：{pythonExe} {pythonScript}");
+                    StatusChanged?.Invoke(this, "正在启动 ASR 服务...");
+
+                    // 启动 Python 脚本（隐藏窗口）
+                    var process = new System.Diagnostics.Process
+                    {
+                        StartInfo = new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = pythonExe,
+                            Arguments = $"-u \"{pythonScript}\" --port 5000",  // -u 禁用输出缓冲
+                            WorkingDirectory = serverDir,
+                            UseShellExecute = false,  // 不使用 Shell，以便隐藏窗口
+                            CreateNoWindow = true,    // 不创建窗口
+                            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
+                            RedirectStandardOutput = true,  // 重定向输出以便日志记录
+                            RedirectStandardError = true
+                        }
+                    };
+
+                    process.Start();
+                    
+                    // 记录启动日志
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            while (!process.HasExited)
+                            {
+                                var output = await process.StandardOutput.ReadLineAsync();
+                                if (!string.IsNullOrEmpty(output))
+                                {
+                                    Utils.Logger.Log($"[ASR] {output}");
+                                }
+                            }
+                        }
+                        catch { }
+                    });
+
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            while (!process.HasExited)
+                        {
+                                var error = await process.StandardError.ReadLineAsync();
+                                if (!string.IsNullOrEmpty(error))
+                                {
+                                    Utils.Logger.Log($"[ASR-ERR] {error}");
+                                }
+                            }
+                        }
+                        catch { }
+                    });
+                }
                 
                 // 等待服务器启动（最多等 15 秒）
                 for (int i = 0; i < 30; i++)
@@ -467,8 +589,17 @@ namespace WordFlow.Services
 
         public void Dispose()
         {
-            _audioRecorder?.Dispose();
-            _httpClient?.Dispose();
+            try
+            {
+                _audioRecorder?.Dispose();
+            }
+            catch { }
+            
+            try
+            {
+                _httpClient?.Dispose();
+            }
+            catch { }
         }
 
         #region 数据模型

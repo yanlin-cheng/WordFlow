@@ -1,16 +1,19 @@
-<Window x:Class="WordFlow.Views.VocabularyManagerWindow"
+<infrastructure:LocalizedWindow x:Class="WordFlow.Views.VocabularyManagerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:WordFlow.Resources.Strings"
         xmlns:local="clr-namespace:WordFlow.Views"
-        Title="个人词典管理" 
+        xmlns:infrastructure="clr-namespace:WordFlow.Infrastructure"
+        Title="{x:Static res:Strings.VocabularyManager_Title}" 
+        infrastructure:LocalizeExtension.ResourceKey="VocabularyManager_Title"
         Height="650" Width="1000"
         WindowStartupLocation="CenterOwner"
         Background="#F5F5F5">
-    <Window.Resources>
+    <infrastructure:LocalizedWindow.Resources>
         <local:CategoryToStringConverter x:Key="CategoryConverter"/>
         <local:SourceToStringConverter x:Key="SourceConverter"/>
         <local:ContextsToStringConverter x:Key="ContextsConverter"/>
-    </Window.Resources>
+    </infrastructure:LocalizedWindow.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -26,16 +29,20 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <TextBlock Text="个人词典管理" FontSize="18" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock x:Name="StatsText" Text="加载中..." FontSize="12" Foreground="#E3F2FD" Margin="0,5,0,0"/>
+                    <TextBlock Text="{x:Static res:Strings.VocabularyManager_Title}" FontSize="18" FontWeight="Bold" Foreground="White"
+                               infrastructure:LocalizeExtension.ResourceKey="VocabularyManager_Title"/>
+                    <TextBlock x:Name="StatsText" Text="{x:Static res:Strings.VocabManager_Stats_Loading}" FontSize="12" Foreground="#E3F2FD" Margin="0,5,0,0"
+                               infrastructure:LocalizeExtension.ResourceKey="VocabManager_Stats_Loading"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button x:Name="AIButton" Content="🤖 AI分析" Padding="12,6" Margin="5,0"
+                    <Button x:Name="AIButton" Content="{x:Static res:Strings.VocabManager_AI_Button}" Padding="12,6" Margin="5,0"
                             Background="#FF9800" Foreground="White" BorderThickness="0" Cursor="Hand"
-                            Click="OnAIButtonClick"/>
-                    <Button x:Name="LearnButton" Content="📚 智能学习" Padding="12,6" Margin="5,0"
+                            Click="OnAIButtonClick"
+                            infrastructure:LocalizeExtension.ResourceKey="VocabManager_AI_Button"/>
+                    <Button x:Name="LearnButton" Content="{x:Static res:Strings.VocabManager_Learn_Button}" Padding="12,6" Margin="5,0"
                             Background="#4CAF50" Foreground="White" BorderThickness="0" Cursor="Hand"
-                            Click="OnLearnButtonClick"/>
+                            Click="OnLearnButtonClick"
+                            infrastructure:LocalizeExtension.ResourceKey="VocabManager_Learn_Button"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -43,7 +50,8 @@
         <!-- TabControl：词典和历史记录 -->
         <TabControl Grid.Row="1" x:Name="MainTabControl" Background="Transparent" BorderThickness="0">
             <!-- 词典标签页 -->
-            <TabItem Header="📖 个人词典">
+            <TabItem Header="{x:Static res:Strings.VocabularyManager_Title}"
+                     infrastructure:LocalizeExtension.ResourceKey="VocabularyManager_Title">
                 <Grid Margin="0,10,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -53,18 +61,24 @@
                     <!-- 词典工具栏 -->
                     <ToolBarTray Grid.Row="0" Margin="0,0,0,10">
                         <ToolBar Background="Transparent">
-                            <Button x:Name="AddVocabButton" Content="➕ 添加词汇" Click="OnAddButtonClick" Padding="8,4"/>
+                            <Button x:Name="AddVocabButton" Content="{x:Static res:Strings.VocabManager_Toolbar_Add}" Click="OnAddButtonClick" Padding="8,4"
+                                    infrastructure:LocalizeExtension.ResourceKey="VocabManager_Toolbar_Add"/>
                             <Separator/>
-                            <Button x:Name="DeleteVocabButton" Content="🗑️ 删除选中" Click="OnDeleteButtonClick" Padding="8,4"/>
+                            <Button x:Name="DeleteVocabButton" Content="{x:Static res:Strings.VocabManager_Toolbar_Delete}" Click="OnDeleteButtonClick" Padding="8,4"
+                                    infrastructure:LocalizeExtension.ResourceKey="VocabManager_Toolbar_Delete"/>
                             <Separator/>
-                            <Button x:Name="ImportButton" Content="📥 导入" Click="OnImportButtonClick" Padding="8,4"/>
-                            <Button x:Name="ExportButton" Content="📤 导出热词" Click="OnExportButtonClick" Padding="8,4"/>
+                            <Button x:Name="ImportButton" Content="{x:Static res:Strings.VocabManager_Toolbar_Import}" Click="OnImportButtonClick" Padding="8,4"
+                                    infrastructure:LocalizeExtension.ResourceKey="VocabManager_Toolbar_Import"/>
+                            <Button x:Name="ExportButton" Content="{x:Static res:Strings.VocabManager_Toolbar_Export}" Click="OnExportButtonClick" Padding="8,4"
+                                    infrastructure:LocalizeExtension.ResourceKey="VocabManager_Toolbar_Export"/>
                             <Separator/>
-                            <Button x:Name="RefreshVocabButton" Content="🔄 刷新" Click="OnRefreshButtonClick" Padding="8,4"/>
+                            <Button x:Name="RefreshVocabButton" Content="{x:Static res:Strings.VocabManager_Toolbar_Refresh}" Click="OnRefreshButtonClick" Padding="8,4"
+                                    infrastructure:LocalizeExtension.ResourceKey="VocabManager_Toolbar_Refresh"/>
                         </ToolBar>
                         <ToolBar Background="Transparent" HorizontalAlignment="Right">
                             <TextBox x:Name="SearchBox" Width="200" Padding="5" 
-                                     TextChanged="OnSearchTextChanged" ToolTip="搜索词汇"/>
+                                     TextChanged="OnSearchTextChanged" ToolTip="{x:Static res:Strings.VocabManager_SearchBox_Tooltip}"
+                                     infrastructure:LocalizeExtension.ResourceKey="VocabManager_SearchBox_Tooltip"/>
                         </ToolBar>
                     </ToolBarTray>
                     
@@ -77,57 +91,66 @@
                               AlternatingRowBackground="#FAFAFA"
                               RowHeight="35">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="词汇" Binding="{Binding Word}" Width="150">
+                            <DataGridTextColumn Header="{x:Static res:Strings.VocabManager_Column_Word}" Binding="{Binding Word}" Width="150"
+                                                infrastructure:LocalizeExtension.ResourceKey="VocabManager_Column_Word">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="拼音" Binding="{Binding Pinyin}" Width="120">
+                            <DataGridTextColumn Header="{x:Static res:Strings.VocabManager_Column_Pinyin}" Binding="{Binding Pinyin}" Width="120"
+                                                infrastructure:LocalizeExtension.ResourceKey="VocabManager_Column_Pinyin">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground" Value="Gray"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="频率" Binding="{Binding Frequency}" Width="60">
+                            <DataGridTextColumn Header="{x:Static res:Strings.VocabManager_Column_Frequency}" Binding="{Binding Frequency}" Width="60"
+                                                infrastructure:LocalizeExtension.ResourceKey="VocabManager_Column_Frequency">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="HorizontalAlignment" Value="Center"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="权重" Binding="{Binding Weight, StringFormat=F1}" Width="60">
+                            <DataGridTextColumn Header="{x:Static res:Strings.VocabManager_Column_Weight}" Binding="{Binding Weight, StringFormat=F1}" Width="60"
+                                                infrastructure:LocalizeExtension.ResourceKey="VocabManager_Column_Weight">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="HorizontalAlignment" Value="Center"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="分类" Width="90">
+                            <DataGridTextColumn Header="{x:Static res:Strings.VocabManager_Column_Category}" Width="90"
+                                                infrastructure:LocalizeExtension.ResourceKey="VocabManager_Column_Category">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="Category" Converter="{StaticResource CategoryConverter}"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="来源" Width="80">
+                            <DataGridTextColumn Header="{x:Static res:Strings.VocabManager_Column_Source}" Width="80"
+                                                infrastructure:LocalizeExtension.ResourceKey="VocabManager_Column_Source">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="Source" Converter="{StaticResource SourceConverter}"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="上下文示例" Width="*">
+                            <DataGridTextColumn Header="{x:Static res:Strings.VocabManager_Column_Contexts}" Width="*"
+                                                infrastructure:LocalizeExtension.ResourceKey="VocabManager_Column_Contexts">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="Contexts" Converter="{StaticResource ContextsConverter}"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="最后使用" Binding="{Binding LastUsed, StringFormat=yyyy-MM-dd}" Width="90"/>
+                            <DataGridTextColumn Header="{x:Static res:Strings.VocabManager_Column_LastUsed}" Binding="{Binding LastUsed, StringFormat=yyyy-MM-dd}" Width="90"
+                                                infrastructure:LocalizeExtension.ResourceKey="VocabManager_Column_LastUsed"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
             
             <!-- 历史记录标签页 -->
-            <TabItem Header="📜 历史记录">
+            <TabItem Header="{x:Static res:Strings.VocabManager_HistoryTab}"
+                     infrastructure:LocalizeExtension.ResourceKey="VocabManager_HistoryTab">
                 <Grid Margin="0,10,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -137,23 +160,33 @@
                     <!-- 历史记录工具栏 -->
                     <ToolBarTray Grid.Row="0" Margin="0,0,0,10">
                         <ToolBar Background="Transparent">
-                            <Button x:Name="SelectAllButton" Content="☑️ 全选" Click="OnSelectAllHistoryClick" Padding="8,4"/>
-                            <Button x:Name="SelectNoneButton" Content="⬜ 取消选择" Click="OnSelectNoneHistoryClick" Padding="8,4" Margin="5,0"/>
+                            <Button x:Name="SelectAllButton" Content="{x:Static res:Strings.VocabManager_History_SelectAll}" Click="OnSelectAllHistoryClick" Padding="8,4"
+                                    infrastructure:LocalizeExtension.ResourceKey="VocabManager_History_SelectAll"/>
+                            <Button x:Name="SelectNoneButton" Content="{x:Static res:Strings.VocabManager_History_SelectNone}" Click="OnSelectNoneHistoryClick" Padding="8,4" Margin="5,0"
+                                    infrastructure:LocalizeExtension.ResourceKey="VocabManager_History_SelectNone"/>
                             <Separator/>
-                            <Button x:Name="TrainSelectedButton" Content="🎯 训练选中项" Click="OnTrainSelectedClick" Padding="8,4" Background="#4CAF50" Foreground="White"/>
-                            <Button x:Name="AutoTrainButton" Content="🤖 自动训练全部" Click="OnAutoTrainClick" Padding="8,4" Margin="5,0" Background="#2196F3" Foreground="White"/>
+                            <Button x:Name="TrainSelectedButton" Content="{x:Static res:Strings.VocabManager_History_TrainSelected}" Click="OnTrainSelectedClick" Padding="8,4" Background="#4CAF50" Foreground="White"
+                                    infrastructure:LocalizeExtension.ResourceKey="VocabManager_History_TrainSelected"/>
+                            <Button x:Name="AutoTrainButton" Content="{x:Static res:Strings.VocabManager_History_AutoTrain}" Click="OnAutoTrainClick" Padding="8,4" Margin="5,0" Background="#2196F3" Foreground="White"
+                                    infrastructure:LocalizeExtension.ResourceKey="VocabManager_History_AutoTrain"/>
                             <Separator/>
-                            <Button x:Name="DeleteHistoryButton" Content="🗑️ 删除选中" Click="OnDeleteHistoryClick" Padding="8,4"/>
+                            <Button x:Name="DeleteHistoryButton" Content="{x:Static res:Strings.VocabManager_History_Delete}" Click="OnDeleteHistoryClick" Padding="8,4"
+                                    infrastructure:LocalizeExtension.ResourceKey="VocabManager_History_Delete"/>
                         </ToolBar>
                         <ToolBar Background="Transparent" HorizontalAlignment="Right">
                             <ComboBox x:Name="HistoryFilterCombo" Width="120" Padding="5" SelectionChanged="OnHistoryFilterChanged">
-                                <ComboBoxItem Content="全部记录" IsSelected="True"/>
-                                <ComboBoxItem Content="今天"/>
-                                <ComboBoxItem Content="最近7天"/>
-                                <ComboBoxItem Content="最近30天"/>
+                                <ComboBoxItem Content="{x:Static res:Strings.VocabManager_History_Filter}" IsSelected="True"
+                                              infrastructure:LocalizeExtension.ResourceKey="VocabManager_History_Filter"/>
+                                <ComboBoxItem Content="{x:Static res:Strings.VocabManager_History_FilterToday}"
+                                              infrastructure:LocalizeExtension.ResourceKey="VocabManager_History_FilterToday"/>
+                                <ComboBoxItem Content="{x:Static res:Strings.VocabManager_History_Filter7Days}"
+                                              infrastructure:LocalizeExtension.ResourceKey="VocabManager_History_Filter7Days"/>
+                                <ComboBoxItem Content="{x:Static res:Strings.VocabManager_History_Filter30Days}"
+                                              infrastructure:LocalizeExtension.ResourceKey="VocabManager_History_Filter30Days"/>
                             </ComboBox>
                             <TextBox x:Name="HistorySearchBox" Width="180" Padding="5" Margin="5,0,0,0"
-                                     TextChanged="OnHistorySearchChanged" ToolTip="搜索历史记录"/>
+                                     TextChanged="OnHistorySearchChanged" ToolTip="{x:Static res:Strings.VocabManager_History_Search_Tooltip}"
+                                     infrastructure:LocalizeExtension.ResourceKey="VocabManager_History_Search_Tooltip"/>
                         </ToolBar>
                     </ToolBarTray>
                     
@@ -170,11 +203,12 @@
         <!-- 状态栏 -->
         <StatusBar Grid.Row="3" Margin="0,10,0,0">
             <StatusBarItem>
-                <TextBlock x:Name="StatusText" Text="就绪"/>
+                <TextBlock x:Name="StatusText" Text="{x:Static res:Strings.VocabManager_Status_Ready}"
+                           infrastructure:LocalizeExtension.ResourceKey="VocabManager_Status_Ready"/>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <TextBlock x:Name="ProgressText" Text=""/>
             </StatusBarItem>
         </StatusBar>
     </Grid>
-</Window>
+</infrastructure:LocalizedWindow>

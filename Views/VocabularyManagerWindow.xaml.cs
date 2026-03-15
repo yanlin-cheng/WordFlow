@@ -10,6 +10,7 @@ using System.Windows.Media;
 using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Win32;
+using WordFlow.Infrastructure;
 using WordFlow.Models;
 using WordFlow.Services;
 using WordFlow.Utils;
@@ -31,7 +32,7 @@ namespace WordFlow.Views
     /// <summary>
     /// 个人词典管理窗口
     /// </summary>
-    public partial class VocabularyManagerWindow : Window
+    public partial class VocabularyManagerWindow : LocalizedWindow
     {
         private readonly HistoryService? _historyService;
         private readonly VocabularyLearningEngine? _learningEngine;

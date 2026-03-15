@@ -17,6 +17,7 @@ using WordFlow.Services;
 using WordFlow.Utils;
 using WordFlow.Models;
 using WordFlow.Views;
+using WordFlow.Resources.Strings;
 using CorrectionSuggestion = WordFlow.Services.SpeechRecognitionService.CorrectionSuggestion;
 
 namespace WordFlow
@@ -24,7 +25,7 @@ namespace WordFlow
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         // 服务引用（由 App.xaml.cs 注入）
         private SpeechRecognitionService? _speechService;
@@ -33,7 +34,6 @@ namespace WordFlow
         private SettingsService? _settingsService;
 
         // UI 相关
-        private Views.RecordingIndicatorWindow? _recordingIndicator;
         private Views.TranscriptPopupWindow? _transcriptPopup;
         private DispatcherTimer? _recordingTimer;
         private int _recordingSeconds;
@@ -52,8 +52,6 @@ namespace WordFlow
         // 错误检测相关字段
         private string _lastRecognizedText = "";
         private DateTime _lastRecognitionTime;
-        private DispatcherTimer? _correctionCheckTimer;
-        private bool _isUserCorrecting = false;
 
         #region Windows API
         [DllImport("user32.dll")]
@@ -151,8 +149,6 @@ namespace WordFlow
             Closing += OnWindowClosing;
             
             // 编辑器已移除 - 文字将直接输入到目标窗口
-            // 不再需要错误检测定时器
-            _correctionCheckTimer = null;
 
             // 订阅事件总线（新架构）
             SubscribeToEventBus();
@@ -304,39 +300,58 @@ namespace WordFlow
                 });
             });
 
-            // 识别完成
+            // 识别完成 - 完整处理（文字发送 + 历史保存 + UI 更新）
             EventBus.Subscribe<RecognitionCompletedEvent>(async evt =>
             {
-                // 先保存目标窗口信息（不依赖 UI 线程）
                 var targetWindow = evt.TargetWindow;
                 var targetWindowTitle = evt.TargetWindowTitle;
 
-                // UI 更新部分
                 await Application.Current.Dispatcher.BeginInvoke(async () =>
                 {
                     if (string.IsNullOrEmpty(evt.Text))
                     {
                         StatusText.Text = "识别完成（无内容）";
+                        RecordButtonIndicator.Fill = Brushes.Gray;
                         return;
                     }
 
-                    // 文字将直接发送到外部窗口（不再有内部编辑器）
+                    // 【智能后处理】应用文本优化规则
+                    var processedText = TextPostProcessor.Process(evt.Text);
+                    Logger.Log($"原文本：{evt.Text}");
+                    Logger.Log($"处理后：{processedText}");
+
+                    // 保存目标窗口句柄
                     var myHandle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+                    
+                    // 检查目标窗口是否有效
+                    if (targetWindow != IntPtr.Zero && !IsWindow(targetWindow))
+                    {
+                        Logger.Log("目标窗口已关闭，文字将只输入到本程序");
+                        targetWindow = IntPtr.Zero;
+                    }
+
+                    // 发送文字到外部窗口
                     if (targetWindow != IntPtr.Zero && targetWindow != myHandle)
                     {
-                        await SendTextToExternalWindowAsync(targetWindow, evt.Text);
+                        Logger.Log($"准备发送文字到：{targetWindowTitle}");
+                        await SendTextToExternalWindowAsync(targetWindow, processedText);
                     }
-
-                    // 保存历史
-                    await SaveInputHistoryAsync(evt.Text, targetWindowTitle);
-
-                    // 显示底部提示框（如果目标窗口不是 WordFlow 自身）
-                    if (targetWindow == IntPtr.Zero || targetWindow == myHandle)
+                    else if (targetWindow == myHandle)
                     {
-                        ShowTranscriptPopup(evt.Text);
+                        Logger.Log("目标窗口是 WordFlow 自身，文字已输入到编辑器");
                     }
 
+                    // 保存输入历史
+                    await SaveInputHistoryAsync(processedText, targetWindowTitle);
+
+                    // 保存识别结果用于错误检测
+                    _lastRecognizedText = processedText;
+                    _lastRecognitionTime = DateTime.Now;
+
+                    // 显示底部提示框
+                    ShowTranscriptPopup(processedText);
                     StatusText.Text = "识别完成";
+                    RecordButtonIndicator.Fill = Brushes.Gray;
                 });
             });
 
@@ -373,13 +388,18 @@ namespace WordFlow
             if (_settingsService != null)
             {
                 var keyName = SettingsService.GetKeyName(_settingsService.Settings.HotkeyCode);
-                var keyDescription = _settingsService.Settings.HotkeyCode == 0xC0 ? "（ESC 下方）" : "";
-                RecordButtonText.Text = $"按住 {keyName}{keyDescription} 说话";
-                HotkeyHintText.Text = $"当前快捷键：按住 {keyName}{keyDescription}";
+                var keyDescription = _settingsService.Settings.HotkeyCode == 0xC0 ? Strings.MW_HotkeyKeyDescription : "";
+                
+                // 使用资源字符串构建提示文本
+                var displayKeyName = string.Format(Strings.MW_PressToRecordWithKey, keyName + keyDescription);
+                var hotkeyHint = string.Format(Strings.MW_HotkeyHintWithKey, keyName + keyDescription);
+                
+                RecordButtonText.Text = displayKeyName;
+                HotkeyHintText.Text = hotkeyHint;
             }
         }
 
-        private void OnWindowLoaded(object? sender, RoutedEventArgs e)
+        private async void OnWindowLoaded(object? sender, RoutedEventArgs e)
         {
             Focus();
             
@@ -388,6 +408,9 @@ namespace WordFlow
             
             // 更新初始状态
             StatusText.Text = "正在连接服务...";
+            
+            // 自动连接并启动服务
+            await InitializeServiceWithAutoConnectAsync();
         }
 
         private async Task InitializeServiceWithAutoConnectAsync()
@@ -512,106 +535,99 @@ namespace WordFlow
 
         private void OnRecognitionCompleted(object? sender, string text)
         {
-            Dispatcher.Invoke(async () =>
-            {
-                if (string.IsNullOrEmpty(text))
-                {
-                    StatusText.Text = "识别完成（无内容）";
-                    RecordButtonIndicator.Fill = Brushes.Gray;
-                    return;
-                }
-
-                // 【智能后处理】应用文本优化规则
-                var processedText = TextPostProcessor.Process(text);
-                Logger.Log($"原文本：{text}");
-                Logger.Log($"处理后：{processedText}");
-
-                // 【关键】先保存目标窗口句柄（在更新 UI 前，避免焦点被抢夺）
-                var targetWindow = _lastForegroundWindow;
-                var myHandle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-                var targetWindowTitle = GetWindowTitle(targetWindow);
-                
-                // 检查目标窗口是否有效
-                if (targetWindow != IntPtr.Zero && !IsWindow(targetWindow))
-                {
-                    Logger.Log("目标窗口已关闭，文字将只输入到本程序");
-                    targetWindow = IntPtr.Zero;
-                }
-
-                // 1. 文字将直接发送到外部窗口（不再有内部编辑器）
-
-                // 2. 尝试发送到外部窗口
-                if (targetWindow != IntPtr.Zero && targetWindow != myHandle)
-                {
-                    Logger.Log($"准备发送文字到：{targetWindowTitle}");
-                    await SendTextToExternalWindowAsync(targetWindow, processedText);
-                }
-                else if (targetWindow == myHandle)
-                {
-                    Logger.Log("目标窗口是 WordFlow 自身，文字已输入到编辑器");
-                }
-
-                // 3. 保存输入历史（保存处理后的文本）
-                await SaveInputHistoryAsync(processedText, targetWindowTitle);
-
-                // 4. 保存识别结果用于错误检测
-                _lastRecognizedText = processedText;
-                _lastRecognitionTime = DateTime.Now;
-                _isUserCorrecting = false;
-
-                StatusText.Text = "识别完成";
-                RecordButtonIndicator.Fill = Brushes.Gray;
-            });
+            // 注意：识别完成逻辑已移至事件总线订阅（SubscribeToEventBus 中的 RecognitionCompletedEvent）
+            // 此方法保留用于向后兼容，但不再执行实际操作
+            Logger.Log($"OnRecognitionCompleted: 识别结果={text}（已由事件总线处理）");
         }
 
         /// <summary>
-        /// 保存输入历史到数据库
+        /// 发送文字到外部窗口（使用 InputSimulator - 根据过往经验最终成功的方案 13）
         /// </summary>
-        private async Task SaveInputHistoryAsync(string text, string? targetWindowTitle)
+        private async Task SendTextToExternalWindowAsync(IntPtr targetWindow, string text)
         {
-            if (_historyService == null) return;
+            Logger.Log("=== 开始输入到外部窗口 ===");
+            Logger.Log($"目标窗口句柄：{targetWindow}");
+            Logger.Log($"目标窗口标题：{GetWindowTitle(targetWindow)}");
+            Logger.Log($"文本长度：{text.Length} 字符");
+            Logger.Log($"文本内容：{text.Substring(0, Math.Min(30, text.Length))}...");
+            
+            if (targetWindow == IntPtr.Zero)
+            {
+                Logger.Log("✗ 目标窗口句柄为空");
+                return;
+            }
+
+            // 检查窗口是否有效
+            if (!IsWindow(targetWindow))
+            {
+                Logger.Log("✗ 目标窗口已失效");
+                return;
+            }
+
+            // 1. 激活目标窗口
+            Logger.Log("正在激活目标窗口...");
+            BringWindowToForeground(targetWindow);
+            await Task.Delay(100);
+
+            // 2. 保存原始剪贴板内容，输入完成后恢复（避免污染用户剪贴板）
+            string? originalClipboardContent = null;
+            bool hadClipboardContent = false;
             
             try
             {
-                var duration = (DateTime.Now - _recordingStartTime).TotalSeconds;
-                var appName = GetApplicationNameFromWindowTitle(targetWindowTitle);
-                
-                var history = new InputHistory
+                if (System.Windows.Clipboard.ContainsText())
                 {
-                    OriginalText = text,
-                    TargetWindowTitle = targetWindowTitle,
-                    TargetApplication = appName,
-                    RecordingDuration = duration,
-                    Scene = InferInputScene(appName, text)
-                };
-                
-                await _historyService.SaveInputHistoryAsync(history);
-                Logger.Log($"✓ 输入历史已保存: {text.Length} 字");
+                    originalClipboardContent = System.Windows.Clipboard.GetText();
+                    hadClipboardContent = true;
+                    Logger.Log($"步骤 0: 已保存原始剪贴板内容 ({originalClipboardContent.Length} 字符)");
+                }
             }
             catch (Exception ex)
             {
-                Logger.Log($"保存输入历史失败: {ex.Message}");
+                Logger.Log($"步骤 0: 保存剪贴板内容失败（可能为空或无法访问）: {ex.Message}");
             }
-        }
 
-        /// <summary>
-        /// 从窗口标题推断应用程序名称
-        /// </summary>
-        private string? GetApplicationNameFromWindowTitle(string? windowTitle)
-        {
-            if (string.IsNullOrEmpty(windowTitle)) return null;
-            
-            // 常见的应用程序识别
-            if (windowTitle.Contains("Notepad")) return "Notepad";
-            if (windowTitle.Contains("Word")) return "Microsoft Word";
-            if (windowTitle.Contains("WPS")) return "WPS Office";
-            if (windowTitle.Contains("Visual Studio")) return "Visual Studio";
-            if (windowTitle.Contains("Code")) return "VS Code";
-            if (windowTitle.Contains("微信")) return "WeChat";
-            if (windowTitle.Contains("QQ")) return "QQ";
-            
-            // 默认返回窗口标题的前20个字符
-            return windowTitle.Length > 20 ? windowTitle.Substring(0, 20) : windowTitle;
+            // 3. 使用 InputSimulator 发送 Ctrl+V 粘贴
+            try
+            {
+                Logger.Log("步骤 1: 设置剪贴板内容...");
+                System.Windows.Clipboard.Clear();
+                System.Windows.Clipboard.SetText(text + " ");
+                await Task.Delay(50);
+                
+                Logger.Log("步骤 2: 使用 InputSimulator 发送 Ctrl+V...");
+                var simulator = new InputSimulator();
+                simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
+                await Task.Delay(100);
+                
+                Logger.Log("✓ 输入完成");
+                
+                // 4. 恢复原始剪贴板内容
+                if (hadClipboardContent && originalClipboardContent != null)
+                {
+                    System.Windows.Clipboard.SetText(originalClipboardContent);
+                    Logger.Log("✓ 剪贴板已恢复到原始内容");
+                }
+                else
+                {
+                    System.Windows.Clipboard.Clear();
+                    Logger.Log("✓ 剪贴板已清空（原为空）");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"输入失败：{ex.Message}");
+                
+                // 即使输入失败，也尝试恢复剪贴板
+                try
+                {
+                    if (hadClipboardContent && originalClipboardContent != null)
+                    {
+                        System.Windows.Clipboard.SetText(originalClipboardContent);
+                    }
+                }
+                catch { }
+            }
         }
 
         /// <summary>
@@ -645,55 +661,31 @@ namespace WordFlow
         }
 
         /// <summary>
-        /// 发送文字到外部窗口（使用 InputSimulator - 根据过往经验最终成功的方案）
+        /// 保存输入历史记录
         /// </summary>
-        private async Task SendTextToExternalWindowAsync(IntPtr targetWindow, string text)
+        private async Task SaveInputHistoryAsync(string text, string? targetWindow)
         {
-            Logger.Log("=== 开始输入到外部窗口 ===");
-            Logger.Log($"目标窗口句柄：{targetWindow}");
-            Logger.Log($"目标窗口标题：{GetWindowTitle(targetWindow)}");
-            Logger.Log($"文本长度：{text.Length} 字符");
-            Logger.Log($"文本内容：{text.Substring(0, Math.Min(30, text.Length))}...");
+            if (_historyService == null) return;
             
-            if (targetWindow == IntPtr.Zero)
-            {
-                Logger.Log("✗ 目标窗口句柄为空");
-                return;
-            }
-
-            // 检查窗口是否有效
-            if (!IsWindow(targetWindow))
-            {
-                Logger.Log("✗ 目标窗口已失效");
-                return;
-            }
-
-            // 1. 激活目标窗口
-            Logger.Log("正在激活目标窗口...");
-            BringWindowToForeground(targetWindow);
-            await Task.Delay(100);
-
-            // 2. 使用 InputSimulator 发送 Ctrl+V 粘贴（根据过往经验方案 13）
             try
             {
-                Logger.Log("步骤 1: 设置剪贴板内容...");
-                System.Windows.Clipboard.Clear();
-                System.Windows.Clipboard.SetText(text + " ");
-                await Task.Delay(50);
+                var history = new InputHistory
+                {
+                    OriginalText = text,
+                    CorrectedText = text,
+                    Timestamp = DateTime.Now,
+                    TargetApplication = targetWindow
+                };
                 
-                Logger.Log("步骤 2: 使用 InputSimulator 发送 Ctrl+V...");
-                var simulator = new InputSimulator();
-                simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
-                await Task.Delay(50);
-                
-                Logger.Log("✓ 输入完成");
+                await _historyService.SaveInputHistoryAsync(history);
+                Logger.Log($"已保存输入历史：{text.Length} 字");
             }
             catch (Exception ex)
             {
-                Logger.Log($"输入失败：{ex.Message}");
+                Logger.Log($"保存输入历史失败：{ex.Message}");
             }
         }
-        
+
         /// <summary>
         /// 发送单个字符（使用 SendInput）
         /// </summary>
@@ -1324,7 +1316,11 @@ namespace WordFlow
             {
                 StatusText.Text = $"正在录音... (松开 {keyName} 结束)";
                 RecordButtonIndicator.Fill = Brushes.Red;
+                RecordButtonText.Text = $"正在录音（松开 {keyName} 结束）";
+                StartRecordingTimer();
             });
+            
+            Logger.Log($"ShowRecordingNotification: UI 已更新 - 录音中");
         }
 
         private async Task StopRecordingAsync()
@@ -1335,6 +1331,13 @@ namespace WordFlow
 
         private void StartRecordingTimer()
         {
+            // 防止重复启动：如果定时器已在运行，先停止
+            if (_recordingTimer != null && _recordingTimer.IsEnabled)
+            {
+                _recordingTimer.Stop();
+                _recordingTimer = null;
+            }
+            
             _recordingSeconds = 0;
             // 使用 Application.Dispatcher 创建定时器，确保窗口隐藏时也能工作
             _recordingTimer = new DispatcherTimer(
@@ -1343,10 +1346,17 @@ namespace WordFlow
                 (s, e) =>
                 {
                     _recordingSeconds++;
+                    // 同时更新状态栏和录音按钮文本
+                    var keyName = _settingsService != null 
+                        ? SettingsService.GetKeyName(_settingsService.Settings.HotkeyCode) 
+                        : "` 键";
                     StatusText.Text = $"正在录音... {_recordingSeconds}s";
+                    RecordButtonText.Text = $"正在录音（{_recordingSeconds}s，松开 {keyName} 结束）";
                 },
                 Application.Current.Dispatcher);
             _recordingTimer.Start();
+            
+            Logger.Log($"StartRecordingTimer: 定时器已启动");
         }
 
         private void StopRecordingTimer()
@@ -1360,24 +1370,33 @@ namespace WordFlow
         /// </summary>
         private void ShowTranscriptPopup(string text)
         {
-            if (_transcriptPopup == null)
+            try
             {
-                _transcriptPopup = new Views.TranscriptPopupWindow
+                if (_transcriptPopup == null)
                 {
-                    Owner = this
-                };
+                    _transcriptPopup = new Views.TranscriptPopupWindow
+                    {
+                        Owner = this
+                    };
+                }
+
+                // 设置窗口位置（屏幕底部中央）
+                var screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
+                var screenHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
+                var taskbarHeight = System.Windows.SystemParameters.PrimaryScreenHeight - 
+                                    System.Windows.SystemParameters.WorkArea.Height;
+
+                _transcriptPopup.Left = (screenWidth - _transcriptPopup.Width) / 2;
+                _transcriptPopup.Top = screenHeight - _transcriptPopup.Height - taskbarHeight - 20;
+
+                _transcriptPopup.ShowTranscript(text);
             }
-
-            // 设置窗口位置（屏幕底部中央）
-            var screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
-            var screenHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
-            var taskbarHeight = System.Windows.SystemParameters.PrimaryScreenHeight - 
-                                System.Windows.SystemParameters.WorkArea.Height;
-
-            _transcriptPopup.Left = (screenWidth - _transcriptPopup.Width) / 2;
-            _transcriptPopup.Top = screenHeight - _transcriptPopup.Height - taskbarHeight - 20;
-
-            _transcriptPopup.ShowTranscript(text);
+            catch (Exception ex)
+            {
+                // 弹窗显示失败时，只在状态栏显示提示，不影响主要功能
+                Logger.Log($"显示转录弹窗失败：{ex.Message}");
+                StatusText.Text = $"识别完成：{text.Length} 字";
+            }
         }
 
         /// <summary>

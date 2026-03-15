@@ -23,6 +23,7 @@ namespace WordFlow
         private HistoryService? _historyService;
         private SettingsService? _settingsService;
         private TrayServiceV2? _trayService;
+        private UpdateService? _updateService;
 
         private const string ASR_SERVICE_URL = "http://127.0.0.1:5000";
 
@@ -114,6 +115,60 @@ namespace WordFlow
 
             // 12. 检查是否需要首次运行设置
             await CheckFirstRunSetupAsync(mainWindow);
+            
+            // 13. 初始化更新服务并检查更新
+            InitializeUpdateService(mainWindow);
+        }
+
+        /// <summary>
+        /// 初始化更新服务并检查更新
+        /// </summary>
+        private async void InitializeUpdateService(Window mainWindow)
+        {
+            try
+            {
+                _updateService = new UpdateService();
+                _updateService.UpdateAvailable += OnUpdateAvailable;
+                _updateService.UpdateCheckFailed += OnUpdateCheckFailed;
+                
+                // 启动时自动检查更新
+                await _updateService.CheckForUpdateAsync(false);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"初始化更新服务失败：{ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 发现新版本时显示更新对话框
+        /// </summary>
+        private async void OnUpdateAvailable(object? sender, UpdateInfo updateInfo)
+        {
+            try
+            {
+                Logger.Log($"显示更新对话框：v{updateInfo.Version}");
+                
+                await Application.Current.Dispatcher.InvokeAsync(async () =>
+                {
+                    var dialog = new UpdateDialog(updateInfo, _updateService!);
+                    dialog.Owner = MainWindow;
+                    dialog.ShowDialog();
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"显示更新对话框失败：{ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 更新检查失败处理
+        /// </summary>
+        private void OnUpdateCheckFailed(object? sender, string message)
+        {
+            // 静默处理，不干扰用户
+            Logger.Log($"更新检查失败：{message}");
         }
 
         /// <summary>
@@ -203,6 +258,84 @@ namespace WordFlow
                         Message = "未连接到 ASR 服务，请手动启动 Python 服务"
                     });
                 }
+            }
+
+            // 4. 启动自动学习定时器（每 24 小时执行一次自动学习）
+            StartAutoLearnTimer();
+        }
+
+        /// <summary>
+        /// 自动学习定时器
+        /// </summary>
+        private System.Threading.Timer? _autoLearnTimer;
+
+        /// <summary>
+        /// 启动自动学习定时器
+        /// </summary>
+        private void StartAutoLearnTimer()
+        {
+            try
+            {
+                // 24 小时 = 86400000 毫秒
+                var dueTime = TimeSpan.FromMinutes(1); // 1 分钟后首次执行
+                var period = TimeSpan.FromHours(24);   // 之后每 24 小时执行
+
+                _autoLearnTimer = new System.Threading.Timer(
+                    async _ => await RunAutoLearnAsync(),
+                    null,
+                    dueTime,
+                    period);
+
+                Logger.Log("自动学习定时器已启动");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"启动自动学习定时器失败：{ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 执行自动学习
+        /// </summary>
+        private async System.Threading.Tasks.Task RunAutoLearnAsync()
+        {
+            try
+            {
+                Logger.Log("开始自动学习...");
+
+                if (_historyService == null)
+                {
+                    _historyService = new HistoryService();
+                }
+
+                var learningEngine = new VocabularyLearningEngine(_historyService);
+                var result = await learningEngine.AutoLearnAsync(500);
+
+                if (result.Success && result.TotalLearned > 0)
+                {
+                    Logger.Log($"自动学习完成：新增 {result.TotalLearned} 个词汇");
+
+                    // 在 UI 线程显示通知
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        EventBus.Publish(new StatusChangedEvent
+                        {
+                            Message = $"自动学习完成：新增 {result.TotalLearned} 个词汇，请重启 ASR 服务以加载新热词"
+                        });
+                    });
+                }
+                else if (result.Success)
+                {
+                    Logger.Log("自动学习完成：没有新词汇可学习");
+                }
+                else
+                {
+                    Logger.Log($"自动学习失败：{result.ErrorMessage}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"自动学习失败：{ex}");
             }
         }
 
@@ -336,13 +469,52 @@ namespace WordFlow
 
         /// <summary>
         /// 初始化 UI 语言
+        /// 在应用启动时调用，根据设置中的语言代码初始化界面语言
         /// </summary>
         private void InitializeUICulture()
         {
             try
             {
-                var languageCode = _settingsService?.Settings.LanguageCode ?? "zh-CN";
+                // 确保设置服务已加载
+                _settingsService?.Load();
+                
+                // 获取语言代码的优先级：
+                // 1. 优先使用 InstallerLanguageCode（安装程序选择的语言）
+                // 2. 如果 InstallerLanguageCode 为空，则使用 LanguageCode
+                // 3. 最后回退到 zh-CN
+                string languageCode = "zh-CN";  // 默认值
+                
+                if (_settingsService != null)
+                {
+                    var settings = _settingsService.Settings;
+                    Logger.Log($"Settings 加载状态：LanguageCode=[{settings.LanguageCode}], InstallerLanguageCode=[{settings.InstallerLanguageCode}]");
+                    
+                    // 优先使用 InstallerLanguageCode（如果存在）
+                    if (!string.IsNullOrEmpty(settings.InstallerLanguageCode))
+                    {
+                        languageCode = settings.InstallerLanguageCode;
+                        Logger.Log($"使用 InstallerLanguageCode: {languageCode}");
+                    }
+                    // 否则使用 LanguageCode
+                    else if (!string.IsNullOrEmpty(settings.LanguageCode))
+                    {
+                        languageCode = settings.LanguageCode;
+                        Logger.Log($"使用 LanguageCode: {languageCode}");
+                    }
+                    else
+                    {
+                        Logger.Log("InstallerLanguageCode 和 LanguageCode 都为空，使用默认：zh-CN");
+                    }
+                }
+                else
+                {
+                    Logger.Log("SettingsService 为空，使用默认语言：zh-CN");
+                }
+
                 Logger.Log($"初始化 UI 语言：{languageCode}");
+
+                // 初始化 LocalizationService
+                LocalizationService.Instance.Initialize(languageCode);
 
                 // 解析语言代码
                 var cultureInfo = new CultureInfo(languageCode);
@@ -356,6 +528,8 @@ namespace WordFlow
                     typeof(FrameworkElement),
                     new FrameworkPropertyMetadata(
                         XmlLanguage.GetLanguage(cultureInfo.IetfLanguageTag)));
+                        
+                Logger.Log($"UI 语言初始化完成：{languageCode}");
             }
             catch (Exception ex)
             {

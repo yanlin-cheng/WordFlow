@@ -1,8 +1,11 @@
-<Window x:Class="WordFlow.Views.SettingsWindow"
+<infrastructure:LocalizedWindow x:Class="WordFlow.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:res="clr-namespace:WordFlow.Resources.Strings"
-        Title="{x:Static res:Strings.SettingsWindow_Title}" Height="500" Width="550"
+        xmlns:infrastructure="clr-namespace:WordFlow.Infrastructure"
+        Title="{x:Static res:Strings.SettingsWindow_Title}" 
+        infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_Title"
+        Height="500" Width="550"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
     <Grid Margin="20">
@@ -15,117 +18,159 @@
         <TabControl x:Name="SettingsTabControl" Grid.Row="0">
             
             <!-- 热键设置 -->
-            <TabItem Header="{x:Static res:Strings.SettingsWindow_HotkeysTab}">
+            <TabItem Header="{x:Static res:Strings.SettingsWindow_HotkeysTab}"
+                     infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_HotkeysTab">
                 <Grid Margin="15">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <GroupBox Header="录音热键" Grid.Row="0" Padding="10" Margin="0,0,0,15">
+                    <GroupBox Header="{x:Static res:Strings.SettingsWindow_RecordHotkeyGroup}" 
+                              Grid.Row="0" Padding="10" Margin="0,0,0,15"
+                              infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_RecordHotkeyGroup">
                         <StackPanel>
-                            <TextBlock Text="选择录音触发键：" Margin="0,0,0,10"/>
+                            <TextBlock Text="{x:Static res:Strings.SettingsWindow_SelectHotkey}" 
+                                       Margin="0,0,0,10"
+                                       infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_SelectHotkey"/>
                             <ComboBox x:Name="HotkeyComboBox" 
                                       SelectionChanged="HotkeyComboBox_SelectionChanged"
                                       Padding="8,5"/>
                             <TextBlock x:Name="HotkeyHintText" 
-                                       Text="按住选中的键说话，松开后自动识别"
+                                       Text="{x:Static res:Strings.SettingsWindow_HotkeyHint}"
                                        Foreground="Gray" 
                                        FontSize="11"
                                        Margin="0,8,0,0"
-                                       TextWrapping="Wrap"/>
+                                       TextWrapping="Wrap"
+                                       infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_HotkeyHint"/>
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="启动设置" Grid.Row="1" Padding="10">
+                    <GroupBox Header="{x:Static res:Strings.SettingsWindow_StartupGroup}" 
+                              Grid.Row="1" Padding="10"
+                              infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_StartupGroup">
                         <StackPanel>
                             <CheckBox x:Name="AutoStartCheckBox" 
-                                      Content="开机自启动"
+                                      Content="{x:Static res:Strings.SettingsWindow_AutoStart}"
                                       Checked="AutoStartCheckBox_Changed"
                                       Unchecked="AutoStartCheckBox_Changed"
-                                      Margin="0,5"/>
+                                      Margin="0,5"
+                                      infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_AutoStart"/>
                             <CheckBox x:Name="StartMinimizedCheckBox" 
-                                      Content="启动时最小化到托盘"
+                                      Content="{x:Static res:Strings.SettingsWindow_StartMinimized}"
                                       Checked="StartMinimizedCheckBox_Changed"
                                       Unchecked="StartMinimizedCheckBox_Changed"
-                                      Margin="0,5"/>
+                                      Margin="0,5"
+                                      infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_StartMinimized"/>
                         </StackPanel>
                     </GroupBox>
                 </Grid>
             </TabItem>
 
             <!-- 语言设置 -->
-            <TabItem Header="{x:Static res:Strings.SettingsWindow_LanguageTab}">
+            <TabItem Header="{x:Static res:Strings.SettingsWindow_LanguageTab}"
+                     infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_LanguageTab">
                 <Grid Margin="15">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <GroupBox Header="{x:Static res:Strings.SettingsWindow_LanguageLabel}" Grid.Row="0" Padding="10" Margin="0,0,0,15">
+                    <GroupBox Header="{x:Static res:Strings.SettingsWindow_LanguageLabel}" 
+                              Grid.Row="0" Padding="10" Margin="0,0,0,15"
+                              infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_LanguageLabel">
                         <StackPanel>
                             <ComboBox x:Name="LanguageComboBox" 
                                       SelectionChanged="LanguageComboBox_SelectionChanged"
                                       Padding="8,5"
                                       FontSize="14">
-                                <ComboBoxItem Content="{x:Static res:Strings.Language_zhCN}" Tag="zh-CN"/>
-                                <ComboBoxItem Content="{x:Static res:Strings.Language_enUS}" Tag="en-US"/>
-                                <ComboBoxItem Content="{x:Static res:Strings.Language_jaJP}" Tag="ja-JP"/>
-                                <ComboBoxItem Content="{x:Static res:Strings.Language_koKR}" Tag="ko-KR"/>
+                                <ComboBoxItem Content="{x:Static res:Strings.Language_zhCN}" Tag="zh-CN"
+                                              infrastructure:LocalizeExtension.ResourceKey="Language_zhCN"/>
+                                <ComboBoxItem Content="{x:Static res:Strings.Language_enUS}" Tag="en-US"
+                                              infrastructure:LocalizeExtension.ResourceKey="Language_enUS"/>
                             </ComboBox>
                             <TextBlock Text="{x:Static res:Strings.SettingsWindow_LanguageHint}" 
                                        Foreground="Gray" 
                                        FontSize="11"
                                        Margin="0,10,0,0"
-                                       TextWrapping="Wrap"/>
+                                       TextWrapping="Wrap"
+                                       infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_LanguageHint"/>
                         </StackPanel>
                     </GroupBox>
                 </Grid>
             </TabItem>
 
             <!-- 关于 -->
-            <TabItem Header="{x:Static res:Strings.SettingsWindow_AboutTab}">
+            <TabItem Header="{x:Static res:Strings.SettingsWindow_AboutTab}"
+                     infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_AboutTab">
                 <Grid Margin="15">
                     <StackPanel>
-                        <TextBlock Text="WordFlow - 智能语音输入工具" FontSize="16" FontWeight="Bold"/>
-                        <TextBlock Text="版本：1.0.0" Foreground="Gray" Margin="0,10,0,0"/>
+                        <TextBlock Text="{x:Static res:Strings.SettingsWindow_AppTitle}" 
+                                   FontSize="16" FontWeight="Bold"
+                                   infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_AppTitle"/>
+                        <TextBlock Text="{x:Static res:Strings.SettingsWindow_Version}" 
+                                   Foreground="Gray" Margin="0,10,0,0"
+                                   infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_Version"/>
                         
                         <Separator Margin="0,15,0,15"/>
                         
-                        <TextBlock Text="相关链接" FontWeight="Bold" Margin="0,0,0,10"/>
-                        <TextBlock Margin="0,0,0,10">
+                        <TextBlock Text="{x:Static res:Strings.SettingsWindow_RelatedLinks}" 
+                                   FontWeight="Bold" Margin="0,0,0,10"
+                                   infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_RelatedLinks"/>
+                        <TextBlock Margin="0,0,0,10"
+                                   infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_GitHubLink">
                             <Hyperlink NavigateUri="https://github.com/wanddream/WordFlow" 
                                        RequestNavigate="Hyperlink_RequestNavigate">
-                                GitHub 项目地址
+                                {x:Static res:Strings.SettingsWindow_GitHubLink}
                             </Hyperlink>
                         </TextBlock>
-                        <TextBlock Margin="0,0,0,10">
+                        <TextBlock Margin="0,0,0,10"
+                                   infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_GiteeLink">
                             <Hyperlink NavigateUri="https://gitee.com/cheng-yanlin/WordFlow-Release" 
                                        RequestNavigate="Hyperlink_RequestNavigate">
-                                Gitee 发布页面
+                                {x:Static res:Strings.SettingsWindow_GiteeLink}
                             </Hyperlink>
                         </TextBlock>
                         
                         <Separator Margin="0,15,0,15"/>
                         
                         <!-- 首次运行向导入口 -->
-                        <TextBlock Text="工具" FontWeight="Bold" Margin="0,0,0,10"/>
-                        <Button x:Name="RunWizardButton"
-                                Content="🎯 重新运行首次向导"
+                        <TextBlock Text="{x:Static res:Strings.SettingsWindow_ToolsTitle}" 
+                                   FontWeight="Bold" Margin="0,0,0,10"
+                                   infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_ToolsTitle"/>
+                        
+                        <!-- 检查更新按钮 -->
+                        <Button x:Name="CheckUpdateButton"
+                                Content="{x:Static res:Strings.SettingsWindow_CheckUpdate}"
                                 Padding="15,10"
                                 HorizontalAlignment="Left"
-                                Click="RunWizardButton_Click"/>
-                        <TextBlock Text="查看功能介绍和下载语音模型" 
-                                   FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
+                                Click="CheckUpdateButton_Click"
+                                infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_CheckUpdate"/>
+                        <TextBlock Text="{x:Static res:Strings.SettingsWindow_CheckUpdateHint}" 
+                                   FontSize="11" Foreground="Gray" Margin="0,5,0,0"
+                                   infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_CheckUpdateHint"/>
                         
-                        <Button x:Name="ManageModelButton"
-                                Content="📦 模型管理"
+                        <Button x:Name="RunWizardButton"
+                                Content="{x:Static res:Strings.SettingsWindow_RunWizard}"
                                 Padding="15,10"
                                 HorizontalAlignment="Left"
                                 Margin="0,10,0,0"
-                                Click="ManageModelButton_Click"/>
-                        <TextBlock Text="下载、切换或删除语音模型" 
-                                   FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
+                                Click="RunWizardButton_Click"
+                                infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_RunWizard"/>
+                        <TextBlock Text="{x:Static res:Strings.SettingsWindow_WizardHint}" 
+                                   FontSize="11" Foreground="Gray" Margin="0,5,0,0"
+                                   infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_WizardHint"/>
+                        
+                        <Button x:Name="ManageModelButton"
+                                Content="{x:Static res:Strings.SettingsWindow_ManageModel}"
+                                Padding="15,10"
+                                HorizontalAlignment="Left"
+                                Margin="0,10,0,0"
+                                Click="ManageModelButton_Click"
+                                infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_ManageModel"/>
+                        <TextBlock Text="{x:Static res:Strings.SettingsWindow_ModelHint}" 
+                                   FontSize="11" Foreground="Gray" Margin="0,5,0,0"
+                                   infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_ModelHint"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
@@ -133,15 +178,17 @@
 
         <!-- 底部按钮 -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
-            <Button Content="保存" 
+            <Button Content="{x:Static res:Strings.SettingsWindow_SaveButton}" 
                     Click="SaveButton_Click"
                     Padding="20,8" 
                     Margin="0,0,10,0"
-                    IsDefault="True"/>
-            <Button Content="取消" 
+                    IsDefault="True"
+                    infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_SaveButton"/>
+            <Button Content="{x:Static res:Strings.SettingsWindow_CancelButton}" 
                     Click="CancelButton_Click"
                     Padding="20,8"
-                    IsCancel="True"/>
+                    IsCancel="True"
+                    infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_CancelButton"/>
         </StackPanel>
     </Grid>
-</Window>
+</infrastructure:LocalizedWindow>

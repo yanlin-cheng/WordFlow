@@ -11,7 +11,7 @@ using WordFlow.Utils;
 
 namespace WordFlow.Views
 {
-    public partial class SettingsWindow : Window
+    public partial class SettingsWindow : LocalizedWindow
     {
         private readonly SettingsService _settingsService;
         private readonly GlobalHotkeyServiceV2 _hotkeyService;
@@ -68,8 +68,6 @@ namespace WordFlow.Views
             {
                 "zh-CN" => 0,
                 "en-US" => 1,
-                "ja-JP" => 2,
-                "ko-KR" => 3,
                 _ => 0
             };
         }
@@ -80,18 +78,28 @@ namespace WordFlow.Views
             {
                 0 => "zh-CN",
                 1 => "en-US",
-                2 => "ja-JP",
-                3 => "ko-KR",
                 _ => "zh-CN"
             };
         }
 
         private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (LanguageComboBox.SelectedItem is ComboBoxItem selectedItem)
+            // 使用更可靠的方式获取选中的语言代码
+            if (LanguageComboBox.SelectedItem != null && LanguageComboBox.SelectedIndex >= 0)
             {
-                _selectedLanguageCode = selectedItem.Tag?.ToString() ?? "zh-CN";
+                // 方法 1：尝试从 ComboBoxItem 的 Tag 获取
+                if (LanguageComboBox.SelectedItem is ComboBoxItem comboBoxItem && comboBoxItem.Tag != null)
+                {
+                    _selectedLanguageCode = comboBoxItem.Tag.ToString()!;
+                }
+                // 方法 2：如果方法 1 失败，使用 SelectedIndex 获取
+                else
+                {
+                    _selectedLanguageCode = GetLanguageCodeByIndex(LanguageComboBox.SelectedIndex);
+                }
             }
+            
+            Logger.Log($"语言选择变更：{_selectedLanguageCode}");
         }
 
         private void HotkeyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -155,6 +163,15 @@ namespace WordFlow.Views
             _settingsService.Settings.AutoStart = AutoStartCheckBox.IsChecked ?? false;
             _settingsService.Settings.StartMinimized = StartMinimizedCheckBox.IsChecked ?? false;
             _settingsService.Save();
+            
+            // 如果语言改变了，立即应用新语言设置
+            if (oldLanguageCode != _selectedLanguageCode)
+            {
+                Utils.Logger.Log($"语言已更改：{oldLanguageCode} -> {_selectedLanguageCode}");
+                // 调用 LocalizationService 应用新语言
+                LocalizationService.Instance.SetLanguage(_selectedLanguageCode);
+            }
+            
             _isSaved = true;
 
             // 如果语言改变了，提示重启
@@ -181,7 +198,8 @@ namespace WordFlow.Views
                     if (result == MessageBoxResult.Yes)
                     {
                         // 重启应用 - 使用 AppContext.BaseDirectory 替代 Assembly.Location
-                        var appPath = AppContext.BaseDirectory + "\\WordFlow.exe";
+                        // 添加语言参数确保新进程使用正确的语言
+                        var appPath = System.IO.Path.Combine(AppContext.BaseDirectory, "WordFlow.exe");
                         System.Diagnostics.Process.Start(new ProcessStartInfo
                         {
                             FileName = appPath,
@@ -219,6 +237,55 @@ namespace WordFlow.Views
             var modelManager = new ModelManagerWindow();
             modelManager.Owner = this;
             modelManager.ShowDialog();
+        }
+
+        private async void CheckUpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                CheckUpdateButton.IsEnabled = false;
+                CheckUpdateButton.Content = "检查中...";
+                
+                var updateService = new UpdateService();
+                var updateInfo = await updateService.CheckForUpdateAsync(true); // 强制检查
+                
+                if (updateInfo != null && updateInfo.HasUpdate)
+                {
+                    var result = MessageBox.Show(
+                        $"发现新版本 {updateInfo.Version}！\n\n{updateInfo.ReleaseNotes}\n\n是否立即下载更新？",
+                        "发现新版本",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+                    
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // 打开下载页面
+                        Process.Start(new ProcessStartInfo(updateInfo.DownloadUrl) { UseShellExecute = true });
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "当前已是最新版本，无需更新。",
+                        "无需更新",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"检查更新失败：{ex.Message}", ex);
+                MessageBox.Show(
+                    $"检查更新失败：{ex.Message}",
+                    "检查失败",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                CheckUpdateButton.IsEnabled = true;
+                CheckUpdateButton.Content = "检查更新";
+            }
         }
     }
 }

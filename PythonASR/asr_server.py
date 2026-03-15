@@ -48,11 +48,35 @@ class SherpaASRService:
         初始化服务
         
         Args:
-            models_dir: 模型存储目录，默认使用程序目录下的models文件夹
+            models_dir: 模型存储目录，默认使用程序目录下的 models 文件夹
         """
         if models_dir is None:
             # 默认路径：程序目录/models
-            self.models_dir = Path(__file__).parent / "models"
+            script_dir = Path(__file__).parent
+            
+            # 首先尝试标准路径（脚本所在目录的 models）
+            self.models_dir = script_dir / "models"
+            
+            # 如果标准路径不存在，尝试其他可能的路径
+            if not self.models_dir.exists():
+                # 尝试 bin 目录下的 PythonASR/models（开发/调试模式）
+                # 检测是否在 bin/Debug 或 bin/Release 目录下运行
+                if "bin" in str(script_dir):
+                    # 已经在 bin 目录下，直接使用相对路径
+                    self.models_dir = script_dir / "models"
+                else:
+                    # 在项目根目录下，尝试查找 bin 目录
+                    # 这可能是因为从项目根目录启动
+                    possible_paths = [
+                        script_dir / "models",  # 标准路径
+                        script_dir.parent / "bin" / "Debug" / "net8.0-windows" / "win-x64" / "PythonASR" / "models",
+                        script_dir.parent / "bin" / "Release" / "net8.0-windows" / "win-x64" / "PythonASR" / "models",
+                    ]
+                    for path in possible_paths:
+                        if path.exists():
+                            logger.info(f"找到模型目录：{path}")
+                            self.models_dir = path
+                            break
         else:
             self.models_dir = Path(models_dir)
         

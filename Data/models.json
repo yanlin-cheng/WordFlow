@@ -1,18 +1,18 @@
 {
-  "version": "1.4",
+  "version": "1.5",
   "description": "WordFlow 可用语音识别模型列表 - 支持多下载源",
-  "baseUrl": "https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0",
-  "mirrorUrl": "https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0",
+  "baseUrl": "https://gitee.com/yanlin-cheng/wordflow/releases/download/models-v1.0.0",
+  "mirrorUrl": "https://github.com/yanlin-cheng/WordFlow/releases/download/models-v1.0.0",
   "mirrors": [
     {
       "name": "Gitee Release",
-      "url": "https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0",
+      "url": "https://gitee.com/yanlin-cheng/wordflow/releases/download/models-v1.0.0",
       "priority": 1,
       "region": "cn"
     },
     {
       "name": "GitHub Releases",
-      "url": "https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0",
+      "url": "https://github.com/yanlin-cheng/WordFlow/releases/download/models-v1.0.0",
       "priority": 1,
       "region": "global"
     }
@@ -20,28 +20,34 @@
   "models": [
     {
       "id": "sensevoice-small",
-      "name": "SenseVoice 小模型",
-      "size": "238 MB",
-      "sizeBytes": 249561088,
-      "description": "轻量级多语种语音识别模型，基于 ONNX 推理，速度快，支持中文、英文、日文、韩文、粤语",
+      "name": "SenseVoice Small",
+      "size": "约 156 MB（分卷压缩）",
+      "sizeBytes": 163561472,
+      "description": "轻量级多语种语音识别模型，基于 ONNX 推理，速度快。支持中文、英文、日文、韩文、粤语。采用 INT8 量化，模型体积小，适合实时语音识别场景。",
       "languages": ["zh-CN", "en-US", "ja-JP", "ko-KR", "yue"],
       "files": {
-        "archive": "sensevoice-small-onnx.tar.bz2"
+        "archive": "sensevoice-small-onnx.zip",
+        "parts": [
+          "sensevoice-small-onnx.zip.001",
+          "sensevoice-small-onnx.zip.002"
+        ]
       },
       "requiredFiles": ["model.int8.onnx", "tokens.txt"],
       "default": true,
       "downloadSources": [
         {
           "name": "Gitee",
-          "url": "https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/sensevoice-small-onnx.tar.bz2",
+          "url": "https://gitee.com/yanlin-cheng/wordflow/releases/download/models-v1.0.0/",
           "region": "cn",
-          "priority": 1
+          "priority": 1,
+          "useParts": true
         },
         {
           "name": "GitHub",
-          "url": "https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/sensevoice-small-onnx.tar.bz2",
+          "url": "https://github.com/yanlin-cheng/WordFlow/releases/download/models-v1.0.0/",
           "region": "global",
-          "priority": 2
+          "priority": 2,
+          "useParts": false
         }
       ]
     }

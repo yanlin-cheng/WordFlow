@@ -29,37 +29,28 @@ namespace WordFlow.Views
     /// <summary>
     /// 个人词典管理页面
     /// </summary>
-    public partial class VocabularyPage : UserControl
+    public partial class VocabularyPage
     {
-        private readonly HistoryService? _historyService;
-        private readonly VocabularyLearningEngine? _learningEngine;
-        private readonly AIVocabularyService? _aiService;
+        private HistoryService? _historyService;
+        private VocabularyLearningEngine? _learningEngine;
+        private AIVocabularyService? _aiService;
         private List<PersonalVocabulary> _allVocabularies = new();
         private List<InputHistory> _allHistory = new();
         private List<Guid> _selectedHistoryIds = new();
 
         /// <summary>
-        /// 返回主界面事件
+        /// 返回事件
         /// </summary>
         public event EventHandler? BackRequested;
 
         public VocabularyPage()
         {
             InitializeComponent();
-
-            try
-            {
-                _historyService = new HistoryService();
-                _learningEngine = new VocabularyLearningEngine(_historyService);
-                _aiService = new AIVocabularyService(_historyService);
-
-                Loaded += OnPageLoaded;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"初始化失败: {ex.Message}", "错误",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            
+            // 初始化服务
+            _historyService = new HistoryService();
+            _learningEngine = new VocabularyLearningEngine(_historyService);
+            _aiService = new AIVocabularyService(_historyService, null);
         }
 
         private async void OnPageLoaded(object sender, RoutedEventArgs e)
@@ -85,9 +76,7 @@ namespace WordFlow.Views
         {
             if (_historyService == null)
             {
-                StatusText.Text = "历史服务未初始化";
-                Debug.WriteLine("[VocabularyPage] _historyService is null");
-                return;
+                _historyService = new HistoryService();
             }
 
             try
@@ -101,12 +90,12 @@ namespace WordFlow.Views
                 // 按频率排序
                 _allVocabularies = _allVocabularies.OrderByDescending(v => v.Frequency).ToList();
 
-                // 确保在UI线程更新
-                Dispatcher.Invoke(() =>
+                // 确保在 UI 线程更新
+                Application.Current.Dispatcher.Invoke(() =>
                 {
                     VocabularyDataGrid.ItemsSource = null; // 先清空
                     VocabularyDataGrid.ItemsSource = _allVocabularies;
-                    Debug.WriteLine($"[VocabularyPage] DataGrid ItemsSource 已设置，数量: {_allVocabularies.Count}");
+                    Debug.WriteLine($"[VocabularyPage] DataGrid ItemsSource 已设置，数量：{_allVocabularies.Count}");
                 });
                 
                 UpdateStats();
@@ -114,9 +103,9 @@ namespace WordFlow.Views
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"加载失败: {ex.Message}";
-                Debug.WriteLine($"[VocabularyPage] 加载词汇失败: {ex}");
-                MessageBox.Show($"加载词汇失败: {ex.Message}\n\n{ex.StackTrace}", "错误", 
+                StatusText.Text = $"加载失败：{ex.Message}";
+                Debug.WriteLine($"[VocabularyPage] 加载词汇失败：{ex}");
+                MessageBox.Show($"加载词汇失败：{ex.Message}\n\n{ex.StackTrace}", "错误", 
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -131,7 +120,7 @@ namespace WordFlow.Views
             var autoLearned = _allVocabularies.Count(v => v.Source == VocabularySource.AutoLearned);
             var manual = _allVocabularies.Count(v => v.Source == VocabularySource.Manual);
 
-            StatsText.Text = $"总计: {total} | AI生成: {aiGenerated} | 自动学习: {autoLearned} | 手动添加: {manual}";
+            StatsText.Text = $"总计：{total} | AI 生成：{aiGenerated} | 自动学习：{autoLearned} | 手动添加：{manual}";
         }
 
         /// <summary>
@@ -157,11 +146,11 @@ namespace WordFlow.Views
         }
 
         /// <summary>
-        /// 添加新词汇
+        /// 添加新词汇（对话框方式）
         /// </summary>
         private async void OnAddButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_historyService == null) return;
+            if (_historyService == null) _historyService = new HistoryService();
 
             var dialog = new AddVocabularyDialog();
             if (dialog.ShowDialog() == true && dialog.Vocabulary != null)
@@ -170,13 +159,100 @@ namespace WordFlow.Views
                 {
                     await _historyService.UpsertVocabularyAsync(dialog.Vocabulary);
                     await RefreshVocabularyAsync();
-                    StatusText.Text = $"已添加: {dialog.Vocabulary.Word}";
+                    StatusText.Text = $"已添加：{dialog.Vocabulary.Word}";
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"添加失败: {ex.Message}", "错误",
+                    MessageBox.Show($"添加失败：{ex.Message}", "错误",
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 快速添加词汇
+        /// </summary>
+        private async void OnQuickAddButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (_historyService == null) _historyService = new HistoryService();
+
+            // 从 XAML 中获取控件
+            var quickAddTextBox = FindName("QuickAddTextBox") as TextBox;
+            var quickAddCategoryCombo = FindName("QuickAddCategoryCombo") as ComboBox;
+            var quickAddButton = FindName("QuickAddButton") as Button;
+
+            var input = quickAddTextBox?.Text?.Trim() ?? "";
+            if (string.IsNullOrEmpty(input))
+            {
+                MessageBox.Show("请输入要添加的词汇", "提示",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // 获取选中的分类
+            var categoryIndex = quickAddCategoryCombo?.SelectedIndex ?? 0;
+            var category = (VocabularyCategory)categoryIndex;
+
+            // 支持批量添加，用空格分隔
+            var words = input.Split(new[] { ' ', ',', '，' }, StringSplitOptions.RemoveEmptyEntries);
+            var addedCount = 0;
+            var skippedCount = 0;
+
+            try
+            {
+                StatusText.Text = "正在添加词汇...";
+                if (quickAddButton != null) quickAddButton.IsEnabled = false;
+
+                foreach (string word in words)
+                {
+                    var trimmedWord = word.Trim();
+                    if (string.IsNullOrEmpty(trimmedWord)) continue;
+
+                    // 检查是否已存在
+                    var existing = _allVocabularies.FirstOrDefault(v => v.Word == trimmedWord);
+                    if (existing != null)
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    // 创建新词汇
+                    var vocabulary = new PersonalVocabulary
+                    {
+                        Id = Guid.NewGuid(),
+                        Word = trimmedWord,
+                        Pinyin = TinyPinyin.PinyinHelper.GetPinyin(trimmedWord, "").ToLower(),
+                        Frequency = 1,
+                        Weight = 10.0f,
+                        Category = category,
+                        Source = VocabularySource.Manual,
+                        Contexts = new List<string>(),
+                        LastUsed = DateTime.Now
+                    };
+
+                    await _historyService.UpsertVocabularyAsync(vocabulary);
+                    addedCount++;
+                }
+
+                await RefreshVocabularyAsync();
+                if (quickAddTextBox != null) quickAddTextBox.Clear();
+                
+                var message = $"成功添加 {addedCount} 个词汇";
+                if (skippedCount > 0)
+                {
+                    message += $"，跳过 {skippedCount} 个已存在的词汇";
+                }
+                StatusText.Text = message;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"添加失败：{ex.Message}", "错误",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusText.Text = $"添加失败：{ex.Message}";
+            }
+            finally
+            {
+                if (quickAddButton != null) quickAddButton.IsEnabled = true;
             }
         }
 
@@ -206,11 +282,11 @@ namespace WordFlow.Views
                         new { Id = selected.Id.ToString() });
 
                     await RefreshVocabularyAsync();
-                    StatusText.Text = $"已删除: {selected.Word}";
+                    StatusText.Text = $"已删除：{selected.Word}";
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"删除失败: {ex.Message}", "错误",
+                    MessageBox.Show($"删除失败：{ex.Message}", "错误",
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -221,7 +297,8 @@ namespace WordFlow.Views
         /// </summary>
         private async void OnImportButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_aiService == null || _historyService == null) return;
+            if (_aiService == null) _aiService = new AIVocabularyService(_historyService ?? new HistoryService(), null);
+            if (_historyService == null) _historyService = new HistoryService();
 
             var dialog = new OpenFileDialog
             {
@@ -240,7 +317,7 @@ namespace WordFlow.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"导入失败: {ex.Message}", "错误",
+                    MessageBox.Show($"导入失败：{ex.Message}", "错误",
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -251,7 +328,7 @@ namespace WordFlow.Views
         /// </summary>
         private async void OnExportButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_historyService == null) return;
+            if (_historyService == null) _historyService = new HistoryService();
 
             var dialog = new SaveFileDialog
             {
@@ -266,7 +343,7 @@ namespace WordFlow.Views
                 {
                     StatusText.Text = "正在导出...";
                     var path = await _historyService.ExportHotwordsFileAsync(dialog.FileName);
-                    StatusText.Text = $"已导出到: {path}";
+                    StatusText.Text = $"已导出到：{path}";
 
                     if (MessageBox.Show("导出成功！是否打开所在文件夹？", "完成",
                         MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
@@ -276,7 +353,7 @@ namespace WordFlow.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"导出失败: {ex.Message}", "错误",
+                    MessageBox.Show($"导出失败：{ex.Message}", "错误",
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -291,48 +368,49 @@ namespace WordFlow.Views
         }
 
         /// <summary>
-        /// AI分析按钮
+        /// AI 分析按钮
         /// </summary>
         private async void OnAIButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_aiService == null || _historyService == null) return;
+            if (_aiService == null) _aiService = new AIVocabularyService(_historyService ?? new HistoryService(), null);
+            if (_historyService == null) _historyService = new HistoryService();
 
             var result = MessageBox.Show(
-                "AI分析将检查您的输入历史，智能生成专业词典。\n\n" +
-                "注意：此功能需要连接到AI服务（未来可作为付费功能）。\n\n" +
+                "AI 分析将检查您的输入历史，智能生成专业词典。\n\n" +
+                "注意：此功能需要连接到 AI 服务（未来可作为付费功能）。\n\n" +
                 "是否继续？",
-                "AI智能分析", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                "AI 智能分析", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result != MessageBoxResult.Yes) return;
 
             try
             {
                 AIButton.IsEnabled = false;
-                StatusText.Text = "AI正在分析您的输入习惯...";
+                StatusText.Text = "AI 正在分析您的输入习惯...";
 
                 var analysis = await _aiService.AnalyzeUserInputHistoryAsync(30);
 
                 if (analysis.Success)
                 {
                     await RefreshVocabularyAsync();
-                    StatusText.Text = $"AI分析完成！生成了 {analysis.GeneratedTerms} 个专业词汇";
+                    StatusText.Text = $"AI 分析完成！生成了 {analysis.GeneratedTerms} 个专业词汇";
 
                     MessageBox.Show(
                         $"分析完成！\n\n" +
-                        $"分析记录: {analysis.AnalyzedRecords} 条\n" +
-                        $"生成词汇: {analysis.GeneratedTerms} 个\n" +
-                        $"推荐分类: {analysis.SuggestedCategory}\n\n" +
-                        $"洞察: {analysis.Insights}",
-                        "AI分析结果", MessageBoxButton.OK, MessageBoxImage.Information);
+                        $"分析记录：{analysis.AnalyzedRecords} 条\n" +
+                        $"生成词汇：{analysis.GeneratedTerms} 个\n" +
+                        $"推荐分类：{analysis.SuggestedCategory}\n\n" +
+                        $"洞察：{analysis.Insights}",
+                        "AI 分析结果", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    StatusText.Text = $"AI分析: {analysis.Message}";
+                    StatusText.Text = $"AI 分析：{analysis.Message}";
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"AI分析失败: {ex.Message}", "错误",
+                MessageBox.Show($"AI 分析失败：{ex.Message}", "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -346,7 +424,7 @@ namespace WordFlow.Views
         /// </summary>
         private async void OnLearnButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_learningEngine == null) return;
+            if (_learningEngine == null) _learningEngine = new VocabularyLearningEngine(_historyService ?? new HistoryService());
 
             var result = MessageBox.Show(
                 "智能学习将分析您的输入历史，自动学习高频词汇和错误模式。\n\n" +
@@ -369,16 +447,16 @@ namespace WordFlow.Views
 
                     MessageBox.Show(
                         $"学习完成！\n\n" +
-                        $"从历史学习: {learnResult.LearnedFromHistory.Count} 个新词\n" +
-                        $"从历史更新: {learnResult.UpdatedFromHistory.Count} 个词\n" +
-                        $"从修正学习: {learnResult.LearnedFromCorrections.Count} 个词\n" +
-                        $"生成纠错规则: {learnResult.GeneratedRules.Count} 条",
+                        $"从历史学习：{learnResult.LearnedFromHistory.Count} 个新词\n" +
+                        $"从历史更新：{learnResult.UpdatedFromHistory.Count} 个词\n" +
+                        $"从修正学习：{learnResult.LearnedFromCorrections.Count} 个词\n" +
+                        $"生成纠错规则：{learnResult.GeneratedRules.Count} 条",
                         "学习结果", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"学习失败: {ex.Message}", "错误",
+                MessageBox.Show($"学习失败：{ex.Message}", "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -396,11 +474,7 @@ namespace WordFlow.Views
         /// </summary>
         private async Task RefreshHistoryAsync()
         {
-            if (_historyService == null)
-            {
-                StatusText.Text = "历史服务未初始化";
-                return;
-            }
+            if (_historyService == null) _historyService = new HistoryService();
 
             try
             {
@@ -412,7 +486,7 @@ namespace WordFlow.Views
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"加载失败: {ex.Message}";
+                StatusText.Text = $"加载失败：{ex.Message}";
             }
         }
 
@@ -421,7 +495,17 @@ namespace WordFlow.Views
         /// </summary>
         private void RenderHistoryList()
         {
-            HistoryListPanel.Children.Clear();
+            // 使用 FindName 获取控件（因为 LocalizedUserControl 可能不自动生成字段）
+            var historyListPanel = FindName("HistoryListPanel") as StackPanel;
+            if (historyListPanel == null)
+            {
+                // 控件未加载，延迟执行
+                Dispatcher.BeginInvoke(new Action(() => RenderHistoryList()), 
+                    System.Windows.Threading.DispatcherPriority.Loaded);
+                return;
+            }
+
+            historyListPanel.Children.Clear();
 
             // 按日期分组
             var grouped = _allHistory
@@ -445,19 +529,19 @@ namespace WordFlow.Views
                     Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102))
                 };
                 headerBorder.Child = headerText;
-                HistoryListPanel.Children.Add(headerBorder);
+                historyListPanel.Children.Add(headerBorder);
 
                 // 该日期的记录
                 foreach (var history in group)
                 {
                     var itemPanel = CreateHistoryItemPanel(history);
-                    HistoryListPanel.Children.Add(itemPanel);
+                    historyListPanel.Children.Add(itemPanel);
                 }
             }
         }
 
         /// <summary>
-        /// 创建单条历史记录UI
+        /// 创建单条历史记录 UI
         /// </summary>
         private Border CreateHistoryItemPanel(InputHistory history)
         {
@@ -579,7 +663,7 @@ namespace WordFlow.Views
                 return "昨天";
             if (date > today.AddDays(-7))
                 return date.ToString("dddd"); // 星期几
-            return date.ToString("yyyy年MM月dd日");
+            return date.ToString("yyyy 年 MM 月 dd 日");
         }
 
         /// <summary>
@@ -645,7 +729,10 @@ namespace WordFlow.Views
         /// </summary>
         private void UpdateHistoryItemVisual(Guid id, bool isSelected)
         {
-            foreach (var child in HistoryListPanel.Children)
+            var historyListPanel = FindName("HistoryListPanel") as StackPanel;
+            if (historyListPanel == null) return;
+
+            foreach (var child in historyListPanel.Children)
             {
                 if (child is Border border && border.Tag is Guid itemId && itemId == id)
                 {
@@ -702,7 +789,9 @@ namespace WordFlow.Views
         /// </summary>
         private async void OnTrainSelectedClick(object sender, RoutedEventArgs e)
         {
-            if (_learningEngine == null || _historyService == null) return;
+            if (_learningEngine == null) _learningEngine = new VocabularyLearningEngine(_historyService ?? new HistoryService());
+            if (_historyService == null) _historyService = new HistoryService();
+            
             if (_selectedHistoryIds.Count == 0)
             {
                 MessageBox.Show("请先选择要训练的历史记录", "提示",
@@ -728,14 +817,14 @@ namespace WordFlow.Views
                     await RefreshVocabularyAsync();
                     MessageBox.Show(
                         $"训练完成！\n\n" +
-                        $"学习新词: {result.LearnedFromHistory.Count} 个\n" +
-                        $"更新词汇: {result.UpdatedFromHistory.Count} 个",
+                        $"学习新词：{result.LearnedFromHistory.Count} 个\n" +
+                        $"更新词汇：{result.UpdatedFromHistory.Count} 个",
                         "训练结果", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"训练失败: {ex.Message}", "错误",
+                MessageBox.Show($"训练失败：{ex.Message}", "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -745,7 +834,7 @@ namespace WordFlow.Views
         /// </summary>
         private async void OnAutoTrainClick(object sender, RoutedEventArgs e)
         {
-            if (_learningEngine == null) return;
+            if (_learningEngine == null) _learningEngine = new VocabularyLearningEngine(_historyService ?? new HistoryService());
 
             var result = MessageBox.Show(
                 $"将对全部 {_allHistory.Count} 条未训练记录进行自动学习。\n\n" +
@@ -765,13 +854,13 @@ namespace WordFlow.Views
                     await RefreshHistoryAsync();
                     MessageBox.Show(
                         $"自动训练完成！\n\n" +
-                        $"新增词汇: {learnResult.TotalLearned} 个",
+                        $"新增词汇：{learnResult.TotalLearned} 个",
                         "训练结果", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"训练失败: {ex.Message}", "错误",
+                MessageBox.Show($"训练失败：{ex.Message}", "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -781,7 +870,8 @@ namespace WordFlow.Views
         /// </summary>
         private async void OnDeleteHistoryClick(object sender, RoutedEventArgs e)
         {
-            if (_historyService == null) return;
+            if (_historyService == null) _historyService = new HistoryService();
+            
             if (_selectedHistoryIds.Count == 0)
             {
                 MessageBox.Show("请先选择要删除的记录", "提示",
@@ -813,7 +903,7 @@ namespace WordFlow.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"删除失败: {ex.Message}", "错误",
+                MessageBox.Show($"删除失败：{ex.Message}", "错误",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -823,20 +913,25 @@ namespace WordFlow.Views
         /// </summary>
         private async void OnHistoryFilterChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_historyService == null) return;
+            if (_historyService == null) _historyService = new HistoryService();
 
             var filter = (HistoryFilterCombo.SelectedItem as ComboBoxItem)?.Content?.ToString();
             var cutoffDate = filter switch
             {
                 "今天" => DateTime.Today,
-                "最近7天" => DateTime.Today.AddDays(-7),
-                "最近30天" => DateTime.Today.AddDays(-30),
+                "最近 7 天" => DateTime.Today.AddDays(-7),
+                "最近 30 天" => DateTime.Today.AddDays(-30),
                 _ => DateTime.MinValue
             };
 
             try
             {
-                StatusText.Text = "正在筛选...";
+                var statusText = FindName("StatusText") as TextBlock;
+                if (statusText != null)
+                {
+                    statusText.Text = "正在筛选...";
+                }
+
                 _allHistory = await _historyService.GetRecentHistoryAsync(500);
 
                 if (cutoffDate > DateTime.MinValue)
@@ -846,11 +941,19 @@ namespace WordFlow.Views
 
                 _selectedHistoryIds.Clear();
                 RenderHistoryList();
-                StatusText.Text = $"共 {_allHistory.Count} 条记录";
+
+                if (statusText != null)
+                {
+                    statusText.Text = $"共 {_allHistory.Count} 条记录";
+                }
             }
             catch (Exception ex)
             {
-                StatusText.Text = $"筛选失败: {ex.Message}";
+                var statusText = FindName("StatusText") as TextBlock;
+                if (statusText != null)
+                {
+                    statusText.Text = $"筛选失败：{ex.Message}";
+                }
             }
         }
 

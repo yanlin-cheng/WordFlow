@@ -127,6 +127,15 @@
   <data name="SettingsWindow_ModelHint" xml:space="preserve">
     <value>下载、切换或删除语音模型</value>
   </data>
+  <data name="SettingsWindow_CheckUpdate" xml:space="preserve">
+    <value>🔄 检查更新</value>
+  </data>
+  <data name="SettingsWindow_CheckUpdateHint" xml:space="preserve">
+    <value>检查是否有新版本可用</value>
+  </data>
+  <data name="SettingsWindow_CheckingUpdate" xml:space="preserve">
+    <value>检查中...</value>
+  </data>
   
   <!-- 语言选项 -->
   <data name="Language_zhCN" xml:space="preserve">
@@ -280,10 +289,10 @@
     <value>首次使用前，需要下载语音识别模型。</value>
   </data>
   <data name="Wizard_Card6_Recommend" xml:space="preserve">
-    <value>• 推荐模型：Paraformer 中文（约 200MB）</value>
+    <value>• 当前模型：SenseVoice-small（约 200MB）</value>
   </data>
   <data name="Wizard_Card6_MultiLang" xml:space="preserve">
-    <value>• 多语种模型：SenseVoice（支持中英日韩粤）</value>
+    <value>• 支持语言：中文、英文、日文、韩文、粤语</value>
   </data>
   <data name="Wizard_Card6_ButtonHint" xml:space="preserve">
     <value>点击「打开模型管理」按钮开始下载</value>
@@ -334,7 +343,7 @@
   </data>
   <data name="FirstRunWizard_Feature2" xml:space="preserve">
     <value>🧠 本地 ASR 识别
-使用阿里达摩院 Paraformer 模型，离线可用</value>
+使用阿里 SenseVoice-small 模型，离线可用，支持多语言</value>
   </data>
   <data name="FirstRunWizard_Feature3" xml:space="preserve">
     <value>📚 个人词库
@@ -350,7 +359,7 @@
   <data name="FirstRunWizard_DownloadText" xml:space="preserve">
     <value>需要下载语音模型才能使用语音识别功能。
 
-模型大小约 238MB，请保持网络连接。</value>
+模型大小约 200MB，请保持网络连接。</value>
   </data>
   <data name="FirstRunWizard_DownloadButton" xml:space="preserve">
     <value>开始下载</value>
@@ -479,5 +488,815 @@
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>退出</value>
+  </data>
+  
+  <!-- 主窗口 -->
+  <data name="MW_OfflineASR" xml:space="preserve">
+    <value>离线语音输入</value>
+  </data>
+  <data name="MW_ModelManager" xml:space="preserve">
+    <value>模型管理</value>
+  </data>
+  <data name="MW_ModelManager_Tooltip" xml:space="preserve">
+    <value>管理语音模型（切换/下载/删除）</value>
+  </data>
+  <data name="MW_PersonalDictionary" xml:space="preserve">
+    <value>个人词典</value>
+  </data>
+  <data name="MW_PersonalDictionary_Tooltip" xml:space="preserve">
+    <value>管理个人词典和热词</value>
+  </data>
+  <data name="MW_ImportAudio" xml:space="preserve">
+    <value>导入音频</value>
+  </data>
+  <data name="MW_ImportAudio_Tooltip" xml:space="preserve">
+    <value>导入 WAV 文件进行识别</value>
+  </data>
+  <data name="MW_Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="MW_Settings_Tooltip" xml:space="preserve">
+    <value>热键和启动设置</value>
+  </data>
+  <data name="MW_Status_NotConnected" xml:space="preserve">
+    <value>未连接</value>
+  </data>
+  <data name="MW_Status_Ready" xml:space="preserve">
+    <value>就绪</value>
+  </data>
+  <data name="MW_StartRecording" xml:space="preserve">
+    <value>开始录音</value>
+  </data>
+  <data name="MW_RecordHint" xml:space="preserve">
+    <value>按住快捷键说话，松开自动识别</value>
+  </data>
+  <data name="MW_HotkeyHint" xml:space="preserve">
+    <value>当前快捷键：按住 ` 键（ESC 下方）</value>
+  </data>
+<data name="MW_PressToRecord" xml:space="preserve">
+    <value>按住 ` 键说话</value>
+  </data>
+  <data name="MW_PressToRecordWithKey" xml:space="preserve">
+    <value>按住 {0} 说话</value>
+  </data>
+  <data name="MW_HotkeyHintWithKey" xml:space="preserve">
+    <value>当前快捷键：按住 {0}</value>
+  </data>
+  <data name="MW_HotkeyKeyDescription" xml:space="preserve">
+    <value>（ESC 下方）</value>
+  </data>
+  <data name="MW_Recording" xml:space="preserve">
+    <value>正在录音...</value>
+  </data>
+  <data name="MW_TodayInput" xml:space="preserve">
+    <value>今日输入</value>
+  </data>
+  <data name="MW_TotalInput" xml:space="preserve">
+    <value>累计输入</value>
+  </data>
+  <data name="MW_SavedTime" xml:space="preserve">
+    <value>节省时间</value>
+  </data>
+  <data name="MW_Estimated" xml:space="preserve">
+    <value>估算值</value>
+  </data>
+  <data name="MW_Accuracy" xml:space="preserve">
+    <value>识别准确率</value>
+  </data>
+  <data name="MW_BasedOnCorrections" xml:space="preserve">
+    <value>基于修正统计</value>
+  </data>
+  <data name="MW_NewbieGuide" xml:space="preserve">
+    <value>新手引导</value>
+  </data>
+  <data name="MW_HowToUseTitle" xml:space="preserve">
+    <value>📌 如何使用语音输入</value>
+  </data>
+  <data name="MW_HowToUse_Step1" xml:space="preserve">
+    <value>1. 确保已安装语音模型（首次使用请在「模型管理」中下载）</value>
+  </data>
+  <data name="MW_HowToUse_Step2" xml:space="preserve">
+    <value>2. 点击需要输入文字的窗口（如记事本、Word 等）</value>
+  </data>
+  <data name="MW_HowToUse_Step3" xml:space="preserve">
+    <value>3. 按住 ` 键 或 右 Alt 键说话，说完松开</value>
+  </data>
+  <data name="MW_HowToUse_Step4" xml:space="preserve">
+    <value>4. 文字将自动输入到您选择的目标窗口中</value>
+  </data>
+  <data name="MW_TipsTitle" xml:space="preserve">
+    <value>💡 提示</value>
+  </data>
+  <data name="MW_Tip1" xml:space="preserve">
+    <value>• 可在「设置」中更改快捷键（支持 ` 键 或 右 Alt）</value>
+  </data>
+  <data name="MW_Tip2" xml:space="preserve">
+    <value>• 录音时请确保周围环境相对安静</value>
+  </data>
+  <data name="MW_Tip3" xml:space="preserve">
+    <value>• 识别结果会自动保存到「历史记录」</value>
+  </data>
+  <data name="MW_Tip4" xml:space="preserve">
+    <value>• 专业词汇可在「个人词典」中添加，提高识别准确率</value>
+  </data>
+  <data name="MW_InputExplanationTitle" xml:space="preserve">
+    <value>📝 文字输入说明</value>
+  </data>
+  <data name="MW_InputExplanationText" xml:space="preserve">
+    <value>文字将直接输入到您选择的目标窗口（如记事本、Word 等）</value>
+  </data>
+  <data name="MW_HistoryHint" xml:space="preserve">
+    <value>如需查看历史记录，请使用「个人词典」功能</value>
+  </data>
+<data name="MW_Characters" xml:space="preserve">
+    <value>字</value>
+  </data>
+  
+  <!-- Settings Window - Missing translations -->
+  <data name="SettingsWindow_VersionLabel" xml:space="preserve">
+    <value>版本：</value>
+  </data>
+  <data name="SettingsWindow_WizardButton" xml:space="preserve">
+    <value>🎯 重新运行首次向导</value>
+  </data>
+  <data name="SettingsWindow_ManageModelButton" xml:space="preserve">
+    <value>📦 模型管理</value>
+  </data>
+  <data name="SettingsWindow_Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="SettingsWindow_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  
+  <!-- Vocabulary Manager Window - DataGrid Columns -->
+  <data name="VocabManager_Column_Word" xml:space="preserve">
+    <value>词汇</value>
+  </data>
+  <data name="VocabManager_Column_Pinyin" xml:space="preserve">
+    <value>拼音</value>
+  </data>
+  <data name="VocabManager_Column_Frequency" xml:space="preserve">
+    <value>频率</value>
+  </data>
+  <data name="VocabManager_Column_Weight" xml:space="preserve">
+    <value>权重</value>
+  </data>
+  <data name="VocabManager_Column_Category" xml:space="preserve">
+    <value>分类</value>
+  </data>
+  <data name="VocabManager_Column_Source" xml:space="preserve">
+    <value>来源</value>
+  </data>
+  <data name="VocabManager_Column_Contexts" xml:space="preserve">
+    <value>上下文示例</value>
+  </data>
+  <data name="VocabManager_Column_LastUsed" xml:space="preserve">
+    <value>最后使用</value>
+  </data>
+  
+  <!-- Vocabulary Manager Window - Toolbar Buttons -->
+  <data name="VocabManager_Toolbar_Add" xml:space="preserve">
+    <value>➕ 添加词汇</value>
+  </data>
+  <data name="VocabManager_Toolbar_Delete" xml:space="preserve">
+    <value>🗑️ 删除选中</value>
+  </data>
+  <data name="VocabManager_Toolbar_Import" xml:space="preserve">
+    <value>📥 导入</value>
+  </data>
+  <data name="VocabManager_Toolbar_Export" xml:space="preserve">
+    <value>📤 导出热词</value>
+  </data>
+  <data name="VocabManager_Toolbar_Refresh" xml:space="preserve">
+    <value>🔄 刷新</value>
+  </data>
+  <data name="VocabManager_SearchBox_Tooltip" xml:space="preserve">
+    <value>搜索词汇</value>
+  </data>
+  
+  <!-- Vocabulary Manager Window - History Tab -->
+  <data name="VocabManager_HistoryTab" xml:space="preserve">
+    <value>📜 历史记录</value>
+  </data>
+  <data name="VocabManager_History_SelectAll" xml:space="preserve">
+    <value>☑️ 全选</value>
+  </data>
+  <data name="VocabManager_History_SelectNone" xml:space="preserve">
+    <value>⬜ 取消选择</value>
+  </data>
+  <data name="VocabManager_History_TrainSelected" xml:space="preserve">
+    <value>🎯 训练选中项</value>
+  </data>
+  <data name="VocabManager_History_AutoTrain" xml:space="preserve">
+    <value>🤖 自动训练全部</value>
+  </data>
+  <data name="VocabManager_History_Delete" xml:space="preserve">
+    <value>🗑️ 删除选中</value>
+  </data>
+  <data name="VocabManager_History_Filter" xml:space="preserve">
+    <value>全部记录</value>
+  </data>
+  <data name="VocabManager_History_FilterToday" xml:space="preserve">
+    <value>今天</value>
+  </data>
+  <data name="VocabManager_History_Filter7Days" xml:space="preserve">
+    <value>最近 7 天</value>
+  </data>
+  <data name="VocabManager_History_Filter30Days" xml:space="preserve">
+    <value>最近 30 天</value>
+  </data>
+  <data name="VocabManager_History_Search_Tooltip" xml:space="preserve">
+    <value>搜索历史记录</value>
+  </data>
+  
+  <!-- Vocabulary Manager Window - Status Bar -->
+  <data name="VocabManager_Status_Ready" xml:space="preserve">
+    <value>就绪</value>
+  </data>
+  <data name="VocabManager_Stats_Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="VocabManager_AI_Button" xml:space="preserve">
+    <value>🤖 AI</value>
+  </data>
+  <data name="VocabManager_Learn_Button" xml:space="preserve">
+    <value>📚 Learn</value>
+  </data>
+  
+  <!-- Category and Source enums -->
+  <data name="VocabCategory_General" xml:space="preserve">
+    <value>通用</value>
+  </data>
+  <data name="VocabCategory_Medical" xml:space="preserve">
+    <value>医疗</value>
+  </data>
+  <data name="VocabCategory_Legal" xml:space="preserve">
+    <value>法律</value>
+  </data>
+  <data name="VocabCategory_Tech" xml:space="preserve">
+    <value>科技</value>
+  </data>
+  <data name="VocabSource_Manual" xml:space="preserve">
+    <value>手动</value>
+  </data>
+  <data name="VocabSource_Input" xml:space="preserve">
+    <value>输入</value>
+  </data>
+  <data name="VocabSource_Correction" xml:space="preserve">
+    <value>修正</value>
+  </data>
+  
+  <!-- Model Manager Window - Additional translations -->
+  <data name="ModelManager_Subtitle" xml:space="preserve">
+    <value>管理已安装的模型，或下载新模型</value>
+  </data>
+  <data name="ModelManager_RefreshButton" xml:space="preserve">
+    <value>🔄 刷新列表</value>
+  </data>
+  <data name="ModelManager_BackgroundDownloadButton" xml:space="preserve">
+    <value>📥 后台下载</value>
+  </data>
+  <data name="ModelManager_CloseButton2" xml:space="preserve">
+    <value>✅ 关闭</value>
+  </data>
+  <data name="ModelManager_DownloadProgress" xml:space="preserve">
+    <value>准备下载...</value>
+  </data>
+  
+  <!-- Model Manager - Dynamic UI -->
+  <data name="ModelManager_NoModelsAvailable" xml:space="preserve">
+    <value>暂无可用模型
+
+请检查网络连接或确认模型配置正确</value>
+  </data>
+  <data name="ModelManager_Status_NotDownloaded_Short" xml:space="preserve">
+    <value>⬇️ 未下载</value>
+  </data>
+  <data name="ModelManager_Status_Current" xml:space="preserve">
+    <value>✅ 当前使用</value>
+  </data>
+  <data name="ModelManager_Status_Installed_Short" xml:space="preserve">
+    <value>✅ 已安装</value>
+  </data>
+  <data name="ModelManager_Button_Use" xml:space="preserve">
+    <value>使用</value>
+  </data>
+  <data name="ModelManager_Button_Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="ModelManager_Button_Download" xml:space="preserve">
+    <value>📥 下载</value>
+  </data>
+  <data name="ModelManager_Button_CancelDownload" xml:space="preserve">
+    <value>⏸️ 取消下载</value>
+  </data>
+  <data name="ModelManager_DownloadComplete" xml:space="preserve">
+    <value>下载完成！</value>
+  </data>
+  <data name="ModelManager_DownloadFailed" xml:space="preserve">
+    <value>下载失败</value>
+  </data>
+  <data name="ModelManager_DownloadCancelled" xml:space="preserve">
+    <value>下载已取消</value>
+  </data>
+  <data name="ModelManager_ConfirmDownload" xml:space="preserve">
+    <value>确定要下载 {0} 吗？
+
+大小：{1}
+
+下载完成后将自动尝试加载模型。</value>
+  </data>
+  <data name="ModelManager_ConfirmDelete" xml:space="preserve">
+    <value>确定要删除模型 {0} 吗？
+删除后需要重新下载才能使用。</value>
+  </data>
+  <data name="ModelManager_ServiceNotRunning" xml:space="preserve">
+    <value>ASR 服务未启动，是否现在启动服务？
+
+启动后可以加载模型：{0}</value>
+  </data>
+  <data name="ModelManager_SwitchSuccess" xml:space="preserve">
+    <value>✅ 已切换到模型：{0}
+
+现在可以开始使用语音输入了。</value>
+  </data>
+  <data name="ModelManager_SwitchFailed" xml:space="preserve">
+    <value>❌ 切换模型失败
+
+请检查 ASR 服务日志确认模型是否正确安装。</value>
+  </data>
+  <data name="ModelManager_LoadSuccess" xml:space="preserve">
+    <value>模型下载并加载成功！
+
+现在可以开始使用语音输入了。</value>
+  </data>
+  <data name="ModelManager_ServiceStartPrompt" xml:space="preserve">
+    <value>模型已下载完成！
+
+但 ASR 服务未启动，是否现在启动服务？</value>
+  </data>
+  <data name="ModelManager_ServiceStartSuccess" xml:space="preserve">
+    <value>服务已启动并加载模型：{0}
+
+现在可以开始使用语音输入了。</value>
+  </data>
+  <data name="ModelManager_ServiceStartFailed" xml:space="preserve">
+    <value>服务启动失败，请手动启动 ASR 服务。
+
+启动方法：
+双击 PythonASR/start_server.bat</value>
+  </data>
+  <data name="ModelManager_CloseWhileDownloading" xml:space="preserve">
+    <value>下载正在进行中，关闭窗口不会中断下载。
+确定要关闭吗？</value>
+  </data>
+  <data name="ModelManager_DownloadingPrompt" xml:space="preserve">
+    <value>正在下载中，请等待完成</value>
+  </data>
+  <data name="ModelManager_ModelNotFound" xml:space="preserve">
+    <value>未找到模型配置：{0}</value>
+  </data>
+<data name="ModelManager_LocalModel" xml:space="preserve">
+    <value>本地已安装模型</value>
+  </data>
+  
+  <!-- Model Descriptions -->
+  <data name="Model_SenseVoice_Name" xml:space="preserve">
+    <value>SenseVoice Small</value>
+  </data>
+  <data name="Model_SenseVoice_Description" xml:space="preserve">
+    <value>轻量级多语种语音识别模型，基于 ONNX 推理，速度快。支持中文、英文、日文、韩文、粤语。采用 INT8 量化，模型体积小，适合实时语音识别场景。</value>
+  </data>
+  <data name="Model_SenseVoice_Languages" xml:space="preserve">
+    <value>中文、英文、日文、韩文、粤语</value>
+  </data>
+  <data name="Model_SenseVoice_Size" xml:space="preserve">
+    <value>约 156 MB（分卷压缩）</value>
+  </data>
+  <data name="Model_SenseVoice_Features" xml:space="preserve">
+    <value>• 支持 5 种语言：中文/英文/日文/韩文/粤语
+• INT8 量化，模型体积小
+• 基于 ONNX 推理，速度快
+• 适合实时语音识别场景</value>
+  </data>
+  
+  <!-- Vocabulary Page -->
+  <data name="VocabPage_BackButton" xml:space="preserve">
+    <value>← 返回</value>
+  </data>
+  <data name="VocabPage_Title" xml:space="preserve">
+    <value>个人词典管理</value>
+  </data>
+  <data name="VocabPage_StatsText" xml:space="preserve">
+    <value>总计：{0} | AI 生成：{1} | 自动学习：{2} | 手动添加：{3}</value>
+  </data>
+  <data name="VocabPage_AIButton" xml:space="preserve">
+    <value>🤖 AI 分析</value>
+  </data>
+  <data name="VocabPage_LearnButton" xml:space="preserve">
+    <value>📚 智能学习</value>
+  </data>
+  <data name="VocabPage_TabVocabulary" xml:space="preserve">
+    <value>📖 个人词典</value>
+  </data>
+  <data name="VocabPage_TabHistory" xml:space="preserve">
+    <value>📜 历史记录</value>
+  </data>
+  <data name="VocabPage_AddButton" xml:space="preserve">
+    <value>➕ 添加词汇</value>
+  </data>
+  <data name="VocabPage_DeleteButton" xml:space="preserve">
+    <value>🗑️ 删除选中</value>
+  </data>
+  <data name="VocabPage_ImportButton" xml:space="preserve">
+    <value>📥 导入</value>
+  </data>
+  <data name="VocabPage_ExportButton" xml:space="preserve">
+    <value>📤 导出热词</value>
+  </data>
+  <data name="VocabPage_RefreshButton" xml:space="preserve">
+    <value>🔄 刷新</value>
+  </data>
+  <data name="VocabPage_SearchBox" xml:space="preserve">
+    <value>搜索词汇</value>
+  </data>
+  <data name="VocabPage_SelectAll" xml:space="preserve">
+    <value>☑️ 全选</value>
+  </data>
+  <data name="VocabPage_SelectNone" xml:space="preserve">
+    <value>⬜ 取消选择</value>
+  </data>
+  <data name="VocabPage_TrainSelected" xml:space="preserve">
+    <value>🎯 训练选中项</value>
+  </data>
+  <data name="VocabPage_AutoTrain" xml:space="preserve">
+    <value>🤖 自动训练全部</value>
+  </data>
+  <data name="VocabPage_FilterAll" xml:space="preserve">
+    <value>全部记录</value>
+  </data>
+  <data name="VocabPage_FilterToday" xml:space="preserve">
+    <value>今天</value>
+  </data>
+  <data name="VocabPage_Filter7Days" xml:space="preserve">
+    <value>最近 7 天</value>
+  </data>
+  <data name="VocabPage_Filter30Days" xml:space="preserve">
+    <value>最近 30 天</value>
+  </data>
+  <data name="VocabPage_StatusReady" xml:space="preserve">
+    <value>就绪</value>
+  </data>
+  <data name="VocabPage_QuickAddTitle" xml:space="preserve">
+    <value>快速添加词汇</value>
+  </data>
+  <data name="VocabPage_QuickAddHint" xml:space="preserve">
+    <value>输入词汇，多个用空格分隔</value>
+  </data>
+  <data name="VocabPage_QuickAddButton" xml:space="preserve">
+    <value>添加</value>
+  </data>
+  <data name="VocabPage_QuickAddCategory" xml:space="preserve">
+    <value>分类：</value>
+  </data>
+  <data name="VocabPage_ExportSuccess" xml:space="preserve">
+    <value>已导出到：{0}</value>
+  </data>
+  <data name="VocabPage_ExportFailed" xml:space="preserve">
+    <value>导出失败：{0}</value>
+  </data>
+  <data name="VocabPage_ExportOpenFolder" xml:space="preserve">
+    <value>导出成功！是否打开所在文件夹？</value>
+  </data>
+  <data name="VocabPage_DeleteConfirm" xml:space="preserve">
+    <value>确定要删除词汇 "{0}" 吗？</value>
+  </data>
+  <data name="VocabPage_DeleteTitle" xml:space="preserve">
+    <value>确认删除</value>
+  </data>
+  <data name="VocabPage_SelectWordFirst" xml:space="preserve">
+    <value>请先选择一个词汇</value>
+  </data>
+  <data name="VocabPage_AddSuccess" xml:space="preserve">
+    <value>已添加：{0}</value>
+  </data>
+  <data name="VocabPage_LoadingVocab" xml:space="preserve">
+    <value>正在加载词典...</value>
+  </data>
+  <data name="VocabPage_LoadingHistory" xml:space="preserve">
+    <value>正在加载历史记录...</value>
+  </data>
+  <data name="VocabPage_LearnConfirm" xml:space="preserve">
+    <value>智能学习将分析您的输入历史，自动学习高频词汇和错误模式。
+
+是否继续？</value>
+  </data>
+  <data name="VocabPage_LearnTitle" xml:space="preserve">
+    <value>智能学习</value>
+  </data>
+  <data name="VocabPage_Learning" xml:space="preserve">
+    <value>正在学习您的输入习惯...</value>
+  </data>
+  <data name="VocabPage_LearnComplete" xml:space="preserve">
+    <value>学习完成！新增 {0} 个词汇</value>
+  </data>
+  <data name="VocabPage_LearnResult" xml:space="preserve">
+    <value>学习完成！
+
+从历史学习：{0} 个新词
+从历史更新：{1} 个词
+从修正学习：{2} 个词
+生成纠错规则：{3} 条</value>
+  </data>
+  <data name="VocabPage_AIConfirm" xml:space="preserve">
+    <value>AI 分析将检查您的输入历史，智能生成专业词典。
+
+注意：此功能需要连接到 AI 服务（未来可作为付费功能）。
+
+是否继续？</value>
+  </data>
+  <data name="VocabPage_AITitle" xml:space="preserve">
+    <value>AI 智能分析</value>
+  </data>
+  <data name="VocabPage_AIAnalyzing" xml:space="preserve">
+    <value>AI 正在分析您的输入习惯...</value>
+  </data>
+  <data name="VocabPage_AIComplete" xml:space="preserve">
+    <value>AI 分析完成！生成了 {0} 个专业词汇</value>
+  </data>
+  <data name="VocabPage_AIResult" xml:space="preserve">
+    <value>分析完成！
+
+分析记录：{0} 条
+生成词汇：{1} 个
+推荐分类：{2}
+
+洞察：{3}</value>
+  </data>
+  <data name="VocabPage_TrainProgress" xml:space="preserve">
+    <value>正在训练 {0} 条记录...</value>
+  </data>
+  <data name="VocabPage_SelectHistoryFirst" xml:space="preserve">
+    <value>请先选择要训练的历史记录</value>
+  </data>
+  <data name="VocabPage_TrainResult" xml:space="preserve">
+    <value>训练完成！
+
+学习新词：{0} 个
+更新词汇：{1} 个</value>
+  </data>
+  <data name="VocabPage_AutoTrainConfirm" xml:space="preserve">
+    <value>将对全部 {0} 条未训练记录进行自动学习。
+
+是否继续？</value>
+  </data>
+  <data name="VocabPage_AutoTrainTitle" xml:space="preserve">
+    <value>自动训练</value>
+  </data>
+  <data name="VocabPage_AutoTraining" xml:space="preserve">
+    <value>正在自动训练...</value>
+  </data>
+  <data name="VocabPage_AutoTrainComplete" xml:space="preserve">
+    <value>自动训练完成！
+
+新增词汇：{0} 个</value>
+  </data>
+  <data name="VocabPage_DeleteHistoryConfirm" xml:space="preserve">
+    <value>确定要删除选中的 {0} 条记录吗？
+
+此操作不可恢复！</value>
+  </data>
+  <data name="VocabPage_SelectHistoryToDelete" xml:space="preserve">
+    <value>请先选择要删除的记录</value>
+  </data>
+  <data name="VocabPage_DeleteSuccess" xml:space="preserve">
+    <value>删除成功</value>
+  </data>
+  <data name="VocabPage_Filtering" xml:space="preserve">
+    <value>正在筛选...</value>
+  </data>
+  <data name="VocabPage_FoundRecords" xml:space="preserve">
+    <value>找到 {0} 条匹配记录</value>
+  </data>
+  <data name="VocabPage_TotalRecords" xml:space="preserve">
+    <value>共 {0} 条记录</value>
+  </data>
+  <data name="VocabPage_ServiceNotInit" xml:space="preserve">
+    <value>历史服务未初始化</value>
+  </data>
+  <data name="VocabPage_LoadFailed" xml:space="preserve">
+    <value>加载失败：{0}</value>
+  </data>
+  <data name="VocabPage_AddFailed" xml:space="preserve">
+    <value>添加失败：{0}</value>
+  </data>
+  <data name="VocabPage_DeleteFailed" xml:space="preserve">
+    <value>删除失败：{0}</value>
+  </data>
+  <data name="VocabPage_ImportFailed" xml:space="preserve">
+    <value>导入失败：{0}</value>
+  </data>
+  <data name="VocabPage_ImportSuccess" xml:space="preserve">
+    <value>成功导入 {0} 个词汇</value>
+  </data>
+  <data name="VocabPage_Importing" xml:space="preserve">
+    <value>正在导入...</value>
+  </data>
+  <data name="VocabPage_Exporting" xml:space="preserve">
+    <value>正在导出...</value>
+  </data>
+  <data name="VocabCategory_General" xml:space="preserve">
+    <value>通用</value>
+  </data>
+  <data name="VocabCategory_Medical" xml:space="preserve">
+    <value>医疗</value>
+  </data>
+  <data name="VocabCategory_Legal" xml:space="preserve">
+    <value>法律</value>
+  </data>
+  <data name="VocabCategory_Tech" xml:space="preserve">
+    <value>科技</value>
+  </data>
+  <data name="VocabCategory_Business" xml:space="preserve">
+    <value>商务</value>
+  </data>
+  <data name="VocabCategory_Academic" xml:space="preserve">
+    <value>学术</value>
+  </data>
+  <data name="VocabCategory_Programming" xml:space="preserve">
+    <value>编程</value>
+  </data>
+  <data name="VocabSource_Manual" xml:space="preserve">
+    <value>手动</value>
+  </data>
+  <data name="VocabSource_AIGenerated" xml:space="preserve">
+    <value>AI 生成</value>
+  </data>
+  <data name="VocabSource_AutoLearned" xml:space="preserve">
+    <value>自动学习</value>
+  </data>
+  <data name="VocabSource_Input" xml:space="preserve">
+    <value>输入</value>
+  </data>
+<data name="VocabSource_Correction" xml:space="preserve">
+    <value>修正</value>
+  </data>
+  
+  <!-- Wizard - Background Download -->
+  <data name="Wizard_BackgroundDownload" xml:space="preserve">
+    <value>后台下载</value>
+  </data>
+  <data name="Wizard_Downloading" xml:space="preserve">
+    <value>下载中...</value>
+  </data>
+  <data name="Wizard_DownloadComplete" xml:space="preserve">
+    <value>下载完成</value>
+  </data>
+  <data name="Wizard_DownloadFailed" xml:space="preserve">
+    <value>下载失败</value>
+  </data>
+  <data name="Wizard_DownloadCancelled" xml:space="preserve">
+    <value>下载已取消</value>
+  </data>
+  <data name="Wizard_ProgressHint" xml:space="preserve">
+    <value>可在模型管理中查看进度</value>
+  </data>
+  <data name="Wizard_ClickNextToContinue" xml:space="preserve">
+    <value>点击「下一步」继续</value>
+  </data>
+  <data name="Wizard_WaitDownloadComplete" xml:space="preserve">
+    <value>请等待下载完成后再继续</value>
+  </data>
+  <data name="Wizard_DownloadProgress" xml:space="preserve">
+    <value>下载进度：{0}%</value>
+  </data>
+  <data name="Wizard_ModelDownloading" xml:space="preserve">
+    <value>模型下载中...</value>
+  </data>
+  <data name="Wizard_ModelDownloaded" xml:space="preserve">
+    <value>模型已下载</value>
+  </data>
+  <data name="Wizard_StartDownload" xml:space="preserve">
+    <value>开始下载</value>
+  </data>
+  <data name="Wizard_CancelDownload" xml:space="preserve">
+    <value>取消下载</value>
+  </data>
+  <data name="Wizard_OpenModelManager" xml:space="preserve">
+    <value>打开模型管理</value>
+  </data>
+  <data name="Wizard_WarningTitle" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="Wizard_NoModelWarning" xml:space="preserve">
+    <value>检测到您还未下载模型，语音输入功能将无法使用。
+
+请返回模型管理下载模型，或稍后在设置中下载。</value>
+  </data>
+<data name="Wizard_Complete_ModelStatus_Installed" xml:space="preserve">
+    <value>模型已安装，开始使用语音输入吧！</value>
+  </data>
+  
+  <!-- Wizard Card 7 - Download UI -->
+  <data name="Wizard_StartDownloadButton" xml:space="preserve">
+    <value>⬇️ 开始下载模型</value>
+  </data>
+  <data name="Wizard_CancelDownloadButton" xml:space="preserve">
+    <value>取消下载</value>
+  </data>
+  <data name="Wizard_ProgressNetworkHint" xml:space="preserve">
+    <value>下载过程中请保持网络连接</value>
+  </data>
+  <data name="Wizard_DownloadCompleteHint" xml:space="preserve">
+    <value>✓ 下载完成，点击「下一步」继续</value>
+  </data>
+  <data name="Wizard_Card6_LanguagesList" xml:space="preserve">
+    <value>• 中文、英文、日文、韩文、粤语</value>
+  </data>
+<data name="Wizard_Complete_ModelStatus_NotInstalled" xml:space="preserve">
+    <value>模型未安装，请返回下载模型</value>
+  </data>
+  <data name="Wizard_Complete_ModelStatus_Installed" xml:space="preserve">
+    <value>模型已安装，开始使用语音输入吧！</value>
+  </data>
+  <data name="Wizard_StartButton" xml:space="preserve">
+    <value>开始使用</value>
+  </data>
+  <data name="Wizard_WaitDownloadComplete" xml:space="preserve">
+    <value>请等待下载完成后再继续</value>
+  </data>
+  <data name="Wizard_WarningTitle" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="Wizard_DownloadProgress" xml:space="preserve">
+    <value>下载进度：{0}%</value>
+  </data>
+<data name="Wizard_ModelDownloading" xml:space="preserve">
+    <value>模型下载中...</value>
+  </data>
+  
+  <!-- Update Dialog - 更新对话框 -->
+  <data name="UpdateDialog_Title" xml:space="preserve">
+    <value>发现新版本</value>
+  </data>
+  <data name="UpdateDialog_ReleaseDate" xml:space="preserve">
+    <value>发布日期</value>
+  </data>
+  <data name="UpdateDialog_SkipButton" xml:space="preserve">
+    <value>跳过此版本</value>
+  </data>
+  <data name="UpdateDialog_LaterButton" xml:space="preserve">
+    <value>稍后提醒</value>
+  </data>
+  <data name="UpdateDialog_UpdateButton" xml:space="preserve">
+    <value>立即更新</value>
+  </data>
+  <data name="UpdateDialog_SkipDisabledTooltip" xml:space="preserve">
+    <value>此更新为重要安全更新，必须安装</value>
+  </data>
+  <data name="UpdateDialog_NoChanges" xml:space="preserve">
+    <value>暂无更新内容</value>
+  </data>
+  <data name="UpdateDialog_Verifying" xml:space="preserve">
+    <value>正在验证...</value>
+  </data>
+  <data name="UpdateDialog_VerificationFailed" xml:space="preserve">
+    <value>文件验证失败，请重新下载</value>
+  </data>
+  <data name="UpdateDialog_Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="UpdateDialog_ReadyToInstall" xml:space="preserve">
+    <value>下载完成，是否立即安装？
+
+安装过程中程序将自动关闭，安装完成后需要重新启动。</value>
+  </data>
+  <data name="UpdateDialog_Install" xml:space="preserve">
+    <value>确认安装</value>
+  </data>
+  <data name="UpdateDialog_Installing" xml:space="preserve">
+    <value>正在安装...</value>
+  </data>
+  <data name="UpdateDialog_InstallSuccess" xml:space="preserve">
+    <value>安装成功！请重新启动程序。</value>
+  </data>
+  <data name="UpdateDialog_Success" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="UpdateDialog_InstallFailed" xml:space="preserve">
+    <value>安装失败，请重试</value>
+  </data>
+  <data name="UpdateDialog_Cancelled" xml:space="preserve">
+    <value>下载已取消</value>
+  </data>
+  <data name="UpdateDialog_DownloadFailed" xml:space="preserve">
+    <value>下载失败</value>
+  </data>
+  <data name="UpdateDialog_RemainingTime" xml:space="preserve">
+    <value>剩余时间：{0}</value>
+  </data>
+  <data name="UpdateDialog_Seconds" xml:space="preserve">
+    <value>秒</value>
   </data>
 </root>

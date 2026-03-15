@@ -31,6 +31,38 @@ namespace WordFlow.Views
             _animationTimer.Tick += OnAnimationTick;
         }
 
+        /// <summary>
+        /// 设置状态文本（用于显示模型切换等信息）
+        /// </summary>
+        /// <param name="message">状态消息，为空则清除显示</param>
+        public void SetStatusMessage(string? message)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (string.IsNullOrEmpty(message))
+                {
+                    StatusText.Text = "";
+                    StatusText.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    StatusText.Text = message;
+                    StatusText.Visibility = Visibility.Visible;
+                }
+            });
+        }
+
+        /// <summary>
+        /// 设置标题文本
+        /// </summary>
+        public void SetTitleMessage(string message)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                TitleText.Text = message;
+            });
+        }
+
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
         {
             base.OnRenderSizeChanged(sizeInfo);

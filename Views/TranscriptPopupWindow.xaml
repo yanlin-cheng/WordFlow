@@ -13,22 +13,13 @@
         Topmost="True"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
-        Opacity="0.95">
-    
-    <Window.Resources>
-        <DropShadowEffect x:Key="WindowShadow" 
-                          Color="Black" 
-                          Direction="270" 
-                          ShadowDepth="5" 
-                          BlurRadius="15" 
-                          Opacity="0.5"/>
-    </Window.Resources>
+        Opacity="0.95"
+        WindowStartupLocation="Manual">
     
     <Border Background="#1E1E1E" 
             CornerRadius="16" 
             BorderBrush="#333333" 
-            BorderThickness="1"
-            Effect="{StaticResource WindowShadow}">
+            BorderThickness="1">
         <Grid Margin="20,16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

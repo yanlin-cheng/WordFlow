@@ -12,7 +12,7 @@
 
 | ダウンロード | サイズ | 説明 |
 |----------|------|-------------|
-| [⬇️ WordFlow_Setup.exe](https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/WordFlow_Setup.exe) | 約 60 MB | **インストーラー**（.NET 8 ランタイムを自動検出・インストール） |
+| [⬇️ WordFlow_Setup.exe](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/WordFlow_Setup.exe) | 約 60 MB | **インストーラー**（.NET 8 ランタイムを自動検出・インストール） |
 
 ### オプション 2：モデルの手動ダウンロード（オプション）
 
@@ -20,9 +20,9 @@
 
 | ダウンロード | サイズ | 説明 |
 |----------|------|-------------|
-| [🧠 モデルファイル 1/3](https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/paraformer-zh.tar.bz2.part1) | 90 MB | 音声モデルパート 1 |
-| [🧠 モデルファイル 2/3](https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/paraformer-zh.tar.bz2.part2) | 90 MB | 音声モデルパート 2 |
-| [🧠 モデルファイル 3/3](https://gitee.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/paraformer-zh.tar.bz2.part3) | 26 MB | 音声モデルパート 3 |
+| [🧠 モデルファイル 1/3](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/paraformer-zh.tar.bz2.part1) | 90 MB | 音声モデルパート 1 |
+| [🧠 モデルファイル 2/3](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/paraformer-zh.tar.bz2.part2) | 90 MB | 音声モデルパート 2 |
+| [🧠 モデルファイル 3/3](https://gitee.com/yanlin-cheng/wordflow/releases/download/v2.0.0/paraformer-zh.tar.bz2.part3) | 26 MB | 音声モデルパート 3 |
 
 > **💡 ヒント**: インストーラーの使用を推奨します。初回起動時に自動的にモデルをダウンロードします。
 
@@ -285,9 +285,9 @@ v2.0 はこの問題を最適化しました：
 | プラットフォーム | リンク |
 |----------|------|
 | 📂 **GitHub ソースリポジトリ** | https://github.com/yanlin-cheng/WordFlow |
-| 📦 **Gitee リリースバージョン** | https://gitee.com/yanlin-cheng/WordFlow/releases |
+| 📦 **Gitee リリースバージョン** | https://gitee.com/yanlin-cheng/wordflow/releases |
 | 🐛 **Issue トラッカー (GitHub)** | https://github.com/yanlin-cheng/WordFlow/issues |
-| 🐛 **Issue トラッカー (Gitee)** | https://gitee.com/yanlin-cheng/WordFlow/issues |
+| 🐛 **Issue トラッカー (Gitee)** | https://gitee.com/yanlin-cheng/wordflow/issues |
 
 ---
 

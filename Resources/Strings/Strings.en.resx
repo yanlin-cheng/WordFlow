@@ -136,7 +136,7 @@
     <value>🇺🇸 English</value>
   </data>
   <data name="Language_jaJP" xml:space="preserve">
-    <value>🇯 日本語</value>
+    <value>🇯🇵 日本語</value>
   </data>
   <data name="Language_koKR" xml:space="preserve">
     <value>🇰🇷 한국어</value>
@@ -280,10 +280,10 @@ Click "Next" to start setup.</value>
     <value>You need to download a speech model before first use.</value>
   </data>
   <data name="Wizard_Card6_Recommend" xml:space="preserve">
-    <value>• Recommended: Paraformer Chinese (~200MB)</value>
+    <value>• Current Model: SenseVoice-small (~200MB)</value>
   </data>
   <data name="Wizard_Card6_MultiLang" xml:space="preserve">
-    <value>• Multi-language: SenseVoice (Supports Chinese, English, Japanese, Korean, Cantonese)</value>
+    <value>• Supported Languages: Chinese, English, Japanese, Korean, Cantonese</value>
   </data>
   <data name="Wizard_Card6_ButtonHint" xml:space="preserve">
     <value>Click 'Open Model Manager' button to start download</value>
@@ -334,7 +334,7 @@ Hold to speak, release to recognize and input</value>
   </data>
   <data name="FirstRunWizard_Feature2" xml:space="preserve">
     <value>🧠 Local ASR Recognition
-Uses Alibaba DAMO Academy Paraformer model, works offline</value>
+Uses Alibaba SenseVoice-small model, works offline, supports multiple languages</value>
   </data>
   <data name="FirstRunWizard_Feature3" xml:space="preserve">
     <value>📚 Personal Vocabulary
@@ -350,7 +350,7 @@ Automatically saves input history for reference</value>
   <data name="FirstRunWizard_DownloadText" xml:space="preserve">
     <value>You need to download the speech model to use speech recognition.
 
-Model size is about 238MB, please keep network connection.</value>
+Model size is about 200MB, please keep network connection.</value>
   </data>
   <data name="FirstRunWizard_DownloadButton" xml:space="preserve">
     <value>Start Download</value>
@@ -479,5 +479,800 @@ Model size is about 238MB, please keep network connection.</value>
   </data>
   <data name="Tray_Exit" xml:space="preserve">
     <value>Exit</value>
+  </data>
+  
+  <!-- Main Window -->
+  <data name="MW_OfflineASR" xml:space="preserve">
+    <value>Offline Voice Input</value>
+  </data>
+  <data name="MW_ModelManager" xml:space="preserve">
+    <value>Model Manager</value>
+  </data>
+  <data name="MW_ModelManager_Tooltip" xml:space="preserve">
+    <value>Manage speech models (switch/download/delete)</value>
+  </data>
+  <data name="MW_PersonalDictionary" xml:space="preserve">
+    <value>Personal Dictionary</value>
+  </data>
+  <data name="MW_PersonalDictionary_Tooltip" xml:space="preserve">
+    <value>Manage personal dictionary and hot words</value>
+  </data>
+  <data name="MW_ImportAudio" xml:space="preserve">
+    <value>Import Audio</value>
+  </data>
+  <data name="MW_ImportAudio_Tooltip" xml:space="preserve">
+    <value>Import WAV file for recognition</value>
+  </data>
+  <data name="MW_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="MW_Settings_Tooltip" xml:space="preserve">
+    <value>Hotkey and startup settings</value>
+  </data>
+  <data name="MW_Status_NotConnected" xml:space="preserve">
+    <value>Not Connected</value>
+  </data>
+  <data name="MW_Status_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="MW_StartRecording" xml:space="preserve">
+    <value>Start Recording</value>
+  </data>
+  <data name="MW_RecordHint" xml:space="preserve">
+    <value>Hold hotkey to speak, release to recognize</value>
+  </data>
+  <data name="MW_HotkeyHint" xml:space="preserve">
+    <value>Current hotkey: Hold ` key (below ESC)</value>
+  </data>
+<data name="MW_PressToRecord" xml:space="preserve">
+    <value>Hold ` to Speak</value>
+  </data>
+  <data name="MW_PressToRecordWithKey" xml:space="preserve">
+    <value>Hold {0} to Speak</value>
+  </data>
+  <data name="MW_HotkeyHintWithKey" xml:space="preserve">
+    <value>Current Hotkey: Hold {0}</value>
+  </data>
+  <data name="MW_HotkeyKeyDescription" xml:space="preserve">
+    <value>(below ESC)</value>
+  </data>
+  <data name="MW_Recording" xml:space="preserve">
+    <value>Recording...</value>
+  </data>
+  <data name="MW_TodayInput" xml:space="preserve">
+    <value>Today's Input</value>
+  </data>
+  <data name="MW_TotalInput" xml:space="preserve">
+    <value>Total Input</value>
+  </data>
+  <data name="MW_SavedTime" xml:space="preserve">
+    <value>Time Saved</value>
+  </data>
+  <data name="MW_Estimated" xml:space="preserve">
+    <value>Estimated</value>
+  </data>
+  <data name="MW_Accuracy" xml:space="preserve">
+    <value>Recognition Accuracy</value>
+  </data>
+  <data name="MW_BasedOnCorrections" xml:space="preserve">
+    <value>Based on corrections</value>
+  </data>
+  <data name="MW_NewbieGuide" xml:space="preserve">
+    <value>Newbie Guide</value>
+  </data>
+  <data name="MW_HowToUseTitle" xml:space="preserve">
+    <value>📌 How to Use Voice Input</value>
+  </data>
+  <data name="MW_HowToUse_Step1" xml:space="preserve">
+    <value>1. Ensure speech model is installed (download in Model Manager for first use)</value>
+  </data>
+  <data name="MW_HowToUse_Step2" xml:space="preserve">
+    <value>2. Click the window where you want to input text (e.g., Notepad, Word)</value>
+  </data>
+  <data name="MW_HowToUse_Step3" xml:space="preserve">
+    <value>3. Hold ` key or Right Alt to speak, release when done</value>
+  </data>
+  <data name="MW_HowToUse_Step4" xml:space="preserve">
+    <value>4. Text will be auto-inputted to your selected target window</value>
+  </data>
+  <data name="MW_TipsTitle" xml:space="preserve">
+    <value>💡 Tips</value>
+  </data>
+  <data name="MW_Tip1" xml:space="preserve">
+    <value>• Change hotkey in Settings (supports ` key or Right Alt)</value>
+  </data>
+  <data name="MW_Tip2" xml:space="preserve">
+    <value>• Keep environment relatively quiet when recording</value>
+  </data>
+  <data name="MW_Tip3" xml:space="preserve">
+    <value>• Recognition results are automatically saved to History</value>
+  </data>
+  <data name="MW_Tip4" xml:space="preserve">
+    <value>• Add professional vocabulary in Personal Dictionary to improve accuracy</value>
+  </data>
+  <data name="MW_InputExplanationTitle" xml:space="preserve">
+    <value>📝 Text Input Explanation</value>
+  </data>
+  <data name="MW_InputExplanationText" xml:space="preserve">
+    <value>Text will be directly inputted to your selected target window (e.g., Notepad, Word)</value>
+  </data>
+  <data name="MW_HistoryHint" xml:space="preserve">
+    <value>To view history, please use Personal Dictionary feature</value>
+  </data>
+<data name="MW_Characters" xml:space="preserve">
+    <value>chars</value>
+  </data>
+  
+  <!-- Settings Window - Missing translations -->
+  <data name="SettingsWindow_VersionLabel" xml:space="preserve">
+    <value>Version:</value>
+  </data>
+  <data name="SettingsWindow_WizardButton" xml:space="preserve">
+    <value>🎯 Run First-Time Wizard</value>
+  </data>
+  <data name="SettingsWindow_ManageModelButton" xml:space="preserve">
+    <value>📦 Model Manager</value>
+  </data>
+  <data name="SettingsWindow_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SettingsWindow_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  
+  <!-- Vocabulary Manager Window - DataGrid Columns -->
+  <data name="VocabManager_Column_Word" xml:space="preserve">
+    <value>Word</value>
+  </data>
+  <data name="VocabManager_Column_Pinyin" xml:space="preserve">
+    <value>Pinyin</value>
+  </data>
+  <data name="VocabManager_Column_Frequency" xml:space="preserve">
+    <value>Frequency</value>
+  </data>
+  <data name="VocabManager_Column_Weight" xml:space="preserve">
+    <value>Weight</value>
+  </data>
+  <data name="VocabManager_Column_Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="VocabManager_Column_Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="VocabManager_Column_Contexts" xml:space="preserve">
+    <value>Context Examples</value>
+  </data>
+  <data name="VocabManager_Column_LastUsed" xml:space="preserve">
+    <value>Last Used</value>
+  </data>
+  
+  <!-- Vocabulary Manager Window - Toolbar Buttons -->
+  <data name="VocabManager_Toolbar_Add" xml:space="preserve">
+    <value>➕ Add Word</value>
+  </data>
+  <data name="VocabManager_Toolbar_Delete" xml:space="preserve">
+    <value>🗑️ Delete Selected</value>
+  </data>
+  <data name="VocabManager_Toolbar_Import" xml:space="preserve">
+    <value>📥 Import</value>
+  </data>
+  <data name="VocabManager_Toolbar_Export" xml:space="preserve">
+    <value>📤 Export Hot Words</value>
+  </data>
+  <data name="VocabManager_Toolbar_Refresh" xml:space="preserve">
+    <value>🔄 Refresh</value>
+  </data>
+  <data name="VocabManager_SearchBox_Tooltip" xml:space="preserve">
+    <value>Search vocabulary</value>
+  </data>
+  
+  <!-- Vocabulary Manager Window - History Tab -->
+  <data name="VocabManager_HistoryTab" xml:space="preserve">
+    <value>📜 History</value>
+  </data>
+  <data name="VocabManager_History_SelectAll" xml:space="preserve">
+    <value>☑️ Select All</value>
+  </data>
+  <data name="VocabManager_History_SelectNone" xml:space="preserve">
+    <value>⬜ Deselect</value>
+  </data>
+  <data name="VocabManager_History_TrainSelected" xml:space="preserve">
+    <value>🎯 Train Selected</value>
+  </data>
+  <data name="VocabManager_History_AutoTrain" xml:space="preserve">
+    <value>🤖 Auto Train All</value>
+  </data>
+  <data name="VocabManager_History_Delete" xml:space="preserve">
+    <value>🗑️ Delete Selected</value>
+  </data>
+  <data name="VocabManager_History_Filter" xml:space="preserve">
+    <value>All Records</value>
+  </data>
+  <data name="VocabManager_History_FilterToday" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="VocabManager_History_Filter7Days" xml:space="preserve">
+    <value>Last 7 Days</value>
+  </data>
+  <data name="VocabManager_History_Filter30Days" xml:space="preserve">
+    <value>Last 30 Days</value>
+  </data>
+  <data name="VocabManager_History_Search_Tooltip" xml:space="preserve">
+    <value>Search history</value>
+  </data>
+  
+  <!-- Vocabulary Manager Window - Status Bar -->
+  <data name="VocabManager_Status_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="VocabManager_Stats_Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="VocabManager_AI_Button" xml:space="preserve">
+    <value>🤖 AI</value>
+  </data>
+  <data name="VocabManager_Learn_Button" xml:space="preserve">
+    <value>📚 Learn</value>
+  </data>
+  
+  <!-- Category and Source enums -->
+  <data name="VocabCategory_General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="VocabCategory_Medical" xml:space="preserve">
+    <value>Medical</value>
+  </data>
+  <data name="VocabCategory_Legal" xml:space="preserve">
+    <value>Legal</value>
+  </data>
+  <data name="VocabCategory_Tech" xml:space="preserve">
+    <value>Tech</value>
+  </data>
+  <data name="VocabSource_Manual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="VocabSource_Input" xml:space="preserve">
+    <value>Input</value>
+  </data>
+  <data name="VocabSource_Correction" xml:space="preserve">
+    <value>Correction</value>
+  </data>
+  
+  <!-- Model Manager Window - Additional translations -->
+  <data name="ModelManager_Subtitle" xml:space="preserve">
+    <value>Manage installed models, or download new models</value>
+  </data>
+  <data name="ModelManager_RefreshButton" xml:space="preserve">
+    <value>🔄 Refresh List</value>
+  </data>
+  <data name="ModelManager_BackgroundDownloadButton" xml:space="preserve">
+    <value>📥 Background Download</value>
+  </data>
+  <data name="ModelManager_CloseButton2" xml:space="preserve">
+    <value>✅ Close</value>
+  </data>
+  <data name="ModelManager_DownloadProgress" xml:space="preserve">
+    <value>Preparing download...</value>
+  </data>
+  
+  <!-- Model Manager - Dynamic UI -->
+  <data name="ModelManager_NoModelsAvailable" xml:space="preserve">
+    <value>No models available
+
+Please check network connection or verify model configuration</value>
+  </data>
+  <data name="ModelManager_Status_NotDownloaded_Short" xml:space="preserve">
+    <value>⬇️ Not Downloaded</value>
+  </data>
+  <data name="ModelManager_Status_Current" xml:space="preserve">
+    <value>✅ Current</value>
+  </data>
+  <data name="ModelManager_Status_Installed_Short" xml:space="preserve">
+    <value>✅ Installed</value>
+  </data>
+  <data name="ModelManager_Button_Use" xml:space="preserve">
+    <value>Use</value>
+  </data>
+  <data name="ModelManager_Button_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ModelManager_Button_Download" xml:space="preserve">
+    <value>📥 Download</value>
+  </data>
+  <data name="ModelManager_Button_CancelDownload" xml:space="preserve">
+    <value>⏸️ Cancel Download</value>
+  </data>
+  <data name="ModelManager_DownloadComplete" xml:space="preserve">
+    <value>Download complete!</value>
+  </data>
+  <data name="ModelManager_DownloadFailed" xml:space="preserve">
+    <value>Download failed</value>
+  </data>
+  <data name="ModelManager_DownloadCancelled" xml:space="preserve">
+    <value>Download cancelled</value>
+  </data>
+  <data name="ModelManager_ConfirmDownload" xml:space="preserve">
+    <value>Are you sure you want to download {0}?
+
+Size: {1}
+
+The model will be loaded automatically after download.</value>
+  </data>
+  <data name="ModelManager_ConfirmDelete" xml:space="preserve">
+    <value>Are you sure you want to delete model {0}?
+You will need to download it again to use it.</value>
+  </data>
+  <data name="ModelManager_ServiceNotRunning" xml:space="preserve">
+    <value>ASR service is not running. Start the service now?
+
+Model can be loaded after starting: {0}</value>
+  </data>
+  <data name="ModelManager_SwitchSuccess" xml:space="preserve">
+    <value>✅ Switched to model: {0}
+
+You can now start using voice input.</value>
+  </data>
+  <data name="ModelManager_SwitchFailed" xml:space="preserve">
+    <value>❌ Failed to switch model
+
+Please check ASR service logs to verify model is properly installed.</value>
+  </data>
+  <data name="ModelManager_LoadSuccess" xml:space="preserve">
+    <value>Model downloaded and loaded successfully!
+
+You can now start using voice input.</value>
+  </data>
+  <data name="ModelManager_ServiceStartPrompt" xml:space="preserve">
+    <value>Model download complete!
+
+But ASR service is not running. Start the service now?</value>
+  </data>
+  <data name="ModelManager_ServiceStartSuccess" xml:space="preserve">
+    <value>Service started and model loaded: {0}
+
+You can now start using voice input.</value>
+  </data>
+  <data name="ModelManager_ServiceStartFailed" xml:space="preserve">
+    <value>Failed to start service. Please start ASR service manually.
+
+Start method:
+Double-click PythonASR/start_server.bat</value>
+  </data>
+  <data name="ModelManager_CloseWhileDownloading" xml:space="preserve">
+    <value>Download is in progress. Closing the window will not interrupt the download.
+Are you sure you want to close?</value>
+  </data>
+  <data name="ModelManager_DownloadingPrompt" xml:space="preserve">
+    <value>Downloading, please wait</value>
+  </data>
+  <data name="ModelManager_ModelNotFound" xml:space="preserve">
+    <value>Model configuration not found: {0}</value>
+  </data>
+<data name="ModelManager_LocalModel" xml:space="preserve">
+    <value>Locally installed model</value>
+  </data>
+  
+  <!-- Model Descriptions -->
+  <data name="Model_SenseVoice_Name" xml:space="preserve">
+    <value>SenseVoice Small</value>
+  </data>
+  <data name="Model_SenseVoice_Description" xml:space="preserve">
+    <value>Lightweight multilingual speech recognition model with ONNX inference for fast performance. Supports Chinese, English, Japanese, Korean, and Cantonese. Uses INT8 quantization for smaller model size, ideal for real-time speech recognition scenarios.</value>
+  </data>
+  <data name="Model_SenseVoice_Languages" xml:space="preserve">
+    <value>Chinese, English, Japanese, Korean, Cantonese</value>
+  </data>
+  <data name="Model_SenseVoice_Size" xml:space="preserve">
+    <value>~156 MB (split archive)</value>
+  </data>
+  <data name="Model_SenseVoice_Features" xml:space="preserve">
+    <value>• Supports 5 languages: Chinese/English/Japanese/Korean/Cantonese
+• INT8 quantization for smaller model size
+• ONNX inference for fast performance
+• Ideal for real-time speech recognition</value>
+  </data>
+  
+  <!-- Vocabulary Page -->
+  <data name="VocabPage_BackButton" xml:space="preserve">
+    <value>← Back</value>
+  </data>
+  <data name="VocabPage_Title" xml:space="preserve">
+    <value>Personal Dictionary</value>
+  </data>
+  <data name="VocabPage_StatsText" xml:space="preserve">
+    <value>Total: {0} | AI: {1} | Auto: {2} | Manual: {3}</value>
+  </data>
+  <data name="VocabPage_AIButton" xml:space="preserve">
+    <value>🤖 AI Analysis</value>
+  </data>
+  <data name="VocabPage_LearnButton" xml:space="preserve">
+    <value>📚 Smart Learning</value>
+  </data>
+  <data name="VocabPage_TabVocabulary" xml:space="preserve">
+    <value>📖 Vocabulary</value>
+  </data>
+  <data name="VocabPage_TabHistory" xml:space="preserve">
+    <value>📜 History</value>
+  </data>
+  <data name="VocabPage_AddButton" xml:space="preserve">
+    <value>➕ Add Word</value>
+  </data>
+  <data name="VocabPage_DeleteButton" xml:space="preserve">
+    <value>🗑️ Delete Selected</value>
+  </data>
+  <data name="VocabPage_ImportButton" xml:space="preserve">
+    <value>📥 Import</value>
+  </data>
+  <data name="VocabPage_ExportButton" xml:space="preserve">
+    <value>📤 Export Hot Words</value>
+  </data>
+  <data name="VocabPage_RefreshButton" xml:space="preserve">
+    <value>🔄 Refresh</value>
+  </data>
+  <data name="VocabPage_SearchBox" xml:space="preserve">
+    <value>Search vocabulary</value>
+  </data>
+  <data name="VocabPage_SelectAll" xml:space="preserve">
+    <value>☑️ Select All</value>
+  </data>
+  <data name="VocabPage_SelectNone" xml:space="preserve">
+    <value>⬜ Deselect</value>
+  </data>
+  <data name="VocabPage_TrainSelected" xml:space="preserve">
+    <value>🎯 Train Selected</value>
+  </data>
+  <data name="VocabPage_AutoTrain" xml:space="preserve">
+    <value>🤖 Auto Train All</value>
+  </data>
+  <data name="VocabPage_FilterAll" xml:space="preserve">
+    <value>All Records</value>
+  </data>
+  <data name="VocabPage_FilterToday" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="VocabPage_Filter7Days" xml:space="preserve">
+    <value>Last 7 Days</value>
+  </data>
+  <data name="VocabPage_Filter30Days" xml:space="preserve">
+    <value>Last 30 Days</value>
+  </data>
+  <data name="VocabPage_StatusReady" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="VocabPage_QuickAddTitle" xml:space="preserve">
+    <value>Quick Add Words</value>
+  </data>
+  <data name="VocabPage_QuickAddHint" xml:space="preserve">
+    <value>Enter words, separated by spaces</value>
+  </data>
+  <data name="VocabPage_QuickAddButton" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="VocabPage_QuickAddCategory" xml:space="preserve">
+    <value>Category:</value>
+  </data>
+  <data name="VocabPage_ExportSuccess" xml:space="preserve">
+    <value>Exported to: {0}</value>
+  </data>
+  <data name="VocabPage_ExportFailed" xml:space="preserve">
+    <value>Export failed: {0}</value>
+  </data>
+  <data name="VocabPage_ExportOpenFolder" xml:space="preserve">
+    <value>Export successful! Open containing folder?</value>
+  </data>
+  <data name="VocabPage_DeleteConfirm" xml:space="preserve">
+    <value>Are you sure you want to delete word "{0}"?</value>
+  </data>
+  <data name="VocabPage_DeleteTitle" xml:space="preserve">
+    <value>Confirm Delete</value>
+  </data>
+  <data name="VocabPage_SelectWordFirst" xml:space="preserve">
+    <value>Please select a word first</value>
+  </data>
+  <data name="VocabPage_AddSuccess" xml:space="preserve">
+    <value>Added: {0}</value>
+  </data>
+  <data name="VocabPage_LoadingVocab" xml:space="preserve">
+    <value>Loading vocabulary...</value>
+  </data>
+  <data name="VocabPage_LoadingHistory" xml:space="preserve">
+    <value>Loading history...</value>
+  </data>
+  <data name="VocabPage_LearnConfirm" xml:space="preserve">
+    <value>Smart Learning will analyze your input history and automatically learn high-frequency words and error patterns.
+
+Continue?</value>
+  </data>
+  <data name="VocabPage_LearnTitle" xml:space="preserve">
+    <value>Smart Learning</value>
+  </data>
+  <data name="VocabPage_Learning" xml:space="preserve">
+    <value>Learning your input habits...</value>
+  </data>
+  <data name="VocabPage_LearnComplete" xml:space="preserve">
+    <value>Learning complete! Added {0} new words</value>
+  </data>
+  <data name="VocabPage_LearnResult" xml:space="preserve">
+    <value>Learning complete!
+
+Learned from history: {0} new words
+Updated from history: {1} words
+Learned from corrections: {2} words
+Generated correction rules: {3}</value>
+  </data>
+  <data name="VocabPage_AIConfirm" xml:space="preserve">
+    <value>AI Analysis will check your input history and intelligently generate professional vocabulary.
+
+Note: This feature requires connection to AI service (may be a paid feature in the future).
+
+Continue?</value>
+  </data>
+  <data name="VocabPage_AITitle" xml:space="preserve">
+    <value>AI Smart Analysis</value>
+  </data>
+  <data name="VocabPage_AIAnalyzing" xml:space="preserve">
+    <value>AI is analyzing your input habits...</value>
+  </data>
+  <data name="VocabPage_AIComplete" xml:space="preserve">
+    <value>AI analysis complete! Generated {0} professional words</value>
+  </data>
+  <data name="VocabPage_AIResult" xml:space="preserve">
+    <value>Analysis complete!
+
+Analyzed records: {0}
+Generated words: {1}
+Recommended category: {2}
+
+Insights: {3}</value>
+  </data>
+  <data name="VocabPage_TrainProgress" xml:space="preserve">
+    <value>Training {0} records...</value>
+  </data>
+  <data name="VocabPage_SelectHistoryFirst" xml:space="preserve">
+    <value>Please select history records to train</value>
+  </data>
+  <data name="VocabPage_TrainResult" xml:space="preserve">
+    <value>Training complete!
+
+Learned new words: {0}
+Updated words: {1}</value>
+  </data>
+  <data name="VocabPage_AutoTrainConfirm" xml:space="preserve">
+    <value>This will automatically learn all {0} untrained records.
+
+Continue?</value>
+  </data>
+  <data name="VocabPage_AutoTrainTitle" xml:space="preserve">
+    <value>Auto Training</value>
+  </data>
+  <data name="VocabPage_AutoTraining" xml:space="preserve">
+    <value>Auto training...</value>
+  </data>
+  <data name="VocabPage_AutoTrainComplete" xml:space="preserve">
+    <value>Auto training complete!
+
+Added words: {0}</value>
+  </data>
+  <data name="VocabPage_DeleteHistoryConfirm" xml:space="preserve">
+    <value>Are you sure you want to delete {0} selected records?
+
+This action cannot be undone!</value>
+  </data>
+  <data name="VocabPage_SelectHistoryToDelete" xml:space="preserve">
+    <value>Please select records to delete</value>
+  </data>
+  <data name="VocabPage_DeleteSuccess" xml:space="preserve">
+    <value>Delete successful</value>
+  </data>
+  <data name="VocabPage_Filtering" xml:space="preserve">
+    <value>Filtering...</value>
+  </data>
+  <data name="VocabPage_FoundRecords" xml:space="preserve">
+    <value>Found {0} matching records</value>
+  </data>
+  <data name="VocabPage_TotalRecords" xml:space="preserve">
+    <value>Total {0} records</value>
+  </data>
+  <data name="VocabPage_ServiceNotInit" xml:space="preserve">
+    <value>History service not initialized</value>
+  </data>
+  <data name="VocabPage_LoadFailed" xml:space="preserve">
+    <value>Load failed: {0}</value>
+  </data>
+  <data name="VocabPage_AddFailed" xml:space="preserve">
+    <value>Add failed: {0}</value>
+  </data>
+  <data name="VocabPage_DeleteFailed" xml:space="preserve">
+    <value>Delete failed: {0}</value>
+  </data>
+  <data name="VocabPage_ImportFailed" xml:space="preserve">
+    <value>Import failed: {0}</value>
+  </data>
+  <data name="VocabPage_ImportSuccess" xml:space="preserve">
+    <value>Successfully imported {0} words</value>
+  </data>
+  <data name="VocabPage_Importing" xml:space="preserve">
+    <value>Importing...</value>
+  </data>
+  <data name="VocabPage_Exporting" xml:space="preserve">
+    <value>Exporting...</value>
+  </data>
+  <data name="VocabCategory_General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="VocabCategory_Medical" xml:space="preserve">
+    <value>Medical</value>
+  </data>
+  <data name="VocabCategory_Legal" xml:space="preserve">
+    <value>Legal</value>
+  </data>
+  <data name="VocabCategory_Tech" xml:space="preserve">
+    <value>Tech</value>
+  </data>
+  <data name="VocabCategory_Business" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="VocabCategory_Academic" xml:space="preserve">
+    <value>Academic</value>
+  </data>
+  <data name="VocabCategory_Programming" xml:space="preserve">
+    <value>Programming</value>
+  </data>
+  <data name="VocabSource_Manual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="VocabSource_AIGenerated" xml:space="preserve">
+    <value>AI Generated</value>
+  </data>
+  <data name="VocabSource_AutoLearned" xml:space="preserve">
+    <value>Auto Learned</value>
+  </data>
+  <data name="VocabSource_Input" xml:space="preserve">
+    <value>Input</value>
+  </data>
+<data name="VocabSource_Correction" xml:space="preserve">
+    <value>Correction</value>
+  </data>
+  
+  <!-- Wizard - Background Download -->
+  <data name="Wizard_BackgroundDownload" xml:space="preserve">
+    <value>Background Download</value>
+  </data>
+  <data name="Wizard_Downloading" xml:space="preserve">
+    <value>Downloading...</value>
+  </data>
+  <data name="Wizard_DownloadComplete" xml:space="preserve">
+    <value>Download Complete</value>
+  </data>
+  <data name="Wizard_DownloadFailed" xml:space="preserve">
+    <value>Download Failed</value>
+  </data>
+  <data name="Wizard_DownloadCancelled" xml:space="preserve">
+    <value>Download Cancelled</value>
+  </data>
+  <data name="Wizard_ProgressHint" xml:space="preserve">
+    <value>View progress in Model Manager</value>
+  </data>
+  <data name="Wizard_ClickNextToContinue" xml:space="preserve">
+    <value>Click "Next" to continue</value>
+  </data>
+  <data name="Wizard_WaitDownloadComplete" xml:space="preserve">
+    <value>Please wait for download to complete</value>
+  </data>
+  <data name="Wizard_DownloadProgress" xml:space="preserve">
+    <value>Download Progress: {0}%</value>
+  </data>
+  <data name="Wizard_ModelDownloading" xml:space="preserve">
+    <value>Model Downloading...</value>
+  </data>
+  <data name="Wizard_ModelDownloaded" xml:space="preserve">
+    <value>Model Downloaded</value>
+  </data>
+  <data name="Wizard_StartDownload" xml:space="preserve">
+    <value>Start Download</value>
+  </data>
+  <data name="Wizard_CancelDownload" xml:space="preserve">
+    <value>Cancel Download</value>
+  </data>
+  <data name="Wizard_OpenModelManager" xml:space="preserve">
+    <value>Open Model Manager</value>
+  </data>
+  <data name="Wizard_WarningTitle" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Wizard_NoModelWarning" xml:space="preserve">
+    <value>The model has not been downloaded yet. Voice input will not work.
+
+Please download the model in Model Manager or download it later in Settings.</value>
+  </data>
+<data name="Wizard_Complete_ModelStatus_Installed" xml:space="preserve">
+    <value>Model installed, start using voice input!</value>
+  </data>
+  <data name="Wizard_Complete_ModelStatus_NotInstalled" xml:space="preserve">
+    <value>Model not installed, please download first</value>
+  </data>
+  <data name="Wizard_StartButton" xml:space="preserve">
+    <value>Start Using</value>
+  </data>
+  
+  <!-- Wizard Card 7 - Download UI -->
+  <data name="Wizard_StartDownloadButton" xml:space="preserve">
+    <value>⬇️ Start Download</value>
+  </data>
+  <data name="Wizard_CancelDownloadButton" xml:space="preserve">
+    <value>Cancel Download</value>
+  </data>
+  <data name="Wizard_ProgressNetworkHint" xml:space="preserve">
+    <value>Please keep network connection during download</value>
+  </data>
+  <data name="Wizard_DownloadCompleteHint" xml:space="preserve">
+    <value>✓ Download complete, click 'Next' to continue</value>
+  </data>
+<data name="Wizard_Card6_LanguagesList" xml:space="preserve">
+    <value>• Chinese, English, Japanese, Korean, Cantonese</value>
+  </data>
+  
+  <!-- Update Dialog - 更新对话框 -->
+  <data name="UpdateDialog_Title" xml:space="preserve">
+    <value>New Version Available</value>
+  </data>
+  <data name="UpdateDialog_ReleaseDate" xml:space="preserve">
+    <value>Release Date</value>
+  </data>
+  <data name="UpdateDialog_SkipButton" xml:space="preserve">
+    <value>Skip This Version</value>
+  </data>
+  <data name="UpdateDialog_LaterButton" xml:space="preserve">
+    <value>Remind Later</value>
+  </data>
+  <data name="UpdateDialog_UpdateButton" xml:space="preserve">
+    <value>Update Now</value>
+  </data>
+  <data name="UpdateDialog_SkipDisabledTooltip" xml:space="preserve">
+    <value>This is a critical security update and must be installed</value>
+  </data>
+  <data name="UpdateDialog_NoChanges" xml:space="preserve">
+    <value>No changes listed</value>
+  </data>
+  <data name="UpdateDialog_Verifying" xml:space="preserve">
+    <value>Verifying...</value>
+  </data>
+  <data name="UpdateDialog_VerificationFailed" xml:space="preserve">
+    <value>File verification failed, please download again</value>
+  </data>
+  <data name="UpdateDialog_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="UpdateDialog_ReadyToInstall" xml:space="preserve">
+    <value>Download complete. Install now?
+
+The application will close during installation and needs to be restarted after completion.</value>
+  </data>
+  <data name="UpdateDialog_Install" xml:space="preserve">
+    <value>Confirm Installation</value>
+  </data>
+  <data name="UpdateDialog_Installing" xml:space="preserve">
+    <value>Installing...</value>
+  </data>
+  <data name="UpdateDialog_InstallSuccess" xml:space="preserve">
+    <value>Installation successful! Please restart the application.</value>
+  </data>
+  <data name="UpdateDialog_Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="UpdateDialog_InstallFailed" xml:space="preserve">
+    <value>Installation failed, please try again</value>
+  </data>
+  <data name="UpdateDialog_Cancelled" xml:space="preserve">
+    <value>Download cancelled</value>
+  </data>
+  <data name="UpdateDialog_DownloadFailed" xml:space="preserve">
+    <value>Download failed</value>
+  </data>
+  <data name="UpdateDialog_RemainingTime" xml:space="preserve">
+    <value>Remaining time: {0}</value>
+  </data>
+  <data name="UpdateDialog_Seconds" xml:space="preserve">
+    <value>sec</value>
   </data>
 </root>

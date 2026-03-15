@@ -31,44 +31,64 @@ namespace WordFlow.Services
             // 获取应用程序基础目录
             var exeDir = AppDomain.CurrentDomain.BaseDirectory;
             
-            // 尝试多个可能的路径来找到模型目录
+            Logger.Info($"ModelDownloadService 初始化，应用程序目录：{exeDir}");
+            
+            // 尝试多个可能的路径来找到模型目录（增强版）
             var possibleModelPaths = new[]
             {
-                // 标准发布结构
+                // 标准发布结构（安装后）
                 Path.Combine(exeDir, "PythonASR", "models"),
-                // 单文件发布解压后的结构
-                Path.Combine(exeDir, "..", "PythonASR", "models"),
                 // 开发环境结构
                 Path.Combine(exeDir, "..", "..", "..", "PythonASR", "models"),
+                // 单文件发布解压后的结构
+                Path.Combine(exeDir, "..", "PythonASR", "models"),
+                // 备用：用户数据目录
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WordFlow", "models"),
+                // 备用：本地应用数据目录
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WordFlow", "models"),
+                // 安装到 Program Files 的路径
+                Path.Combine(exeDir, "..", "PythonASR", "models"),
             };
             
             _modelsDir = possibleModelPaths.FirstOrDefault(Directory.Exists) ?? possibleModelPaths[0];
             _modelsDir = Path.GetFullPath(_modelsDir);
             
+            Logger.Info($"ModelDownloadService: 模型目录 = {_modelsDir}");
+            Logger.Info($"ModelDownloadService: 模型目录存在 = {Directory.Exists(_modelsDir)}");
+            
             // 确保模型目录存在
             try
             {
                 Directory.CreateDirectory(_modelsDir);
-                Logger.Log($"ModelDownloadService: 确保模型目录存在：{_modelsDir}");
+                Logger.Info($"ModelDownloadService: 确保模型目录存在：{_modelsDir}");
             }
             catch (Exception ex)
             {
-                Logger.Log($"ModelDownloadService: 创建模型目录失败 - {ex.Message}");
+                Logger.Error($"ModelDownloadService: 创建模型目录失败 - {ex.Message}", ex);
             }
             
-            // 同样处理配置文件路径
+            // 同样处理配置文件路径（增强版）
             var possibleConfigPaths = new[]
             {
+                // 标准发布结构
                 Path.Combine(exeDir, "Data", "models.json"),
-                Path.Combine(exeDir, "..", "Data", "models.json"),
+                // 开发环境结构
                 Path.Combine(exeDir, "..", "..", "..", "Data", "models.json"),
+                // 安装后的路径
+                Path.Combine(exeDir, "..", "Data", "models.json"),
+                // 用户数据目录
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WordFlow", "Data", "models.json"),
+                // 本地应用数据目录
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "WordFlow", "Data", "models.json"),
+                // 备用：当前目录
+                Path.Combine(exeDir, "models.json"),
             };
             
             _configPath = possibleConfigPaths.FirstOrDefault(File.Exists) ?? possibleConfigPaths[0];
             _configPath = Path.GetFullPath(_configPath);
             
-            Logger.Log($"ModelDownloadService: 模型目录 = {_modelsDir}");
-            Logger.Log($"ModelDownloadService: 配置文件 = {_configPath}");
+            Logger.Info($"ModelDownloadService: 配置文件 = {_configPath}");
+            Logger.Info($"ModelDownloadService: 配置文件存在 = {File.Exists(_configPath)}");
         }
 
         /// <summary>
@@ -289,43 +309,54 @@ namespace WordFlow.Services
         }
 
         /// <summary>
-        /// 检查目录是否包含有效的模型文件
+        /// 获取默认模型配置（硬编码备用）
         /// </summary>
-        private bool IsValidModel(string modelDir)
+        private ModelsConfig GetDefaultModelsConfig()
         {
-            // 检查是否存在 model.onnx 或 model.int8.onnx
-            var hasModel = File.Exists(Path.Combine(modelDir, "model.onnx")) ||
-                          File.Exists(Path.Combine(modelDir, "model.int8.onnx"));
-            
-            // 检查是否存在 tokens.txt
-            var hasTokens = File.Exists(Path.Combine(modelDir, "tokens.txt"));
-            
-            return hasModel && hasTokens;
-        }
-
-        #endregion
-
-        #region 模型配置
-
-        /// <summary>
-        /// 获取可用模型列表
-        /// </summary>
-        public async Task<List<ModelInfo>> GetAvailableModelsAsync()
-        {
-            try
+            return new ModelsConfig
             {
-                if (_config == null)
+                Version = "1.5",
+                Description = "WordFlow 默认模型配置",
+                BaseUrl = "https://gitee.com/yanlin-cheng/wordflow/releases/download/models-v1.0.0",
+                MirrorUrl = "https://github.com/yanlin-cheng/WordFlow/releases/download/models-v1.0.0",
+                Models = new List<ModelInfo>
                 {
-                    await LoadConfigAsync();
+                    new ModelInfo
+                    {
+                        Id = "sensevoice-small-onnx",
+                        Name = "SenseVoice Small",
+                        Size = "约 156 MB（分卷压缩）",
+                        SizeBytes = 163561472,
+                        Description = "轻量级多语种语音识别模型，基于 ONNX 推理，速度快。支持中文、英文、日文、韩文、粤语。采用 INT8 量化，模型体积小，适合实时语音识别场景。",
+                        Default = true,
+                        Files = new ModelFiles
+                        {
+                            Archive = "sensevoice-small-onnx.zip",
+                            Parts = new[] { "sensevoice-small-onnx.zip.001", "sensevoice-small-onnx.zip.002" }
+                        },
+                        RequiredFiles = new List<string> { "model.int8.onnx", "tokens.txt" },
+                        DownloadSources = new List<DownloadSource>
+                        {
+                            new DownloadSource
+                            {
+                                Name = "Gitee",
+                                Url = "https://gitee.com/yanlin-cheng/wordflow/releases/download/models-v1.0.0",
+                                Region = "cn",
+                                Priority = 1,
+                                UseParts = true
+                            },
+                            new DownloadSource
+                            {
+                                Name = "GitHub",
+                                Url = "https://github.com/yanlin-cheng/WordFlow/releases/download/models-v1.0.0",
+                                Region = "global",
+                                Priority = 2,
+                                UseParts = false
+                            }
+                        }
+                    }
                 }
-                
-                return _config?.Models ?? new List<ModelInfo>();
-            }
-            catch (Exception ex)
-            {
-                Logger.Log($"获取模型列表失败：{ex.Message}");
-                return new List<ModelInfo>();
-            }
+            };
         }
 
         /// <summary>
@@ -380,40 +411,6 @@ namespace WordFlow.Services
         }
         
         /// <summary>
-        /// 获取默认模型配置（硬编码备用）
-        /// </summary>
-        private ModelsConfig GetDefaultModelsConfig()
-        {
-            return new ModelsConfig
-            {
-                Version = "1.0",
-                Description = "WordFlow 默认模型配置",
-                BaseUrl = "https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v1.0.0",
-                MirrorUrl = "https://gitee.com/cheng-yanlin/WordFlow-Release/releases/download/v1.0.0",
-                Models = new List<ModelInfo>
-                {
-                    new ModelInfo
-                    {
-                        Id = "paraformer-zh",
-                        Name = "Paraformer 中文",
-                        Size = "200 MB",
-                        SizeBytes = 209715200,
-                        Description = "中文语音识别模型，准确率高，适合中文场景",
-                        Default = true,
-                        Files = new ModelFiles
-                        {
-                            Archive = "paraformer-zh.tar.bz2",
-                            Parts = new[] { "paraformer-zh.tar.bz2.part1", "paraformer-zh.tar.bz2.part2", "paraformer-zh.tar.bz2.part3" }
-                        },
-                        RequiredFiles = new List<string> { "model.int8.onnx", "tokens.txt" }
-                    }
-                    // SenseVoice 小模型 - 待开发
-                    // 未来将支持多语种模型，支持中英日韩粤
-                }
-            };
-        }
-
-        /// <summary>
         /// 获取默认模型
         /// </summary>
         public async Task<ModelInfo?> GetDefaultModelAsync()
@@ -422,12 +419,69 @@ namespace WordFlow.Services
             return models.FirstOrDefault(m => m.Default) ?? models.FirstOrDefault();
         }
 
+        /// <summary>
+        /// 获取可用模型列表
+        /// </summary>
+        public async Task<List<ModelInfo>> GetAvailableModelsAsync()
+        {
+            await LoadConfigAsync();
+            return _config?.Models ?? new List<ModelInfo>();
+        }
+
+        /// <summary>
+        /// 检查目录是否包含有效的模型文件
+        /// </summary>
+        private bool IsValidModel(string modelDir)
+        {
+            var hasModel = File.Exists(Path.Combine(modelDir, "model.onnx")) ||
+                          File.Exists(Path.Combine(modelDir, "model.int8.onnx"));
+            var hasTokens = File.Exists(Path.Combine(modelDir, "tokens.txt"));
+            return hasModel && hasTokens;
+        }
+
+        /// <summary>
+        /// 尝试修复模型目录名称（处理旧版模型 ID 名称不匹配问题）
+        /// 旧版模型目录名可能是 "sensevoice-small"，新版是 "sensevoice-small-onnx"
+        /// </summary>
+        public void FixModelDirectoryNames()
+        {
+            try
+            {
+                if (!Directory.Exists(_modelsDir))
+                    return;
+
+                // 旧版模型目录名 -> 新版模型目录名 映射
+                var nameMapping = new Dictionary<string, string>
+                {
+                    { "sensevoice-small", "sensevoice-small-onnx" }
+                };
+
+                foreach (var oldName in nameMapping.Keys)
+                {
+                    var oldDir = Path.Combine(_modelsDir, oldName);
+                    var newName = nameMapping[oldName];
+                    var newDir = Path.Combine(_modelsDir, newName);
+
+                    if (Directory.Exists(oldDir) && !Directory.Exists(newDir))
+                    {
+                        Logger.Log($"重命名模型目录：{oldDir} -> {newDir}");
+                        Directory.Move(oldDir, newDir);
+                        Logger.Log($"模型目录重命名完成：{newDir}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"重命名模型目录失败：{ex.Message}");
+            }
+        }
+
         #endregion
 
         #region 下载模型
 
         /// <summary>
-        /// 下载并安装模型（支持多下载源自动切换）
+        /// 下载并安装模型（支持多下载源自动切换、分卷下载）
         /// </summary>
         public async Task<DownloadResult> DownloadModelAsync(
             ModelInfo model, 
@@ -442,20 +496,6 @@ namespace WordFlow.Services
                 // 确保模型目录存在
                 Directory.CreateDirectory(_modelsDir);
                 
-                // 检查是否有分卷文件（Gitee 分卷下载）
-                if (model.Files.Parts != null && model.Files.Parts.Length > 0)
-                {
-                    Logger.Log($"使用分卷下载：{model.Files.Parts.Length} 个分包");
-                    return await DownloadModelFromGiteeAsync(
-                        model.Id,
-                        "wanddream",  // Gitee 用户名
-                        "WordFlow",  // 仓库名
-                        "v1.0.0",  // 版本
-                        model.Files.Parts,
-                        model.SizeBytes,
-                        cancellationToken);
-                }
-                
                 // 获取最优下载源列表（按区域优先级排序）
                 var sources = GetOptimalDownloadSources(model);
                 
@@ -469,7 +509,17 @@ namespace WordFlow.Services
                     if (string.IsNullOrEmpty(baseUrl))
                     {
                         Logger.Log("未配置下载基础 URL，使用默认 Gitee 地址");
-                        baseUrl = "https://gitee.com/wanddream/WordFlow/releases/download/v1.0.0";
+                        baseUrl = "https://gitee.com/yanlin-cheng/WordFlow/releases/download/models-v1.0.0/";
+                    }
+                    
+                    // 检查是否有分卷文件
+                    if (model.Files.Parts != null && model.Files.Parts.Length > 0)
+                    {
+                        Logger.Log($"使用分卷下载：{model.Files.Parts.Length} 个分包");
+                        return await DownloadModelWithPartsAsync(
+                            model,
+                            baseUrl,
+                            cancellationToken);
                     }
                     
                     return await DownloadFromSingleSourceAsync(model, baseUrl, cancellationToken);
@@ -485,7 +535,20 @@ namespace WordFlow.Services
                         StatusChanged?.Invoke(this, $"正在从 {source.Name} 下载...");
                         Logger.Log($"尝试从下载源下载：{source.Name} - {source.Url}");
                         
-                        var result = await DownloadFromSingleSourceAsync(model, source.Url, cancellationToken, source.Name);
+                        // 检查是否需要使用分卷下载
+                        bool useParts = source.UseParts || (model.Files.Parts != null && model.Files.Parts.Length > 0);
+                        
+                        DownloadResult result;
+                        if (useParts && model.Files.Parts != null && model.Files.Parts.Length > 0)
+                        {
+                            // 使用分卷下载
+                            result = await DownloadModelWithPartsAsync(model, source.Url, cancellationToken, source.Name);
+                        }
+                        else
+                        {
+                            // 使用单文件下载
+                            result = await DownloadFromSingleSourceAsync(model, source.Url, cancellationToken, source.Name);
+                        }
                         
                         if (result.Success)
                         {
@@ -572,7 +635,123 @@ namespace WordFlow.Services
             StatusChanged?.Invoke(this, "模型安装完成！");
             Logger.Log($"模型安装成功：{model.Id}");
             
+            // 额外：复制模型到项目根目录的 PythonASR/models（如果存在）
+            // 这样可以确保从任何位置启动 ASR 服务都能找到模型
+            CopyModelToProjectRoot(model.Id);
+            
             return new DownloadResult { Success = true, ModelPath = modelPath };
+        }
+
+        /// <summary>
+        /// 使用分卷下载模型（支持 ZIP 分卷格式）
+        /// </summary>
+        private async Task<DownloadResult> DownloadModelWithPartsAsync(
+            ModelInfo model,
+            string baseUrl,
+            CancellationToken cancellationToken,
+            string sourceName = "Default")
+        {
+            try
+            {
+                Logger.Log($"开始分卷下载模型：{model.Id}");
+                StatusChanged?.Invoke(this, $"准备下载 {model.Id}...");
+                
+                // 确保模型目录存在
+                Directory.CreateDirectory(_modelsDir);
+                
+                // 确保 baseUrl 以 / 结尾
+                if (!baseUrl.EndsWith("/"))
+                {
+                    baseUrl += "/";
+                }
+                
+                // 下载所有分包
+                var partPaths = new List<string>();
+                var partFiles = model.Files.Parts;
+                
+                for (int i = 0; i < partFiles.Length; i++)
+                {
+                    var partFile = partFiles[i];
+                    var partUrl = $"{baseUrl}{partFile}";
+                    var partPath = Path.Combine(_modelsDir, partFile);
+                    
+                    Logger.Log($"下载分包 {i + 1}/{partFiles.Length}: {partFile}");
+                    StatusChanged?.Invoke(this, $"正在下载模型 ({i + 1}/{partFiles.Length})...");
+                    
+                    var downloadResult = await DownloadFileWithResumeAsync(
+                        partUrl, 
+                        partPath, 
+                        model.SizeBytes / partFiles.Length,  // 估算每个分包大小
+                        cancellationToken,
+                        (progress) =>
+                        {
+                            // 计算整体进度
+                            var overallProgress = ((i + progress / 100.0) / partFiles.Length) * 100;
+                            ProgressChanged?.Invoke(this, new DownloadProgressEventArgs
+                            {
+                                BytesReceived = (long)(model.SizeBytes * overallProgress / 100),
+                                TotalBytes = model.SizeBytes,
+                                ProgressPercentage = overallProgress
+                            });
+                        });
+                    
+                    if (!downloadResult)
+                    {
+                        return new DownloadResult { Success = false, Error = $"分包 {partFile} 下载失败" };
+                    }
+                    
+                    partPaths.Add(partPath);
+                }
+                
+                // 合并分包
+                StatusChanged?.Invoke(this, "正在合并模型文件...");
+                var mergedPath = Path.Combine(_modelsDir, $"{model.Id}.zip");
+                await MergePartsAsync(partPaths, mergedPath);
+                
+                // 删除分包文件
+                foreach (var partPath in partPaths)
+                {
+                    try { File.Delete(partPath); } catch { }
+                }
+                
+                // 解压（ZIP 格式）
+                StatusChanged?.Invoke(this, "正在解压模型...");
+                var extractResult = await ExtractZipModelAsync(mergedPath, model.Id);
+                
+                // 删除合并后的文件
+                try { File.Delete(mergedPath); } catch { }
+                
+                if (!extractResult.Success)
+                {
+                    return new DownloadResult { Success = false, Error = extractResult.Error ?? "解压失败" };
+                }
+                
+                // 验证
+                StatusChanged?.Invoke(this, "正在验证模型...");
+                var modelPath = Path.Combine(_modelsDir, model.Id);
+                if (!ValidateModelIntegrity(modelPath, model))
+                {
+                    return new DownloadResult { Success = false, Error = "模型文件验证失败" };
+                }
+                
+                StatusChanged?.Invoke(this, "模型安装完成！");
+                Logger.Log($"模型安装成功：{model.Id}");
+                
+                // 额外：复制模型到项目根目录的 PythonASR/models（如果存在）
+                CopyModelToProjectRoot(model.Id);
+                
+                return new DownloadResult { Success = true, ModelPath = Path.Combine(_modelsDir, model.Id) };
+            }
+            catch (OperationCanceledException)
+            {
+                Logger.Log("下载被取消");
+                return new DownloadResult { Success = false, Error = "用户取消下载" };
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"下载模型失败：{ex.Message}");
+                return new DownloadResult { Success = false, Error = ex.Message };
+            }
         }
 
         /// <summary>
@@ -811,6 +990,193 @@ namespace WordFlow.Services
         #region 解压模型
 
         /// <summary>
+        /// 解压 ZIP 模型文件
+        /// </summary>
+        private async Task<(bool Success, string? Error)> ExtractZipModelAsync(string zipPath, string modelId)
+        {
+            try
+            {
+                var modelsDir = _modelsDir;
+                Logger.Log($"开始解压 ZIP: {zipPath}");
+                Logger.Log($"目标目录：{modelsDir}");
+                
+                // 使用 SharpZipLib 解压 ZIP
+                await Task.Run(() =>
+                {
+                    using (var fs = new FileStream(zipPath, FileMode.Open, FileAccess.Read))
+                    using (var zipStream = new ICSharpCode.SharpZipLib.Zip.ZipFile(fs))
+                    {
+                        foreach (ICSharpCode.SharpZipLib.Zip.ZipEntry entry in zipStream)
+                        {
+                            if (entry.IsFile)
+                            {
+                                var entryName = entry.Name;
+                                
+                                // 跳过目录条目
+                                if (string.IsNullOrEmpty(entryName)) continue;
+                                
+                                // 处理可能的顶层目录
+                                var parts = entryName.Split('/');
+                                string relativePath;
+                                if (parts.Length > 1)
+                                {
+                                    // 跳过第一层目录（通常是压缩包内的文件夹名）
+                                    relativePath = string.Join("/", parts.Skip(1));
+                                }
+                                else
+                                {
+                                    relativePath = entryName;
+                                }
+                                
+                                if (string.IsNullOrEmpty(relativePath)) continue;
+                                
+                                var targetPath = Path.Combine(modelsDir, modelId, relativePath);
+                                var targetDir = Path.GetDirectoryName(targetPath);
+                                
+                                if (!string.IsNullOrEmpty(targetDir) && !Directory.Exists(targetDir))
+                                {
+                                    Directory.CreateDirectory(targetDir);
+                                }
+                                
+                                using (var entryStream = zipStream.GetInputStream(entry))
+                                using (var outputStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
+                                {
+                                    entryStream.CopyTo(outputStream);
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                Logger.Log("ZIP 解压完成，检查目录结构...");
+                
+                // 查找解压后的目录并重命名
+                var targetDir = Path.Combine(modelsDir, modelId);
+                
+                // 查找解压出来的目录
+                var allDirs = Directory.GetDirectories(modelsDir);
+                var extractedDir = allDirs.FirstOrDefault(d => 
+                {
+                    var name = Path.GetFileName(d);
+                    // 排除目标目录本身和标记文件目录
+                    if (name == modelId) return false;
+                    if (File.Exists(Path.Combine(d, ".first_run_completed"))) return false;
+                    // 匹配包含模型关键字的目录
+                    return name.Contains("sensevoice") || 
+                           name.Contains(modelId.Replace("-", "_")) ||
+                           Directory.GetFiles(d, "*.onnx").Length > 0;
+                });
+                
+                if (extractedDir != null && !extractedDir.Equals(targetDir, StringComparison.OrdinalIgnoreCase))
+                {
+                    Logger.Log($"找到解压目录：{extractedDir}");
+                    
+                    // 如果目标目录已存在，先删除
+                    if (Directory.Exists(targetDir))
+                    {
+                        Logger.Log($"删除已存在的目标目录：{targetDir}");
+                        Directory.Delete(targetDir, true);
+                    }
+                    
+                    // 移动文件到目标目录
+                    CopyDirectory(extractedDir, targetDir);
+                    
+                    // 删除原目录
+                    Directory.Delete(extractedDir, true);
+                    Logger.Log($"移动文件：{extractedDir} -> {targetDir}");
+                }
+                
+                Logger.Log("ZIP 解压流程完成");
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"ZIP 解压异常：{ex.Message}");
+                Logger.Log($"堆栈跟踪：{ex.StackTrace}");
+                return (false, $"ZIP 解压失败：{ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 复制模型到项目根目录的 PythonASR/models（如果存在）
+        /// 这样可以确保从任何位置启动 ASR 服务都能找到模型
+        /// </summary>
+        private void CopyModelToProjectRoot(string modelId)
+        {
+            try
+            {
+                var exeDir = AppDomain.CurrentDomain.BaseDirectory;
+                
+                // 项目根目录的 PythonASR/models 路径
+                var projectRootModelsDir = Path.GetFullPath(Path.Combine(exeDir, "..", "..", "..", "PythonASR", "models"));
+                
+                // 检查项目根目录是否存在（通过检查是否有 PythonASR 目录）
+                if (!Directory.Exists(Path.GetDirectoryName(projectRootModelsDir)))
+                {
+                    Logger.Log($"项目根目录不存在，跳过复制：{projectRootModelsDir}");
+                    return;
+                }
+                
+                var sourceModelDir = Path.Combine(_modelsDir, modelId);
+                var targetModelDir = Path.Combine(projectRootModelsDir, modelId);
+                
+                // 如果源目录不存在，跳过
+                if (!Directory.Exists(sourceModelDir))
+                {
+                    Logger.Log($"源模型目录不存在：{sourceModelDir}");
+                    return;
+                }
+                
+                // 如果目标目录已存在，先删除（确保同步最新文件）
+                if (Directory.Exists(targetModelDir))
+                {
+                    Logger.Log($"删除已存在的项目根目录模型：{targetModelDir}");
+                    Directory.Delete(targetModelDir, true);
+                }
+                
+                // 确保目标目录存在
+                Directory.CreateDirectory(targetModelDir);
+                
+                // 复制模型文件
+                Logger.Log($"复制模型到项目根目录：{sourceModelDir} -> {targetModelDir}");
+                CopyDirectory(sourceModelDir, targetModelDir);
+                
+                Logger.Log($"模型已复制到项目根目录：{targetModelDir}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"复制模型到项目根目录失败：{ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 复制目录内容
+        /// </summary>
+        private void CopyDirectory(string sourceDir, string targetDir)
+        {
+            if (!Directory.Exists(targetDir))
+            {
+                Directory.CreateDirectory(targetDir);
+            }
+            
+            // 复制文件
+            foreach (var file in Directory.GetFiles(sourceDir))
+            {
+                var fileName = Path.GetFileName(file);
+                var targetPath = Path.Combine(targetDir, fileName);
+                File.Copy(file, targetPath, true);
+            }
+            
+            // 复制子目录
+            foreach (var dir in Directory.GetDirectories(sourceDir))
+            {
+                var dirName = Path.GetFileName(dir);
+                var targetPath = Path.Combine(targetDir, dirName);
+                CopyDirectory(dir, targetPath);
+            }
+        }
+
+        /// <summary>
         /// 解压模型（使用 SharpZipLib，不依赖 Python）
         /// </summary>
         private async Task<(bool Success, string? Error)> ExtractModelAsync(string archivePath, string modelId)
@@ -998,6 +1364,7 @@ namespace WordFlow.Services
         public string Url { get; set; } = "";
         public string Region { get; set; } = "global"; // "cn" 或 "global"
         public int Priority { get; set; }
+        public bool UseParts { get; set; } // 是否使用分卷下载
     }
 
     /// <summary>
