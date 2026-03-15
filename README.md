@@ -6,6 +6,17 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 
 ---
 
+## 🌍 多语言版本 / Multi-language Versions
+
+| 语言 | 版本 |
+|------|------|
+| 🇨🇳 [中文](README.md) | 简体中文 |
+| 🇬🇧 [English](README.en.md) | 英语 |
+| 🇯🇵 [日本語](README.ja.md) | 日语 |
+| 🇰🇷 [한국어](README.ko.md) | 韩语 |
+
+---
+
 ## 📥 立即下载
 
 ### 安装程序
@@ -210,13 +221,6 @@ WordFlow/
 | 📂 **GitHub 源码仓库** | https://github.com/yanlin-cheng/WordFlow |
 | 🐛 **问题反馈** | https://github.com/yanlin-cheng/WordFlow/issues |
 | ⬇️ **下载地址** | https://github.com/yanlin-cheng/WordFlow/releases |
-
-### 多语言版本
-
-- [🇨🇳 中文](README.md)
-- [🇬🇧 English](README.en.md)
-- [🇯 日本語](README.ja.md)
-- [🇰🇷 한국어](README.ko.md)
 
 ---
 
