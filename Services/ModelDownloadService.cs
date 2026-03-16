@@ -325,9 +325,9 @@ namespace WordFlow.Services
                     {
                         Id = "sensevoice-small-onnx",
                         Name = "SenseVoice Small",
-                        Size = "约 156 MB（分卷压缩）",
+                        Size = "约 156 MB（分卷压缩） | About 156 MB (compressed)",
                         SizeBytes = 163561472,
-                        Description = "轻量级多语种语音识别模型，基于 ONNX 推理，速度快。支持中文、英文、日文、韩文、粤语。采用 INT8 量化，模型体积小，适合实时语音识别场景。",
+                        Description = "轻量级多语种语音识别模型，基于 ONNX 推理，速度快。支持中文、英文、日文、韩文、粤语。采用 INT8 量化，模型体积小，适合实时语音识别场景。\n\nLightweight multi-language speech recognition model with ONNX inference, fast and efficient. Supports Chinese, English, Japanese, Korean, and Cantonese. Uses INT8 quantization for smaller model size, ideal for real-time speech recognition scenarios.",
                         Default = true,
                         Files = new ModelFiles
                         {

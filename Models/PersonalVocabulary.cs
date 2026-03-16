@@ -74,14 +74,26 @@ namespace WordFlow.Models
         public List<Guid> RelatedHistoryIds { get; set; } = new();
         
         /// <summary>
-        /// 计算动态权重（基于频率、时效性）
+        /// 计算动态权重（基于频率、时效性、来源）
+        /// 用于导出热词文件供 ASR 服务使用
         /// </summary>
         public double CalculateDynamicWeight()
         {
-            // 基础权重
+            // 基础权重：根据来源设置不同的基础值
             double weight = Weight;
             
-            // 频率加成：使用越多权重越高（封顶5倍）
+            // 来源加成：手动添加的词汇权重更高
+            double sourceBonus = Source switch
+            {
+                VocabularySource.Manual => 5.0,      // 手动添加：+5.0 基础权重
+                VocabularySource.AIGenerated => 3.0, // AI 生成：+3.0 基础权重
+                VocabularySource.Imported => 2.0,    // 导入：+2.0 基础权重
+                VocabularySource.AutoLearned => 0.0, // 自动学习：无加成
+                _ => 0.0
+            };
+            weight += sourceBonus;
+            
+            // 频率加成：使用越多权重越高（封顶 5 倍）
             double freqBonus = Math.Min(Frequency * 0.1, 5.0);
             weight += freqBonus;
             
@@ -89,14 +101,16 @@ namespace WordFlow.Models
             var daysSinceLastUse = (DateTime.Now - LastUsed).TotalDays;
             if (daysSinceLastUse > 30)
             {
-                weight *= 0.9; // 30天未用衰减10%
+                weight *= 0.9; // 30 天未用衰减 10%
             }
             if (daysSinceLastUse > 90)
             {
-                weight *= 0.7; // 90天未用衰减30%
+                weight *= 0.7; // 90 天未用衰减 30%
             }
             
-            return Math.Max(weight, 0.5); // 最低0.5
+            // 手动添加的词汇最低权重保证
+            double minWeight = Source == VocabularySource.Manual ? 8.0 : 0.5;
+            return Math.Max(weight, minWeight);
         }
     }
     

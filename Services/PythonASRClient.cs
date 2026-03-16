@@ -131,74 +131,107 @@ namespace WordFlow.Services
                     Path.Combine(exeDir, "..", "PythonASR", "start_server.py"),
                 };
 
-                string? batchPath = null;
-                string? pythonPath = null;
-
+                // 直接使用 Process 类启动 Python 脚本（方案三：保守方案）
+                // 优先查找 Python 脚本
+                string? pythonScriptPath = null;
+                
                 foreach (var path in possiblePaths)
                 {
                     var fullPath = Path.GetFullPath(path);
                     Logger.Debug($"检查路径：{fullPath}");
                     
-                    if (File.Exists(fullPath))
+                    if (fullPath.EndsWith(".py") && File.Exists(fullPath))
                     {
-                        if (fullPath.EndsWith(".bat"))
-                        {
-                            batchPath = fullPath;
-                            Logger.Info($"找到批处理文件：{batchPath}");
-                        }
-                        else if (fullPath.EndsWith(".py"))
-                        {
-                            pythonPath = fullPath;
-                            Logger.Info($"找到 Python 脚本：{pythonPath}");
-                        }
+                        pythonScriptPath = fullPath;
+                        Logger.Info($"找到 Python 脚本：{pythonScriptPath}");
+                        break;
                     }
                 }
 
-                if (batchPath != null)
+                if (pythonScriptPath == null)
                 {
-                    // 使用批处理文件启动
-                    Logger.Info($"使用批处理文件启动服务：{batchPath}");
-                    var processInfo = new ProcessStartInfo
-                    {
-                        FileName = "cmd.exe",
-                        Arguments = $"/c \"{batchPath}\"",
-                        WorkingDirectory = Path.GetDirectoryName(batchPath),
-                        UseShellExecute = true,
-                        CreateNoWindow = true,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    };
-                    Process.Start(processInfo);
-                    Logger.Info("Python ASR 服务进程已启动（批处理）");
-                    return true;
-                }
-                else if (pythonPath != null)
-                {
-                    // 尝试使用内置 Python 启动
-                    var pythonExePath = Path.Combine(exeDir, "PythonASR", "python", "python.exe");
-                    if (!File.Exists(pythonExePath))
-                    {
-                        pythonExePath = "python"; // 使用系统 Python
-                    }
-
-                    Logger.Info($"使用 Python 启动服务：{pythonExePath} {pythonPath}");
-                    var processInfo = new ProcessStartInfo
-                    {
-                        FileName = pythonExePath,
-                        Arguments = $"\"{pythonPath}\"",
-                        WorkingDirectory = Path.GetDirectoryName(pythonPath),
-                        UseShellExecute = true,
-                        CreateNoWindow = true,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    };
-                    Process.Start(processInfo);
-                    Logger.Info("Python ASR 服务进程已启动（Python）");
-                    return true;
-                }
-                else
-                {
-                    Logger.Error("未找到 Python ASR 服务启动文件");
+                    Logger.Error("未找到 Python ASR 服务启动脚本");
                     return false;
                 }
+
+                // 查找嵌入的 Python 解释器
+                var serverDir = Path.GetDirectoryName(pythonScriptPath);
+                var pythonExePath = Path.Combine(serverDir, "python", "python.exe");
+                
+                if (!File.Exists(pythonExePath))
+                {
+                    Logger.Error($"找不到嵌入的 Python 解释器：{pythonExePath}");
+                    return false;
+                }
+
+                Logger.Info($"启动 Python ASR 服务：{pythonExePath} {pythonScriptPath}");
+                
+                // 创建进程启动信息
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = pythonExePath,
+                    // 关键：使用引号包裹路径，正确处理空格（如 Program Files (x86)）
+                    // -u: 禁用输出缓冲，确保日志实时输出
+                    Arguments = $"-u \"{pythonScriptPath}\" --port 5000",
+                    WorkingDirectory = serverDir,
+                    UseShellExecute = false,      // 不使用 Shell，以便隐藏窗口
+                    CreateNoWindow = true,        // 不创建窗口
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    RedirectStandardOutput = true,  // 重定向输出以便日志记录
+                    RedirectStandardError = true,   // 重定向错误输出
+                    // 设置环境变量，确保 UTF-8 编码
+                    StandardOutputEncoding = System.Text.Encoding.UTF8,
+                    StandardErrorEncoding = System.Text.Encoding.UTF8
+                };
+
+                // 添加环境变量 PYTHONIOENCODING，确保 Python 输出使用 UTF-8
+                processInfo.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
+
+                var process = new Process { StartInfo = processInfo };
+                process.Start();
+                
+                Logger.Info($"Python ASR 服务进程已启动，PID={process.Id}");
+                
+                // 异步记录输出日志
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        while (!process.HasExited)
+                        {
+                            var output = await process.StandardOutput.ReadLineAsync();
+                            if (!string.IsNullOrEmpty(output))
+                            {
+                                Logger.Info($"[ASR-OUT] {output}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Debug($"[ASR-OUT] 读取输出失败：{ex.Message}");
+                    }
+                });
+
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        while (!process.HasExited)
+                        {
+                            var error = await process.StandardError.ReadLineAsync();
+                            if (!string.IsNullOrEmpty(error))
+                            {
+                                Logger.Warning($"[ASR-ERR] {error}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Debug($"[ASR-ERR] 读取错误失败：{ex.Message}");
+                    }
+                });
+                
+                return true;
             }
             catch (Exception ex)
             {

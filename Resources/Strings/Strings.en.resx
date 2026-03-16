@@ -1275,4 +1275,23 @@ The application will close during installation and needs to be restarted after c
   <data name="UpdateDialog_Seconds" xml:space="preserve">
     <value>sec</value>
   </data>
+  
+  <!-- Close Dialog -->
+  <data name="CloseDialog_Title" xml:space="preserve">
+    <value>Close WordFlow</value>
+  </data>
+  <data name="CloseDialog_Message" xml:space="preserve">
+    <value>How would you like to handle WordFlow?
+
+• Minimize to tray: The program continues to run in the background, you can press the hotkey for voice input
+• Exit: Completely close the program
+
+You can change this behavior in Settings.</value>
+  </data>
+  <data name="CloseDialog_MinimizeToTray" xml:space="preserve">
+    <value>Minimize to Tray</value>
+  </data>
+  <data name="CloseDialog_Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
 </root>

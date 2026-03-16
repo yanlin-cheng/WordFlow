@@ -27,6 +27,11 @@ namespace WordFlow.Views
         
         // 记录最后下载的模型 ID
         private string? _lastDownloadedModelId;
+        
+        // 模型列表缓存
+        private static List<ModelInfo>? _cachedAvailableModels;
+        private static DateTime _cacheTime;
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
         public ModelManagerWindow()
         {
@@ -66,81 +71,184 @@ namespace WordFlow.Views
         protected override string GetWindowTitleResourceKey() => "ModelManager_Title";
 
         /// <summary>
-        /// 加载模型列表 - 优先从 ASR 服务获取已安装模型，再扫描本地目录 + 配置文件
+        /// 根据当前 UI 语言获取本地化的模型描述
+        /// 如果描述包含"\n\n"分隔符，则根据语言返回对应部分
+        /// </summary>
+        private string GetLocalizedDescription(string description)
+        {
+            // 检查当前 UI 语言是否为英文
+            bool isEnglish = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName == "en";
+            
+            if (string.IsNullOrEmpty(description))
+                return description;
+            
+            // 检查是否包含中英文双语分隔符
+            int separatorIndex = description.IndexOf("\n\n");
+            if (separatorIndex > 0)
+            {
+                string chinesePart = description.Substring(0, separatorIndex).Trim();
+                string englishPart = description.Substring(separatorIndex + 2).Trim();
+                
+                // 根据当前语言返回对应部分
+                if (isEnglish && !string.IsNullOrEmpty(englishPart))
+                {
+                    return englishPart;
+                }
+                else if (!isEnglish && !string.IsNullOrEmpty(chinesePart))
+                {
+                    return chinesePart;
+                }
+            }
+            
+            // 如果没有分隔符或对应语言部分为空，返回原始描述
+            return description;
+        }
+
+        /// <summary>
+        /// 根据当前 UI 语言获取本地化的模型大小
+        /// 如果大小包含" | "分隔符，则根据语言返回对应部分
+        /// </summary>
+        private string GetLocalizedSize(string size)
+        {
+            // 检查当前 UI 语言是否为英文
+            bool isEnglish = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName == "en";
+            
+            if (string.IsNullOrEmpty(size))
+                return size;
+            
+            // 检查是否包含中英文双语分隔符
+            int separatorIndex = size.IndexOf(" | ");
+            if (separatorIndex > 0)
+            {
+                string chinesePart = size.Substring(0, separatorIndex).Trim();
+                string englishPart = size.Substring(separatorIndex + 3).Trim();
+                
+                // 根据当前语言返回对应部分
+                if (isEnglish && !string.IsNullOrEmpty(englishPart))
+                {
+                    return englishPart;
+                }
+                else if (!isEnglish && !string.IsNullOrEmpty(chinesePart))
+                {
+                    return chinesePart;
+                }
+            }
+            
+            // 如果没有分隔符或对应语言部分为空，返回原始大小
+            return size;
+        }
+
+        /// <summary>
+        /// 加载模型列表 - 优化版本：并行加载，减少超时时间
         /// </summary>
         private async Task LoadModelsAsync()
         {
             try
             {
+                // 显示加载提示
+                LoadingPanel.Visibility = Visibility.Visible;
+                ModelListScroll.Visibility = Visibility.Collapsed;
+                EmptyPanel.Visibility = Visibility.Collapsed;
+                LoadingText.Text = "正在检测模型...";
+                
                 ModelListPanel.Children.Clear();
                 
-                // 1. 首先尝试从 ASR 服务获取已安装模型列表（最准确）
-                var installedModelIds = new HashSet<string>();
-                var currentModelId = "";
-                bool serviceConnected = false;
+                // 1. 并行执行：ASR 服务检查和本地扫描
+                Logger.Log("开始并行加载模型列表...");
                 
-                try
-                {
-                    var speechService = new SpeechRecognitionService("http://127.0.0.1:5000");
-                    bool isConnected = await speechService.CheckConnectionAsync();
-                    
-                    if (isConnected)
-                    {
-                        serviceConnected = true;
-                        Logger.Log("ASR 服务已连接，从服务获取模型列表...");
-                        
-                        // 获取健康检查信息（包含已安装模型和当前模型）
-                        var healthResponse = await speechService.GetHealthAsync();
-                        currentModelId = healthResponse?.current_model ?? "";
-                        var serviceModels = healthResponse?.installed_models ?? new List<string>();
-                        foreach (var modelId in serviceModels)
-                        {
-                            installedModelIds.Add(modelId);
-                        }
-                        
-                        Logger.Log($"从服务获取到 {serviceModels.Count} 个已安装模型，当前模型：{currentModelId}");
-                    }
-                    
-                    speechService.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Log($"从 ASR 服务获取模型列表失败：{ex.Message}，将扫描本地目录");
-                    // 不抛出异常，继续执行本地扫描
-                }
-                
-                // 2. 无论服务是否连接，都扫描本地目录（确保本地模型被检测）
-                Logger.Log("扫描本地模型目录...");
                 var outputDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 var outputModelsDir = Path.Combine(outputDir ?? "", "PythonASR", "models");
                 
-                Logger.Log($"加载模型列表：输出目录模型路径={outputModelsDir}");
-                
-                if (Directory.Exists(outputModelsDir))
+                // 任务 1：从 ASR 服务获取模型列表（带 1 秒超时）
+                var serviceTask = Task.Run(async () =>
                 {
-                    var modelDirs = Directory.GetDirectories(outputModelsDir);
-                    foreach (var modelDir in modelDirs)
+                    var installedModelIds = new HashSet<string>();
+                    var currentModelId = "";
+                    
+                    try
                     {
-                        if (IsValidModel(modelDir))
+                        using var speechService = new SpeechRecognitionService("http://127.0.0.1:5000");
+                        
+                        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+                        try
                         {
-                            var modelId = Path.GetFileName(modelDir);
-                            if (installedModelIds.Add(modelId))
+                            bool isConnected = await speechService.CheckConnectionAsync();
+                            
+                            if (isConnected)
                             {
-                                Logger.Log($"本地扫描发现模型：{modelId}");
+                                Logger.Log("ASR 服务已连接，从服务获取模型列表...");
+                                
+                                var healthResponse = await speechService.GetHealthAsync();
+                                currentModelId = healthResponse?.current_model ?? "";
+                                var serviceModels = healthResponse?.installed_models ?? new List<string>();
+                                foreach (var modelId in serviceModels)
+                                {
+                                    installedModelIds.Add(modelId);
+                                }
+                                
+                                Logger.Log($"从服务获取到 {serviceModels.Count} 个已安装模型，当前模型：{currentModelId}");
+                            }
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            Logger.Log("ASR 服务检查超时（1 秒），使用本地扫描结果");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log($"从 ASR 服务获取模型列表失败：{ex.Message}");
+                    }
+                    
+                    return (installedModelIds, currentModelId);
+                });
+                
+                // 任务 2：扫描本地模型目录
+                var localScanTask = Task.Run(() =>
+                {
+                    var localModels = new HashSet<string>();
+                    Logger.Log($"扫描本地模型目录：{outputModelsDir}");
+                    
+                    if (Directory.Exists(outputModelsDir))
+                    {
+                        var modelDirs = Directory.GetDirectories(outputModelsDir);
+                        foreach (var modelDir in modelDirs)
+                        {
+                            if (IsValidModel(modelDir))
+                            {
+                                var modelId = Path.GetFileName(modelDir);
+                                if (localModels.Add(modelId))
+                                {
+                                    Logger.Log($"本地扫描发现模型：{modelId}");
+                                }
                             }
                         }
                     }
+                    
+                    Logger.Log($"本地扫描发现 {localModels.Count} 个模型");
+                    return localModels;
+                });
+                
+                // 等待两个任务完成
+                var (serviceModels, currentModelId) = await serviceTask;
+                var localModels = await localScanTask;
+                
+                // 合并结果
+                var allInstalledModelIds = serviceModels;
+                foreach (var modelId in localModels)
+                {
+                    if (allInstalledModelIds.Add(modelId))
+                    {
+                        Logger.Log($"合并本地模型：{modelId}");
+                    }
                 }
                 
-                Logger.Log($"本地扫描后已安装模型数量：{installedModelIds.Count}");
+                Logger.Log($"已安装模型总数：{allInstalledModelIds.Count}，当前模型：{currentModelId}");
                 
-                // 3. 显示已安装的模型
-                foreach (var modelId in installedModelIds)
+                // 2. 显示已安装的模型
+                foreach (var modelId in allInstalledModelIds)
                 {
-                    // 获取模型详细信息（从配置文件或默认）
                     var modelInfo = await GetModelInfoAsync(modelId);
                     
-                    // 如果配置文件中没有大小信息，扫描本地目录计算实际大小
                     string sizeStr;
                     if (modelInfo != null && !string.IsNullOrEmpty(modelInfo.Size) && modelInfo.Size != "未知")
                     {
@@ -148,7 +256,6 @@ namespace WordFlow.Views
                     }
                     else
                     {
-                        // 扫描本地目录计算大小（使用已声明的变量）
                         var modelDirPath = Path.Combine(outputModelsDir, modelId);
                         
                         if (Directory.Exists(modelDirPath))
@@ -172,18 +279,18 @@ namespace WordFlow.Views
                         sizeStr,
                         true,       // 已安装
                         false,      // 不显示下载按钮
-                        isCurrentModel); // 是否当前模型
+                        isCurrentModel);
                     ModelListPanel.Children.Add(modelItem);
                 }
                 
-                // 4. 从配置文件获取可下载的模型列表
-                var availableModels = await _downloadService.GetAvailableModelsAsync();
+                // 3. 从缓存或配置获取可下载的模型列表
+                var availableModels = await GetCachedAvailableModelsAsync();
                 Logger.Log($"可用模型配置数量：{availableModels.Count}");
                 
                 // 添加未安装的模型到列表
                 foreach (var model in availableModels)
                 {
-                    if (!installedModelIds.Contains(model.Id))
+                    if (!allInstalledModelIds.Contains(model.Id))
                     {
                         Logger.Log($"添加可下载模型：{model.Id}");
                         var modelItem = CreateModelItem(
@@ -193,13 +300,13 @@ namespace WordFlow.Views
                             model.Size,
                             false,  // 未安装
                             true,   // 显示下载按钮
-                            false); // 不是当前模型
+                            false);
                         ModelListPanel.Children.Add(modelItem);
                     }
                 }
                 
-                // 如果没有任何模型（本地和配置都没有）
-                if (installedModelIds.Count == 0 && availableModels.Count == 0)
+                // 如果没有任何模型
+                if (allInstalledModelIds.Count == 0 && availableModels.Count == 0)
                 {
                     var noModelText = new TextBlock
                     {
@@ -212,15 +319,53 @@ namespace WordFlow.Views
                     ModelListPanel.Children.Add(noModelText);
                 }
                 
-                Logger.Log($"模型列表加载完成，共 {installedModelIds.Count + availableModels.Count} 个模型");
+                Logger.Log($"模型列表加载完成，共 {allInstalledModelIds.Count + availableModels.Count} 个模型");
+                
+                // 隐藏加载提示，显示模型列表
+                LoadingPanel.Visibility = Visibility.Collapsed;
+                
+                if (ModelListPanel.Children.Count > 0)
+                {
+                    ModelListScroll.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    EmptyPanel.Visibility = Visibility.Visible;
+                }
             }
             catch (Exception ex)
             {
                 Logger.Log($"加载模型列表失败：{ex.Message}");
                 Logger.Log($"堆栈跟踪：{ex.StackTrace}");
+                
+                // 显示错误状态
+                LoadingPanel.Visibility = Visibility.Collapsed;
+                EmptyPanel.Visibility = Visibility.Visible;
+                
                 MessageBox.Show($"加载模型列表失败：{ex.Message}", "错误", 
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+        
+        /// <summary>
+        /// 获取可用的模型列表（带缓存）
+        /// </summary>
+        private async Task<List<ModelInfo>> GetCachedAvailableModelsAsync()
+        {
+            // 检查缓存是否有效
+            if (_cachedAvailableModels != null && 
+                DateTime.Now - _cacheTime < CacheDuration)
+            {
+                Logger.Log($"使用缓存的模型列表（{_cachedAvailableModels.Count} 个）");
+                return _cachedAvailableModels;
+            }
+            
+            // 从服务获取并缓存
+            _cachedAvailableModels = await _downloadService.GetAvailableModelsAsync();
+            _cacheTime = DateTime.Now;
+            Logger.Log($"已缓存模型列表（{_cachedAvailableModels.Count} 个）");
+            
+            return _cachedAvailableModels;
         }
         
         /// <summary>
@@ -358,10 +503,11 @@ namespace WordFlow.Views
             
             infoPanel.Children.Add(headerPanel);
             
-            // 描述文字（完整显示）
+            // 描述文字（根据当前 UI 语言显示对应部分）
+            var localizedDesc = GetLocalizedDescription(description);
             var descText = new TextBlock 
             { 
-                Text = description, 
+                Text = localizedDesc, 
                 FontSize = 13, 
                 Foreground = new SolidColorBrush(Color.FromRgb(117, 117, 117)),
                 TextWrapping = TextWrapping.Wrap,
@@ -370,10 +516,11 @@ namespace WordFlow.Views
             };
             infoPanel.Children.Add(descText);
             
-            // 大小信息
+            // 大小信息（根据当前 UI 语言显示对应部分）
+            var localizedSize = GetLocalizedSize(size);
             var sizeText = new TextBlock 
             { 
-                Text = $"💾 {size}", 
+                Text = $"💾 {localizedSize}", 
                 FontSize = 12, 
                 Foreground = new SolidColorBrush(Color.FromRgb(158, 158, 158))
             };
@@ -446,15 +593,12 @@ namespace WordFlow.Views
             
             try
             {
-                // 创建 SpeechRecognitionService 客户端
-                var speechService = new SpeechRecognitionService("http://127.0.0.1:5000");
+                using var speechService = new SpeechRecognitionService("http://127.0.0.1:5000");
                 
-                // 检查服务是否连接
                 bool isConnected = await speechService.CheckConnectionAsync();
                 
                 if (!isConnected)
                 {
-                    // 服务未连接，尝试自动启动
                     var result = MessageBox.Show(
                         string.Format(Strings.ModelManager_ServiceNotRunning, modelId),
                         Strings.ModelManager_ServiceNotRunning,
@@ -471,18 +615,15 @@ namespace WordFlow.Views
                                 Strings.ModelManager_ServiceStartFailed,
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);
-                            speechService.Dispose();
                             return;
                         }
                     }
                     else
                     {
-                        speechService.Dispose();
                         return;
                     }
                 }
                 
-                // 切换模型
                 Logger.Log($"正在切换模型：{modelId}");
                 bool loaded = await speechService.SwitchModelAsync(modelId);
                 
@@ -506,8 +647,6 @@ namespace WordFlow.Views
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                 }
-                
-                speechService.Dispose();
             }
             catch (Exception ex)
             {
@@ -543,13 +682,13 @@ namespace WordFlow.Views
                     if (Directory.Exists(modelPath))
                     {
                         Directory.Delete(modelPath, true);
-                        Logger.Log($"模型已删除: {modelId}");
-                        await LoadModelsAsync(); // 刷新列表
+                        Logger.Log($"模型已删除：{modelId}");
+                        await LoadModelsAsync();
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"删除失败: {ex.Message}", "错误", 
+                    MessageBox.Show($"删除失败：{ex.Message}", "错误", 
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -567,10 +706,8 @@ namespace WordFlow.Views
                 return;
             }
             
-            // 直接获取点击的模型 ID
             var modelId = (string)((Button)sender).Tag;
             
-            // 从配置文件获取模型信息
             var availableModels = await _downloadService.GetAvailableModelsAsync();
             var model = availableModels.FirstOrDefault(m => m.Id == modelId);
             
@@ -581,7 +718,6 @@ namespace WordFlow.Views
                 return;
             }
             
-            // 确认下载
             var confirmResult = MessageBox.Show(
                 string.Format(Strings.ModelManager_ConfirmDownload, model.Name, model.Size),
                 Strings.ModelManager_ConfirmDownload,
@@ -607,9 +743,7 @@ namespace WordFlow.Views
                 // 显示进度区域
                 DownloadProgressGrid.Visibility = Visibility.Visible;
                 BackgroundDownloadButton.Visibility = Visibility.Visible;
-                BackgroundDownloadButton.Content = "⏸️ 取消下载";
                 
-                // 获取要下载的模型
                 var model = modelToDownload ?? await _downloadService.GetDefaultModelAsync();
                 if (model == null)
                 {
@@ -621,7 +755,6 @@ namespace WordFlow.Views
                 Logger.Log($"开始下载模型：{model.Id} ({model.Name})");
                 OnDownloadStatusChanged(this, $"正在下载 {model.Name}...");
                 
-                // 使用 ModelDownloadService 直接下载
                 var result = await _downloadService.DownloadModelAsync(model, true, _downloadCts.Token);
                 
                 if (result.Success)
@@ -629,17 +762,13 @@ namespace WordFlow.Views
                     DownloadStatusText.Text = Strings.ModelManager_DownloadComplete;
                     DownloadProgressText.Text = "100%";
                     
-                    // 记录下载的模型 ID，用于关闭窗口后自动加载
                     _lastDownloadedModelId = model.Id;
                     
-                    // 刷新列表
                     await LoadModelsAsync();
                     
-                    // 隐藏进度
                     DownloadProgressGrid.Visibility = Visibility.Collapsed;
                     BackgroundDownloadButton.Visibility = Visibility.Collapsed;
                     
-                    // 尝试自动加载模型
                     await TryAutoLoadModelAsync(model.Id);
                 }
                 else
@@ -680,15 +809,12 @@ namespace WordFlow.Views
             {
                 Logger.Log($"尝试自动加载模型：{modelId}");
                 
-                // 创建 SpeechRecognitionService 客户端
-                var speechService = new SpeechRecognitionService("http://127.0.0.1:5000");
+                using var speechService = new SpeechRecognitionService("http://127.0.0.1:5000");
                 
-                // 检查服务是否连接
                 bool isConnected = await speechService.CheckConnectionAsync();
                 
                 if (isConnected)
                 {
-                    // 服务已连接，尝试加载模型
                     Logger.Log("ASR 服务已连接，尝试加载模型...");
                     var loaded = await speechService.SwitchModelAsync(modelId);
                     
@@ -713,7 +839,6 @@ namespace WordFlow.Views
                 }
                 else
                 {
-                    // 服务未连接，提示用户
                     Logger.Log("ASR 服务未连接，提示用户");
                     var result = MessageBox.Show(
                         $"模型已下载完成！\n\n但 ASR 服务未启动，是否现在启动服务？",
@@ -723,11 +848,9 @@ namespace WordFlow.Views
                     
                     if (result == MessageBoxResult.Yes)
                     {
-                        // 尝试启动服务
                         var started = await speechService.TryStartServerAsync();
                         if (started)
                         {
-                            // 服务启动成功，加载模型
                             var loaded = await speechService.SwitchModelAsync(modelId);
                             if (loaded)
                             {
@@ -748,8 +871,6 @@ namespace WordFlow.Views
                         }
                     }
                 }
-                
-                speechService.Dispose();
             }
             catch (Exception ex)
             {
@@ -766,16 +887,11 @@ namespace WordFlow.Views
             {
                 Dispatcher.Invoke(() =>
                 {
-                    // 检查窗口是否已关闭
                     if (!IsVisible) return;
                     
-                    // 更新进度条
                     DownloadProgressBar.Value = e.ProgressPercentage;
-                    
-                    // 更新进度百分比文本
                     DownloadProgressText.Text = $"{e.ProgressPercentage:F1}%";
                     
-                    // 可选：显示速度和剩余时间
                     if (e.Speed > 0 && e.RemainingTime.TotalSeconds > 0)
                     {
                         var speedMB = e.Speed / 1024 / 1024.0;
@@ -786,7 +902,6 @@ namespace WordFlow.Views
             }
             catch (Exception ex)
             {
-                // 忽略窗口已关闭时的 UI 更新异常
                 Logger.Log($"更新下载进度失败（窗口可能已关闭）: {ex.Message}");
             }
         }
@@ -800,7 +915,6 @@ namespace WordFlow.Views
             {
                 Dispatcher.Invoke(() =>
                 {
-                    // 检查窗口是否已关闭
                     if (!IsVisible) return;
                     
                     DownloadStatusText.Text = status;
@@ -809,20 +923,19 @@ namespace WordFlow.Views
             }
             catch (Exception ex)
             {
-                // 忽略窗口已关闭时的 UI 更新异常
                 Logger.Log($"更新下载状态失败（窗口可能已关闭）: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// 后台下载按钮点击（实际为取消）
+        /// 取消下载按钮点击（后台下载按钮）
         /// </summary>
         private void BackgroundDownloadButton_Click(object sender, RoutedEventArgs e)
         {
             if (_isDownloading && _downloadCts != null)
             {
                 _downloadCts.Cancel();
-                BackgroundDownloadButton.Content = Strings.ModelManager_Button_CancelDownload;
+                Logger.Log("用户取消下载");
             }
         }
 
@@ -831,6 +944,8 @@ namespace WordFlow.Views
         /// </summary>
         private async void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
+            // 清空缓存，重新加载
+            _cachedAvailableModels = null;
             await LoadModelsAsync();
         }
 
@@ -868,7 +983,6 @@ namespace WordFlow.Views
                 
                 if (System.IO.File.Exists(logFilePath))
                 {
-                    // 显示最近日志内容
                     var recentLogs = Logger.GetRecentLogs(200);
                     
                     var logWindow = new Window
@@ -884,7 +998,6 @@ namespace WordFlow.Views
                     grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
                     grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                     
-                    // 日志文本框
                     var textBox = new TextBox
                     {
                         Text = recentLogs,
@@ -901,7 +1014,6 @@ namespace WordFlow.Views
                     Grid.SetRow(textBox, 0);
                     grid.Children.Add(textBox);
                     
-                    // 按钮面板
                     var buttonPanel = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -967,7 +1079,5 @@ namespace WordFlow.Views
                 MessageBox.Show($"打开日志失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        // OnClosing 已移至 ModelManagerWindow_Closing 方法
     }
 }

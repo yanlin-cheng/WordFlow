@@ -143,7 +143,7 @@ if exist %SOURCE_DIR%\runtimes (
 )
 
 echo - 复制 PythonASR 目录...
-xcopy /s /y %SOURCE_DIR%\PythonASR\* %OUTPUT_DIR%\WordFlow\PythonASR\ /E
+xcopy /s /y /i "%SOURCE_DIR%\PythonASR\*" "%OUTPUT_DIR%\WordFlow\PythonASR\" /E
 
 echo - 复制 Data 目录...
 xcopy /s /y %SOURCE_DIR%\Data\* %OUTPUT_DIR%\WordFlow\Data\ /E
@@ -171,65 +171,7 @@ for %%L in (cs de es fr it ja ko pl pt-BR ru zh-Hant) do (
 echo 语言包清理完成！
 echo.
 
-REM ==================== 步骤 5: 编译 Inno Setup ====================
-echo [5/6] 编译 Inno Setup 安装程序...
-
-REM 检查 ISS 文件是否存在
-if not exist "%~dp0%ISS_FILE%" (
-    echo 错误：找不到 %ISS_FILE%
-    echo 请确认文件路径正确
-    pause
-    exit /b 1
-)
-echo - ISS 文件存在：%ISS_FILE%
-
-REM 查找 Inno Setup
-set "ISCC_EXE="
-if exist "%INNO_SETUP_PATH%\ISCC.exe" (
-    set "ISCC_EXE=%INNO_SETUP_PATH%\ISCC.exe"
-    echo - 找到 Inno Setup: !ISCC_EXE!
-) else if exist "%PROGRAMFILES%\Inno Setup 6\ISCC.exe" (
-    set "ISCC_EXE=%PROGRAMFILES%\Inno Setup 6\ISCC.exe"
-    echo - 找到 Inno Setup: !ISCC_EXE!
-) else if exist "%PROGRAMFILES(X86)%\Inno Setup 6\ISCC.exe" (
-    set "ISCC_EXE=%PROGRAMFILES(X86)%\Inno Setup 6\ISCC.exe"
-    echo - 找到 Inno Setup: !ISCC_EXE!
-) else (
-    echo.
-    echo 警告：未找到 Inno Setup (ISCC.exe)
-    echo.
-    echo 已检测的位置：
-    echo - %INNO_SETUP_PATH%\ISCC.exe
-    echo - %PROGRAMFILES%\Inno Setup 6\ISCC.exe
-    echo - %PROGRAMFILES(X86)%\Inno Setup 6\ISCC.exe
-    echo.
-    echo 程序文件已复制到：%OUTPUT_DIR%\WordFlow
-    echo 请手动使用 Inno Setup 编译 %ISS_FILE%
-    echo.
-    goto :skipInno
-)
-
-REM 使用 ISCC.exe 编译
-echo - 开始编译安装程序...
-"!ISCC_EXE!" "%~dp0%ISS_FILE%"
-if errorlevel 1 (
-    echo.
-    echo ==========================================
-    echo 错误：Inno Setup 编译失败！
-    echo ==========================================
-    echo 请检查：
-    echo 1. ISS 文件路径是否正确
-    echo 2. ISS 文件中引用的文件是否存在
-    echo 3. Inno Setup 是否正确安装
-    echo.
-    pause
-    exit /b 1
-)
-echo Inno Setup 编译成功！
-echo.
-
-:skipInno
-REM ==================== 步骤 6: 显示结果 ====================
+REM ==================== 步骤 5: 显示结果 ====================
 echo [6/6] 构建完成！
 echo.
 echo ==========================================

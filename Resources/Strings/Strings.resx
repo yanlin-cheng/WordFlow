@@ -1299,4 +1299,23 @@
   <data name="UpdateDialog_Seconds" xml:space="preserve">
     <value>秒</value>
   </data>
+  
+  <!-- Close Dialog -->
+  <data name="CloseDialog_Title" xml:space="preserve">
+    <value>关闭 WordFlow</value>
+  </data>
+  <data name="CloseDialog_Message" xml:space="preserve">
+    <value>您想如何处理 WordFlow？
+
+• 最小化到托盘：程序继续在后台运行，可按热键语音输入
+• 退出：完全关闭程序
+
+您可以在设置中更改此行为。</value>
+  </data>
+  <data name="CloseDialog_MinimizeToTray" xml:space="preserve">
+    <value>最小化到托盘</value>
+  </data>
+  <data name="CloseDialog_Exit" xml:space="preserve">
+    <value>退出</value>
+  </data>
 </root>

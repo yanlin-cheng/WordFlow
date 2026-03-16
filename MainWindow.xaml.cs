@@ -1075,34 +1075,7 @@ namespace WordFlow
             MainContent.Visibility = Visibility.Visible;
         }
 
-        private void ImportAudioButton_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new Microsoft.Win32.OpenFileDialog
-            {
-                Filter = "WAV音频文件 (*.wav)|*.wav|所有文件 (*.*)|*.*",
-                Title = "选择音频文件进行识别",
-                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                string filePath = dialog.FileName;
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await _speechService!.RecognizeFromFileAsync(filePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        Dispatcher.Invoke(() =>
-                        {
-                            MessageBox.Show($"识别失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                        });
-                    }
-                });
-            }
-        }
+        // 导入音频功能已移除 - WordFlow 专注于实时语音输入
 
         #endregion
 
