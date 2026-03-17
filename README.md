@@ -6,14 +6,20 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 
 ---
 
+## 🌏 国内用户下载加速
+
+> **💡 国内用户提示**：如果您在 GitHub 下载速度较慢，可以访问我们的 [Gitee 镜像站](https://gitee.com/yanlin-cheng/wordflow) 获取更快的下载速度。软件和模型文件均在 Gitee 同步发布。
+
+---
+
 ## 🌍 多语言版本 / Multi-language Versions
 
 | 语言 | 版本 |
 |------|------|
 | 🇨🇳 [中文](README.md) | 简体中文 |
-| 🇬🇧 [English](README.en.md) | 英语 |
-| 🇯🇵 [日本語](README.ja.md) | 日语 |
-| 🇰🇷 [한국어](README.ko.md) | 韩语 |
+| 🇬🇧 [English](README.en.md) | English |
+| 🇯🇵 [日本語](README.ja.md) | 日本語 |
+| 🇰🇷 [한국어](README.ko.md) | 한국어 |
 
 ---
 
@@ -25,15 +31,7 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 |--------|---------|------|
 | [⬇️ WordFlow_Setup.exe](https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/WordFlow_Setup.exe) | 约 95 MB | **完整安装包**（内置 .NET 8 运行时和 Python 环境，无需额外安装） |
 
-### 模型文件（必需）
-
-首次使用前需要下载语音识别模型：
-
-| 下载项 | 文件大小 | 说明 |
-|--------|---------|------|
-| [🧠 SenseVoice 模型](https://github.com/yanlin-cheng/WordFlow/releases/download/models-v1.0.0/sensevoice-small-onnx.zip) | 约 150 MB | 语音识别模型（ZIP 格式） |
-
-> **💡 提示**: 下载安装包后，启动 WordFlow 可在程序内下载模型文件。
+> **💡 提示**：安装完成后首次启动，程序会引导您下载语音识别模型（约 150 MB）。也可以在「模型管理」页面随时下载。
 
 ---
 
@@ -44,19 +42,7 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 1. **下载安装包**：下载 `WordFlow_Setup.exe` 安装程序
 2. **运行安装程序**：双击安装包，按照提示完成安装
 3. **启动程序**：安装完成后启动 WordFlow
-
-### 模型安装
-
-**方式一：程序内下载（推荐）**
-1. 启动 WordFlow
-2. 点击「模型管理」按钮
-3. 在模型管理页面点击模型的「下载」按钮
-4. 下载完成后会自动尝试加载模型
-
-**方式二：手动下载**
-1. 下载上方模型文件
-2. 解压到 `PythonASR/models/sensevoice-small-onnx/` 目录
-3. 重启 WordFlow
+4. **下载模型**：首次启动时会自动引导下载模型，或点击「模型管理」→「下载」
 
 ### 使用说明
 
@@ -74,12 +60,26 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 |------|------|
 | 🎤 **智能语音输入** | 按住说话，松手自动识别上屏 |
 | 🧠 **本地 ASR 识别** | 使用 Sherpa-ONNX 框架，离线可用 |
+| 🌐 **多语言识别** | 支持中文、英文、日文、韩文、粤语 |
 | 📚 **个人词库** | 支持自定义词汇，AI 智能纠错 |
 | 📝 **历史记录** | 自动保存输入历史，方便查阅 |
 | 🔔 **托盘集成** | 最小化到系统托盘，随时调用 |
 | ⚡ **开机自启** | 支持设置开机自动启动 |
 | ⌨️ **全局热键** | 可自定义热键 |
-| 🔄 **自动模型加载** | 下载完成后自动尝试加载模型 |
+
+### 支持的语言
+
+WordFlow 的语音识别模型支持以下语言：
+
+| 语言 | 说明 |
+|------|------|
+| 中文（普通话） | 支持简体中文语音识别 |
+| 英语 | 支持英文语音识别 |
+| 日语 | 支持日文语音识别 |
+| 韩语 | 支持韩文语音识别 |
+| 粤语 | 支持粤语语音识别 |
+
+> **注意**：软件界面目前支持中文和英文两种语言。
 
 ### 热键设置
 
@@ -148,14 +148,13 @@ WordFlow/
 
 ### Q1: 第一次启动需要做什么？
 
-首次启动需要下载语音模型文件（约 150MB）。可以在程序内点击「模型管理」→「下载」按钮下载，也可以手动下载模型文件。
+首次启动时，程序会引导您下载语音识别模型文件（约 150 MB）。按照提示操作即可。
 
 ### Q2: 模型下载失败怎么办？
 
 如果程序内下载失败，可以：
 1. 检查网络连接是否正常
-2. 手动下载模型文件（见上方「模型文件」）
-3. 解压到 `PythonASR/models/sensevoice-small-onnx/` 目录
+2. 国内用户可以尝试从 [Gitee](https://gitee.com/yanlin-cheng/wordflow) 下载
 
 ### Q3: 下载完模型后为什么不能使用？
 
@@ -221,6 +220,7 @@ WordFlow/
 | 📂 **GitHub 源码仓库** | https://github.com/yanlin-cheng/WordFlow |
 | 🐛 **问题反馈** | https://github.com/yanlin-cheng/WordFlow/issues |
 | ⬇️ **下载地址** | https://github.com/yanlin-cheng/WordFlow/releases |
+| 🇨🇳 **Gitee 镜像站** | https://gitee.com/yanlin-cheng/wordflow |
 
 ---
 
