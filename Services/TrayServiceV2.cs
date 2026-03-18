@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows;
 using System.Windows.Forms;
 using WordFlow.Infrastructure;
@@ -33,7 +34,8 @@ namespace WordFlow.Services
             _notifyIcon = new NotifyIcon
             {
                 Text = "WordFlow - 智能语音输入\n双击显示窗口",
-                Icon = SystemIcons.Application,
+                // 从 Resources 目录加载自定义图标
+                Icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "icon.ico")),
                 Visible = false // 初始不可见，等窗口最小化后才显示
             };
 

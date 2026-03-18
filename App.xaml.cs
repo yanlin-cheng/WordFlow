@@ -364,12 +364,9 @@ namespace WordFlow
 
             // 用户未记住选择，显示确认对话框（只有两个选项，没有取消）
             var dialog = new MessageBoxImageAndTextWindow(
-                "您想如何处理 WordFlow？\n\n" +
-                "• 最小化到托盘：程序继续在后台运行，可按热键语音输入\n" +
-                "• 退出：完全关闭程序\n\n" +
-                "您可以在设置中更改此行为。",
-                "关闭 WordFlow",
-                new[] { "最小化到托盘", "退出" });
+                WordFlow.Resources.Strings.Strings.CloseDialog_Message,
+                WordFlow.Resources.Strings.Strings.CloseDialog_Title,
+                new[] { WordFlow.Resources.Strings.Strings.CloseDialog_MinimizeToTray, WordFlow.Resources.Strings.Strings.CloseDialog_Exit });
             
             var result = dialog.ShowDialog();
 

@@ -6,6 +6,23 @@ WordFlow is an intelligent voice input tool that supports local ASR speech recog
 
 ---
 
+## 🌏 For Users in China
+
+> **💡 Download Tip**: If you experience slow download speeds from GitHub, you can visit our [Gitee mirror site](https://gitee.com/yanlin-cheng/wordflow) for faster downloads. Software and model files are synchronously released on Gitee.
+
+---
+
+## 🌍 Multi-language Versions
+
+| Language | Version |
+|----------|---------|
+| 🇨🇳 [中文](README.md) | 简体中文 |
+| 🇬🇧 [English](README.en.md) | English |
+| 🇯🇵 [日本語](README.ja.md) | 日本語 |
+| 🇰🇷 [한국어](README.ko.md) | 한국어 |
+
+---
+
 ## 📥 Download Now
 
 ### Installer
@@ -14,15 +31,7 @@ WordFlow is an intelligent voice input tool that supports local ASR speech recog
 |----------|------|-------------|
 | [⬇️ WordFlow_Setup.exe](https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/WordFlow_Setup.exe) | ~95 MB | **Complete installer** (includes .NET 8 Runtime and Python environment, no additional installation required) |
 
-### Model Files (Required)
-
-Voice recognition model is required before first use:
-
-| Download | Size | Description |
-|----------|------|-------------|
-| [🧠 SenseVoice Model](https://github.com/yanlin-cheng/WordFlow/releases/download/models-v1.0.0/sensevoice-small-onnx.zip) | ~150 MB | Voice recognition model (ZIP format) |
-
-> **💡 Tip**: After installing, launch WordFlow to download the model within the application.
+> **💡 Tip**: After installation, the application will guide you to download the voice recognition model (~150 MB) on first launch. You can also download it anytime from the "Model Manager" page.
 
 ---
 
@@ -33,19 +42,7 @@ Voice recognition model is required before first use:
 1. **Download the installer**: Download `WordFlow_Setup.exe`
 2. **Run the installer**: Double-click and follow the prompts
 3. **Launch the application**: Start WordFlow after installation
-
-### Model Installation
-
-**Option 1: Download within application (Recommended)**
-1. Launch WordFlow
-2. Click the "Model Manager" button
-3. Click the "Download" button for the model
-4. The model will be loaded automatically after download completes
-
-**Option 2: Manual download**
-1. Download the model file from above
-2. Extract to `PythonASR/models/sensevoice-small-onnx/` directory
-3. Restart WordFlow
+4. **Download Model**: The application will guide you to download the model on first launch, or click "Model Manager" → "Download"
 
 ### Usage
 
@@ -63,12 +60,26 @@ Voice recognition model is required before first use:
 |---------|-------------|
 | 🎤 **Intelligent Voice Input** | Hold to speak, release to recognize and input |
 | 🧠 **Local ASR Recognition** | Uses Sherpa-ONNX framework, works offline |
+| 🌐 **Multi-language Recognition** | Supports Chinese, English, Japanese, Korean, Cantonese |
 | 📚 **Personal Vocabulary** | Support custom vocabulary with AI-powered correction |
 | 📝 **History Log** | Automatically saves input history for easy reference |
 | 🔔 **Tray Integration** | Minimizes to system tray, always accessible |
 | ⚡ **Auto-start** | Supports automatic startup on boot |
 | ⌨️ **Global Hotkeys** | Customizable hotkeys |
-| 🔄 **Auto Model Load** | Automatically loads model after download |
+
+### Supported Languages
+
+WordFlow's speech recognition model supports the following languages:
+
+| Language | Description |
+|----------|-------------|
+| Chinese (Mandarin) | Simplified Chinese speech recognition |
+| English | English speech recognition |
+| Japanese | Japanese speech recognition |
+| Korean | Korean speech recognition |
+| Cantonese | Cantonese speech recognition |
+
+> **Note**: The software UI currently supports Chinese and English only.
 
 ### Hotkey Settings
 
@@ -137,14 +148,13 @@ WordFlow/
 
 ### Q1: What do I need to do on first launch?
 
-On first launch, you need to download the voice model file (~150MB). You can download it within the application by clicking "Model Manager" → "Download", or manually download the model file.
+On first launch, the application will guide you to download the voice recognition model file (~150 MB). Just follow the prompts.
 
 ### Q2: What should I do if model download fails?
 
 If download within the application fails:
 1. Check if your network connection is working
-2. Manually download the model file (see "Model Files" above)
-3. Extract to `PythonASR/models/sensevoice-small-onnx/` directory
+2. Users in China can try downloading from [Gitee mirror](https://gitee.com/yanlin-cheng/wordflow)
 
 ### Q3: Why can't I use it after downloading the model?
 
@@ -210,13 +220,7 @@ Some applications may restrict external input. Try:
 | 📂 **GitHub Repository** | https://github.com/yanlin-cheng/WordFlow |
 | 🐛 **Issue Tracker** | https://github.com/yanlin-cheng/WordFlow/issues |
 | ⬇️ **Downloads** | https://github.com/yanlin-cheng/WordFlow/releases |
-
-### Multi-language Versions
-
-- [🇨🇳 中文](README.md)
-- [🇬🇧 English](README.en.md)
-- [🇯 日本語](README.ja.md)
-- [🇰🇷 한국어](README.ko.md)
+| 🇨🇳 **Gitee Mirror** | https://gitee.com/yanlin-cheng/wordflow |
 
 ---
 
