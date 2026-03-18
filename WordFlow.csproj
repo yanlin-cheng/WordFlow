@@ -204,6 +204,13 @@
     </None>
   </ItemGroup>
 
+  <!-- 包含 Resources 图标文件（复制到输出目录） -->
+  <ItemGroup>
+    <None Include="Resources\icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <!-- 包含多语言资源文件 -->
   <ItemGroup>
     <Compile Update="Resources\Strings\Strings.Designer.cs">

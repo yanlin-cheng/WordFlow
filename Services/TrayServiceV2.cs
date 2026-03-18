@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Forms;
 using WordFlow.Infrastructure;
@@ -31,11 +32,68 @@ namespace WordFlow.Services
 
         private void InitializeTrayIcon()
         {
+            Icon? trayIcon = null;
+            string loadMethod = "unknown";
+            
+            // 方法 1：优先从当前 EXE 提取关联图标（确保与 EXE 图标一致）
+            try
+            {
+                string exePath = Assembly.GetEntryAssembly()?.Location ?? 
+                                 System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? 
+                                 string.Empty;
+                if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
+                {
+                    trayIcon = Icon.ExtractAssociatedIcon(exePath);
+                    if (trayIcon != null)
+                    {
+                        loadMethod = "EXE associated icon";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"方法 1 失败 (EXE associated icon): {ex.Message}");
+            }
+            
+            // 方法 2：如果方法 1 失败，尝试从 Resources 目录加载
+            if (trayIcon == null)
+            {
+                try
+                {
+                    string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "icon.ico");
+                    System.Diagnostics.Debug.WriteLine($"Trying to load icon from: {iconPath}");
+                    
+                    if (File.Exists(iconPath))
+                    {
+                        trayIcon = new Icon(iconPath);
+                        loadMethod = "Resources/icon.ico file";
+                        System.Diagnostics.Debug.WriteLine("Icon loaded from Resources folder");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Icon file not found at: {iconPath}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"方法 2 失败 (Resources/icon.ico): {ex.Message}");
+                }
+            }
+            
+            // 方法 3：如果以上都失败，使用系统图标作为后备
+            if (trayIcon == null)
+            {
+                trayIcon = SystemIcons.Application;
+                loadMethod = "System default icon";
+                System.Diagnostics.Debug.WriteLine("Using system default icon");
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"Tray icon loaded using: {loadMethod}");
+
             _notifyIcon = new NotifyIcon
             {
                 Text = "WordFlow - 智能语音输入\n双击显示窗口",
-                // 从 Resources 目录加载自定义图标
-                Icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "icon.ico")),
+                Icon = trayIcon,
                 Visible = false // 初始不可见，等窗口最小化后才显示
             };
 
