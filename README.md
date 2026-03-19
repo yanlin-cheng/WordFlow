@@ -1,3 +1,12 @@
+## 🌍 多语言版本 / Multi-language Versions Documents
+
+| 语言 | 版本 |
+|------|------|
+| 🇨🇳 [中文](README.md) | 简体中文 |
+| 🇬🇧 [English](README.en.md) | English |
+| 🇯🇵 [日本語](README.ja.md) | 日本語 |
+| 🇰🇷 [한국어](README.ko.md) | 한국어 |
+
 # WordFlow v1.0
 
 WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可将语音实时转换为文字并输入到任意应用程序中。
@@ -9,19 +18,6 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 ## 🌏 国内用户下载加速
 
 > **💡 国内用户提示**：如果您在 GitHub 下载速度较慢，可以访问我们的 [Gitee 镜像站](https://gitee.com/yanlin-cheng/wordflow) 获取更快的下载速度。软件和模型文件均在 Gitee 同步发布。
-
----
-
-## 🌍 多语言版本 / Multi-language Versions
-
-| 语言 | 版本 |
-|------|------|
-| 🇨🇳 [中文](README.md) | 简体中文 |
-| 🇬🇧 [English](README.en.md) | English |
-| 🇯🇵 [日本語](README.ja.md) | 日本語 |
-| 🇰🇷 [한국어](README.ko.md) | 한국어 |
-
----
 
 ## 📥 立即下载
 
