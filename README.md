@@ -1,3 +1,12 @@
+## 🌍 Multi-language Versions
+
+| Language | Version |
+|----------|---------|
+| 🇨 [简体中文](README.zh-CN.md) | 简体中文 |
+| 🇬 [English](README.md) | English |
+| 🇯🇵 [日本語](README.ja.md) | 日本語 |
+| 🇰🇷 [한국어](README.ko.md) | 한국어 |
+
 # WordFlow v1.0
 
 WordFlow is an intelligent voice input tool that supports local ASR speech recognition, converting speech to text in real-time and inputting it into any application.
@@ -9,16 +18,6 @@ WordFlow is an intelligent voice input tool that supports local ASR speech recog
 ## 🌏 For Users in China
 
 > **💡 Download Tip**: If you experience slow download speeds from GitHub, you can visit our [Gitee mirror site](https://gitee.com/yanlin-cheng/wordflow) for faster downloads. Software and model files are synchronously released on Gitee.
-
----
-
-## 🌍 Multi-language Versions （请点击跳转相应语言说明文档）
-
-| Language | Version |
-|----------|---------|
-| 🇨🇳 [中文](README.zh-CN.md) | 简体中文 |
-| 🇯🇵 [日本語](README.ja.md) | 日本語 |
-| 🇰🇷 [한국어](README.ko.md) | 한국어 |
 
 ---
 
