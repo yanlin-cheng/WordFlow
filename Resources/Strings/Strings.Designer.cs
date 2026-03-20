@@ -61,6 +61,47 @@ namespace WordFlow.Resources.Strings {
         }
         
         /// <summary>
+        ///   查找类似 退出 的本地化字符串。
+        /// </summary>
+        public static string CloseDialog_Exit {
+            get {
+                return ResourceManager.GetString("CloseDialog_Exit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 您想如何处理 WordFlow？
+        ///
+        ///• 最小化到托盘：程序继续在后台运行，可按热键语音输入
+        ///• 退出：完全关闭程序
+        ///
+        ///您可以在设置中更改此行为。 的本地化字符串。
+        /// </summary>
+        public static string CloseDialog_Message {
+            get {
+                return ResourceManager.GetString("CloseDialog_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 最小化到托盘 的本地化字符串。
+        /// </summary>
+        public static string CloseDialog_MinimizeToTray {
+            get {
+                return ResourceManager.GetString("CloseDialog_MinimizeToTray", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 关闭 WordFlow 的本地化字符串。
+        /// </summary>
+        public static string CloseDialog_Title {
+            get {
+                return ResourceManager.GetString("CloseDialog_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 上一步 的本地化字符串。
         /// </summary>
         public static string FirstRunWizard_BackButton {
@@ -3417,42 +3458,6 @@ namespace WordFlow.Resources.Strings {
         public static string Wizard_WarningTitle {
             get {
                 return ResourceManager.GetString("Wizard_WarningTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 关闭 WordFlow 的本地化字符串。
-        /// </summary>
-        public static string CloseDialog_Title {
-            get {
-                return ResourceManager.GetString("CloseDialog_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似关闭对话框消息的本地化字符串。
-        /// </summary>
-        public static string CloseDialog_Message {
-            get {
-                return ResourceManager.GetString("CloseDialog_Message", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 最小化到托盘 的本地化字符串。
-        /// </summary>
-        public static string CloseDialog_MinimizeToTray {
-            get {
-                return ResourceManager.GetString("CloseDialog_MinimizeToTray", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 退出 的本地化字符串。
-        /// </summary>
-        public static string CloseDialog_Exit {
-            get {
-                return ResourceManager.GetString("CloseDialog_Exit", resourceCulture);
             }
         }
     }
