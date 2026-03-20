@@ -1,238 +1,239 @@
 # WordFlow v1.0
 
-WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可将语音实时转换为文字并输入到任意应用程序中。
+WordFlow is an intelligent voice input tool that supports local ASR speech recognition, converting speech to text in real-time and inputting it into any application.
 
-**v1.0 正式版** - 基于 .NET 8 WPF 开发，提供稳定、智能的语音输入体验。
-
----
-
-## 🌏 国内用户下载加速
-
-> **💡 国内用户提示**：如果您在 GitHub 下载速度较慢，可以访问我们的 [Gitee 镜像站](https://gitee.com/yanlin-cheng/wordflow) 获取更快的下载速度。软件和模型文件均在 Gitee 同步发布。
+**v1.0 Release** - Built with .NET 8 WPF, providing a stable and intelligent voice input experience.
 
 ---
 
-## 🌍 多语言版本 / Multi-language Versions
+## 🌏 For Users in China
 
-| 语言 | 版本 |
-|------|------|
-| 🇨🇳 [中文](README.md) | 简体中文 |
-| 🇬🇧 [English](README.en.md) | English |
+> **💡 Download Tip**: If you experience slow download speeds from GitHub, you can visit our [Gitee mirror site](https://gitee.com/yanlin-cheng/wordflow) for faster downloads. Software and model files are synchronously released on Gitee.
+
+---
+
+## 🌍 Multi-language Versions （请点击跳转相应语言说明文档）
+
+| Language | Version |
+|----------|---------|
+| 🇨🇳 [中文](README.zh-CN.md) | 简体中文 |
 | 🇯🇵 [日本語](README.ja.md) | 日本語 |
 | 🇰🇷 [한국어](README.ko.md) | 한국어 |
 
 ---
 
-## 📥 立即下载
+## 📥 Download Now
 
-### 安装程序
+### Installer
 
-| 下载项 | 文件大小 | 说明 |
-|--------|---------|------|
-| [⬇️ WordFlow_Setup.exe](https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/WordFlow_Setup.exe) | 约 95 MB | **完整安装包**（内置 .NET 8 运行时和 Python 环境，无需额外安装） |
+| Download | Size | Description |
+|----------|------|-------------|
+| [⬇️ WordFlow_Setup.exe](https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/WordFlow_Setup.exe) | ~95 MB | **Complete installer** (includes .NET 8 Runtime and Python environment, no additional installation required) |
 
-> **💡 提示**：安装完成后首次启动，程序会引导您下载语音识别模型（约 150 MB）。也可以在「模型管理」页面随时下载。
-
----
-
-## 🚀 快速开始
-
-### 安装步骤
-
-1. **下载安装包**：下载 `WordFlow_Setup.exe` 安装程序
-2. **运行安装程序**：双击安装包，按照提示完成安装
-3. **启动程序**：安装完成后启动 WordFlow
-4. **下载模型**：首次启动时会自动引导下载模型，或点击「模型管理」→「下载」
-
-### 使用说明
-
-1. **启动 WordFlow** - 程序会最小化到系统托盘
-2. **按住说话** - 按住语音输入热键开始录音
-3. **松手上屏** - 松开热键自动识别并输入文字到目标应用
+> **💡 Tip**: After installation, the application will guide you to download the voice recognition model (~150 MB) on first launch. You can also download it anytime from the "Model Manager" page.
+>
+> The download may be flagged as coming from an unknown source. Please click the download button and select "Keep." I will be implementing official digital certification for the software in the future.
 
 ---
 
-## ✨ 功能特性
+## 🚀 Quick Start
 
-### 核心功能
+### Installation Steps
 
-| 功能 | 说明 |
-|------|------|
-| 🎤 **智能语音输入** | 按住说话，松手自动识别上屏 |
-| 🧠 **本地 ASR 识别** | 使用 Sherpa-ONNX 框架，离线可用 |
-| 🌐 **多语言识别** | 支持中文、英文、日文、韩文、粤语 |
-| 📚 **个人词库** | 支持自定义词汇，AI 智能纠错 |
-| 📝 **历史记录** | 自动保存输入历史，方便查阅 |
-| 🔔 **托盘集成** | 最小化到系统托盘，随时调用 |
-| ⚡ **开机自启** | 支持设置开机自动启动 |
-| ⌨️ **全局热键** | 可自定义热键目前只支持：` 键/波浪键（ESC下方）和右ALT键） |
+1. **Download the installer**: Download `WordFlow_Setup.exe`
+2. **Run the installer**: Double-click and follow the prompts
+3. **Launch the application**: Start WordFlow after installation
+4. **Download Model**: The application will guide you to download the model on first launch, or click "Model Manager" → "Download"
 
-### 支持的语言
+### Usage
 
-WordFlow 的语音识别模型支持以下语言：
-
-| 语言 | 说明 |
-|------|------|
-| 中文（普通话） | 支持简体中文语音识别 |
-| 英语 | 支持英文语音识别 |
-| 日语 | 支持日文语音识别 |
-| 韩语 | 支持韩文语音识别 |
-| 粤语 | 支持粤语语音识别 |
-
-> **注意**：软件界面目前支持中文和英文两种语言。
-
-### 热键设置
-
-WordFlow 支持自定义热键，满足不同使用习惯：
-
-| 热键类型 | 说明 |
-|---------|------|
-| 语音输入热键 | 可在设置中自定义，默认使用 ` 键（波浪键） |
-
-> **💡 提示**: 推荐使用方便单手操作的按键作为语音输入热键。
-
-### 模型管理
-
-WordFlow 提供模型管理功能：
-- **一键下载**：点击「下载」按钮直接下载模型
-- **自动加载**：下载完成后自动尝试加载模型
-- **服务检测**：如 ASR 服务未启动，会提示是否启动
-- **状态显示**：实时显示模型状态（已安装/未下载/已加载）
+1. **Launch WordFlow** - The application minimizes to the system tray
+2. **Hold to Speak** - Hold the voice input hotkey to start recording
+3. **Release to Input** - Release the hotkey to recognize and input text to the target application
 
 ---
 
-## 💻 系统要求
+## ✨ Features
 
-| 项目 | 要求 |
-|------|------|
-| 操作系统 | Windows 10/11 64 位 |
-| 运行环境 | .NET 8.0 Runtime（安装包已内置） |
-| 磁盘空间 | 至少 500MB 可用空间（含模型文件） |
-| 网络 | 下载模型时需要联网 |
-| 麦克风 | 需要可用的音频输入设备 |
-| 内存 | 建议 4GB 以上 |
+### Core Features
+
+| Feature | Description |
+|---------|-------------|
+| 🎤 **Intelligent Voice Input** | Hold to speak, release to recognize and input |
+| 🧠 **Local ASR Recognition** | Uses Sherpa-ONNX framework, works offline |
+| 🌐 **Multi-language Recognition** | Supports Chinese, English, Japanese, Korean, Cantonese |
+| 📚 **Personal Vocabulary** | Support custom vocabulary with AI-powered correction |
+| 📝 **History Log** | Automatically saves input history for easy reference |
+| 🔔 **Tray Integration** | Minimizes to system tray, always accessible |
+| ⚡ **Auto-start** | Supports automatic startup on boot |
+| ⌨️ **Global Hotkeys** | Customizable hotkeys |
+
+### Supported Languages
+
+WordFlow's speech recognition model supports the following languages:
+
+| Language | Description |
+|----------|-------------|
+| Chinese (Mandarin) | Simplified Chinese speech recognition |
+| English | English speech recognition |
+| Japanese | Japanese speech recognition |
+| Korean | Korean speech recognition |
+| Cantonese | Cantonese speech recognition |
+
+> **Note**: The software UI currently supports Chinese and English only.
+
+### Hotkey Settings
+
+WordFlow supports customizable hotkeys to meet different usage habits:
+
+| Hotkey Type | Description |
+|-------------|-------------|
+| Voice Input Hotkey | Customizable in settings, default is ` key (grave accent) |
+
+> **💡 Tip**: We recommend using a key that's easy to operate with one hand as the voice input hotkey.
+
+### Model Manager
+
+WordFlow provides model management features:
+- **One-click Download**: Click "Download" to download models directly
+- **Auto Load**: Automatically attempts to load model after download
+- **Service Detection**: Prompts to start ASR service if not running
+- **Status Display**: Real-time model status (Installed/Not Downloaded/Loaded)
 
 ---
 
-## 🏗️ 技术架构
+## 💻 System Requirements
 
-### 技术栈
+| Requirement | Specification |
+|-------------|---------------|
+| Operating System | Windows 10/11 64-bit |
+| Runtime Environment | .NET 8.0 Runtime (included in installer) |
+| Disk Space | At least 500MB free space (including model files) |
+| Network | Internet connection required for model download |
+| Microphone | Available audio input device required |
+| Memory | 4GB RAM recommended |
 
-| 组件 | 技术 |
-|------|------|
-| UI 框架 | .NET 8 WPF |
-| 数据库 | SQLite |
-| 语音识别 | Sherpa-ONNX |
-| 音频处理 | NAudio |
-| 中文分词 | Jieba.NET |
+---
 
-### 目录结构
+## 🏗️ Technical Architecture
+
+### Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| UI Framework | .NET 8 WPF |
+| Database | SQLite |
+| Speech Recognition | Sherpa-ONNX |
+| Audio Processing | NAudio |
+| Chinese Segmentation | Jieba.NET |
+
+### Directory Structure
 
 ```
 WordFlow/
-├── WordFlow.exe              # 主程序
+├── WordFlow.exe              # Main application
 ├── Data/
-│   └── models.json           # 模型配置
+│   └── models.json           # Model configuration
 ├── PythonASR/
-│   ├── asr_server.py         # ASR 服务端
-│   ├── start_server.bat      # 启动脚本
+│   ├── asr_server.py         # ASR server
+│   ├── start_server.bat      # Startup script
 │   └── models/
-│       └── sensevoice-small-onnx/  # 语音模型
+│       └── sensevoice-small-onnx/  # Voice model
 └── Resources/
-    └── icon.ico              # 应用图标
+    └── icon.ico              # Application icon
 ```
 
 ---
 
-## ❓ 常见问题
+## ❓ FAQ
 
-### Q1: 第一次启动需要做什么？
+### Q1: What do I need to do on first launch?
 
-首次启动时，程序会引导您下载语音识别模型文件（约 150 MB）。按照提示操作即可。
+On first launch, the application will guide you to download the voice recognition model file (~150 MB). Just follow the prompts.
 
-### Q2: 模型下载失败怎么办？
+### Q2: What should I do if model download fails?
 
-如果程序内下载失败，可以：
-1. 检查网络连接是否正常
-2. 国内用户可以尝试从 [Gitee](https://gitee.com/yanlin-cheng/wordflow) 下载
+If download within the application fails:
+1. Check if your network connection is working
+2. Users in China can try downloading from [Gitee mirror](https://gitee.com/yanlin-cheng/wordflow)
 
-### Q3: 下载完模型后为什么不能使用？
+### Q3: Why can't I use it after downloading the model?
 
-- 下载完成后会自动尝试加载模型
-- 如 ASR 服务未启动，会提示是否启动
-- 如仍无法使用，请重启程序或手动点击「连接服务」按钮
+- The application automatically attempts to load the model after download
+- If ASR service is not running, you'll be prompted to start it
+- If still not working, restart the application or manually click the "Connect Service" button
 
-### Q4: 识别不准确怎么办？
+### Q4: What should I do if recognition is inaccurate?
 
-1. 检查麦克风是否正常工作
-2. 在安静环境下使用
-3. 吐字清晰，语速适中
-4. 可以在个人词典中添加常用词汇
+1. Check if the microphone is working properly
+2. Use in a quiet environment
+3. Speak clearly at a moderate pace
+4. Add frequently used vocabulary to your personal dictionary
 
-### Q5: 某些程序无法输入文字？
+### Q5: Why can't I input text in some applications?
 
-某些程序可能限制外部输入，可以尝试：
-1. 以管理员身份运行 WordFlow
-2. 在目标程序中先点击文本框获得焦点
-3. 检查是否有安全软件拦截
+Some applications may restrict external input. Try:
+1. Run WordFlow as administrator
+2. Click the text box in the target application to gain focus first
+3. Check if any security software is blocking
 
-### Q6: 如何修改热键？
+### Q6: How do I change the hotkey?
 
-1. 右键点击系统托盘图标
-2. 选择「设置」
-3. 在「热键设置」中修改
+1. Right-click the system tray icon
+2. Select "Settings"
+3. Modify in the "Hotkey Settings" section
 
-### Q7: 开机后没有自动启动？
+### Q7: Why doesn't it auto-start on boot?
 
-1. 检查是否勾选了「开机自启动」选项
-2. 检查安全软件是否拦截了自启动
-3. 在任务管理器的「启动」标签中确认
+1. Check if "Auto-start on boot" option is enabled
+2. Check if security software is blocking auto-start
+3. Confirm in the "Startup" tab of Task Manager
 
 ---
 
-## 📋 更新日志
+## 📋 Changelog
 
 ### v1.0.0 (2026-03-15)
 
-**首次发布**
-- 🎉 实现基础语音输入功能
-- 🎉 实现个人词典管理
-- 🎉 实现历史记录功能
-- 🎉 实现系统托盘集成
-- 🎉 实现开机自启动
-- 🎉 实现全局热键
-- 🎉 实现模型管理功能
+**Initial Release**
+- 🎉 Implemented basic voice input functionality
+- 🎉 Implemented personal vocabulary management
+- 🎉 Implemented history log feature
+- 🎉 Implemented system tray integration
+- 🎉 Implemented auto-start on boot
+- 🎉 Implemented global hotkeys
+- 🎉 Implemented model management
 
-**技术特性**
-- 🏗️ 基于 .NET 8 WPF 开发
-- 🏗️ 采用模块化服务架构
-- 🏗️ 内置 Python 环境和 ASR 服务
+**Technical Features**
+- 🏗️ Built with .NET 8 WPF
+- 🏗️ Modular service architecture
+- 🏗️ Built-in Python environment and ASR service
 
-**已知问题**
-- 某些应用程序可能不完全兼容语音输入上屏功能
-
----
-
-## 🔗 项目链接
-
-| 平台 | 链接 |
-|------|------|
-| 📂 **GitHub 源码仓库** | https://github.com/yanlin-cheng/WordFlow |
-| 🐛 **问题反馈** | https://github.com/yanlin-cheng/WordFlow/issues |
-| ⬇️ **下载地址** | https://github.com/yanlin-cheng/WordFlow/releases |
-| 🇨🇳 **Gitee 镜像站** | https://gitee.com/yanlin-cheng/wordflow |
+**Known Issues**
+- Some applications may not fully support voice input screen feature
 
 ---
 
-## 📄 开源协议
+## 🔗 Project Links
 
-本项目采用 **MIT + 专有许可** 的双模式许可：
-
-- **基础功能** (MIT License)：核心语音输入、离线模型、本地词库管理等
-- **增值服务** (专有许可)：云同步、AI 增强服务等
-
-详见 [LICENSE.txt](LICENSE.txt)
+| Platform | Link |
+|----------|------|
+| 📂 **GitHub Repository** | https://github.com/yanlin-cheng/WordFlow |
+| 🐛 **Issue Tracker** | https://github.com/yanlin-cheng/WordFlow/issues |
+| ⬇️ **Downloads** | https://github.com/yanlin-cheng/WordFlow/releases |
+| 🇨🇳 **Gitee Mirror** | https://gitee.com/yanlin-cheng/wordflow |
 
 ---
 
-**WordFlow v1.0** - 让语音输入更智能、更便捷
+## 📄 License
+
+This project uses a **MIT + Proprietary** dual-mode license:
+
+- **Basic Features** (MIT License): Core voice input, offline models, local vocabulary management, etc.
+- **Premium Features** (Proprietary License): Cloud sync, AI enhancement services, etc.
+
+See [LICENSE.txt](LICENSE.txt) for details.
+
+---
+
+**WordFlow v1.0** - Making voice input smarter and easier

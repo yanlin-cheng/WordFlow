@@ -16,8 +16,8 @@ WordFlow は、ローカル ASR 音声認識をサポートするインテリジ
 
 | 言語 | バージョン |
 |------|----------|
-| 🇨🇳 [中文](README.md) | 简体中文 |
-| 🇬🇧 [English](README.en.md) | English |
+| 🇨🇳 [中文](README.zh-CN.md) | 简体中文 |
+| 🇬🇧 [English](README.md) | English |
 | 🇯🇵 [日本語](README.ja.md) | 日本語 |
 | 🇰🇷 [한국어](README.ko.md) | 한국어 |
 
