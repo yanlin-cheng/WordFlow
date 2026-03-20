@@ -25,8 +25,8 @@ WordFlow 是一款智能语音输入工具，支持本地 ASR 语音识别，可
 
 | 下载项 | 文件大小 | 说明 |
 |--------|---------|------|
-| [⬇️ WordFlow_Setup.exe](https://github.com/yanlin-cheng/WordFlow/releases/download/v1.0.0/WordFlow_Setup.exe) | 约 95 MB | **完整安装包**（内置 .NET 8 运行时和 Python 环境，无需额外安装） |
-
+| [⬇️ WordFlow_Setup.exe](https://gitee.com/yanlin-cheng/wordflow/releases/download/v1.0.0/WordFlow_Setup.exe) | 约 95 MB | **完整安装包**（内置 .NET 8 运行时和 Python 环境，无需额外安装） |
+已配置中国国内用户Gitee下载源
 > **💡 提示**：安装完成后首次启动，程序会引导您下载语音识别模型（约 150 MB）。也可以在「模型管理」页面随时下载。
 
 ---
