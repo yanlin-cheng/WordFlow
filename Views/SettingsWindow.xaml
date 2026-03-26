@@ -119,14 +119,14 @@
                                    infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_RelatedLinks"/>
                         <TextBlock Margin="0,0,0,10"
                                    infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_GitHubLink">
-                            <Hyperlink NavigateUri="https://github.com/wanddream/WordFlow" 
+                            <Hyperlink NavigateUri="https://github.com/yanlin-cheng/WordFlow" 
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 {x:Static res:Strings.SettingsWindow_GitHubLink}
                             </Hyperlink>
                         </TextBlock>
                         <TextBlock Margin="0,0,0,10"
                                    infrastructure:LocalizeExtension.ResourceKey="SettingsWindow_GiteeLink">
-                            <Hyperlink NavigateUri="https://gitee.com/cheng-yanlin/WordFlow-Release" 
+                            <Hyperlink NavigateUri="https://gitee.com/yanlin-cheng/wordflow" 
                                        RequestNavigate="Hyperlink_RequestNavigate">
                                 {x:Static res:Strings.SettingsWindow_GiteeLink}
                             </Hyperlink>
